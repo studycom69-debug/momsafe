@@ -50,7 +50,35 @@
 
 ---
 
-## ✨ Feature Highlights
+## 🌍 Why MomSafe?
+
+### The Problem
+Maternal health complications remain a significant challenge worldwide. Many risks develop **between clinical visits**, where continuous monitoring and proactive guidance are often unavailable.
+
+### The Solution
+MomSafe AI combines real-time vitals monitoring, maternal risk scoring, AI-powered guidance, nutrition tracking, daily health logging, hospital discovery, and wearable integration into a **unified maternal healthcare platform**.
+
+### The Vision
+Every pregnancy deserves intelligent care. MomSafe AI aims to make maternal healthcare more proactive, accessible, and data-driven through AI and real-time health insights.
+
+---
+
+## 📊 Platform Highlights
+
+| Highlight | Detail |
+|-----------|--------|
+| 🧩 **8+ healthcare modules** | Dashboard · Vitals · AI Guidance · Nutrition · Daily Logs · Alerts · Analytics · Hospital Finder |
+| 🤖 **AI-powered maternal guidance** | Rule-based risk engine + guidance engine — explainable, real-time, trimester-aware |
+| 💓 **Real-time vitals monitoring** | Heart rate · BP · SpO₂ · temperature · weight — persisted to Supabase |
+| ⚡ **React 19 + TypeScript frontend** | Fully type-safe · Vite 7 · Tailwind CSS v4 · Framer Motion |
+| 🗄️ **Real-time Supabase backend** | PostgreSQL with Row Level Security · live data sync |
+| 🔐 **Google OAuth authentication** | Secure sign-in via Supabase Auth — no passwords stored |
+| 🔌 **ESP32 wearable integration** | C++/Arduino firmware · Wi-Fi vitals ingestion via Edge Functions |
+| 🌐 **Live production deployment** | Hosted on Vercel · zero-config CI/CD · always-on |
+
+---
+
+## ✨ Current Features
 
 <div align="center">
 
