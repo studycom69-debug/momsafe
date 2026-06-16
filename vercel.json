@@ -1,0 +1,5 @@
+{
+  "buildCommand": "cd artifacts/momsafe-ai && npm install && npm run build",
+  "outputDirectory": "artifacts/momsafe-ai/dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
