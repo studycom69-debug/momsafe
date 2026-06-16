@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.ino": "plaintext"
+  },
+  "clangd.enabled": false,
+  "C_Cpp.errorSquiggles": "Disabled",
+  "C_Cpp.intelliSenseEngine": "Disabled"
+}

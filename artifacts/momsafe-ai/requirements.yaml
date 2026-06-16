@@ -1,0 +1,14 @@
+packages:
+  "framer-motion": "For premium page transitions, card hover effects, and micro-interactions"
+  "recharts": "For beautiful, animated data visualizations and vital trends"
+  "date-fns": "For elegant date formatting in history logs and charts"
+
+images:
+  - path: "artifacts/momsafe-ai/public/images/avatar.png"
+    description: "A premium, beautifully illustrated avatar of a calm, happy pregnant woman in a soft, minimalist 3D style, pastel colors, white background, suitable for a profile picture"
+    aspect_ratio: "1:1"
+
+notes:
+  - Pure frontend application with no backend.
+  - All medical and user data is beautifully mocked to demonstrate the UI capabilities.
+  - Relies heavily on Framer Motion for a "funded startup" premium feel.

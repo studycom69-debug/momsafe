@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm -F @workspace/momsafe-ai build",
+  "outputDirectory": "artifacts/momsafe-ai/dist/public",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

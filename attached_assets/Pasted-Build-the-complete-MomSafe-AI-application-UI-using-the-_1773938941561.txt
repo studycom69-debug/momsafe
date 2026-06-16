@@ -1,0 +1,254 @@
+Build the complete MomSafe AI application UI using the SAME design system, structure, and visual quality as the existing Vercel dashboard.
+
+⚠️ CRITICAL INSTRUCTIONS:
+
+- STRICTLY follow the Vercel dashboard design style
+- Maintain SAME spacing, typography, card style, and layout rhythm
+- DO NOT redesign randomly
+- DO NOT create inconsistent pages
+
+---
+
+🎯 CORE GOAL:
+
+- Extend the Vercel dashboard into a full multi-page app
+- Keep UI clean, premium, and minimal
+- Make dashboard slightly richer (not empty, not overloaded)
+
+---
+
+🎨 DESIGN SYSTEM (MATCH EXACTLY)
+
+- Background: #F9FAFB
+- White cards only
+- Soft borders (#E5E7EB)
+- Rounded 2xl / 3xl
+- Soft shadows
+- Clean typography (bold + subtle gray)
+
+Color usage:
+
+- red → critical
+- yellow → warning
+- green → stable
+- blue → primary actions
+
+---
+
+🧠 DASHBOARD (IMPROVED — SLIGHTLY RICHER, NOT OVERLOADED)
+
+Keep same structure but extend meaningfully.
+
+MUST INCLUDE:
+
+1. HERO SECTION:
+
+- Large MRI score
+- Risk level
+- AI short explanation
+- Confidence %
+- Risk change (+/-)
+- Last updated
+
+2. VITALS PREVIEW (4–5 cards ONLY):
+
+- Heart Rate
+- Blood Pressure
+- SpO2
+- Temperature
+- (optional 1 more)
+
+Each:
+
+- value
+- mini trend
+- clean minimal card
+
+3. MAIN TREND GRAPH:
+
+- Smooth clean graph
+- Toggle (24h / 7d)
+- Same style as Vercel
+
+4. ALERT PREVIEW:
+
+- 2–3 alerts
+- severity indicator
+- clean layout
+
+5. AI INSIGHT PANEL:
+
+- “What to do now”
+- 2–3 suggestions
+- action buttons
+
+6. QUICK SUMMARY:
+
+- current condition
+- short recap
+- system status
+
+7. ACTIVITY FEED:
+
+- last 3–5 events
+- minimal timeline
+
+8. MINI SECONDARY METRICS ROW (NEW ADDITION):
+
+- hydration status
+- sleep summary
+- medication adherence
+- small compact cards
+
+👉 IMPORTANT:
+
+- Dashboard should feel slightly longer but still clean
+- Maintain spacing and balance
+- DO NOT overcrowd
+
+---
+
+🧭 OTHER PAGES (EXTEND SAME STYLE)
+
+---
+
+❤️ VITALS PAGE
+
+- Detailed vitals cards
+- Graphs (same style)
+- Deviation indicators
+- History logs
+- Comparison view
+- AI interpretation
+
+---
+
+🚨 ALERTS PAGE
+
+- Active / Acknowledged / Resolved tabs
+- Alert cards
+- Timeline
+- Escalation status
+- Action buttons
+- Clean layout
+
+---
+
+📈 ANALYTICS PAGE
+
+- Multi graphs (24h / 7d / 30d)
+- Risk trends
+- Correlation view
+- AI insights
+- Summary cards
+
+---
+
+🤖 AI GUIDANCE PAGE
+
+- Recommendations
+- Preventive actions
+- Daily plan
+- “What to do now”
+- Insight cards
+- Action buttons
+
+---
+
+🥗 NUTRITION PAGE
+
+- Meals tracking
+- Calories + macros
+- Daily goals
+- Progress bars
+- Weekly summary
+- Food suggestions
+
+---
+
+💊 MEDICATION PAGE
+
+- Prescription cards
+- Daily schedule timeline
+- Taken / missed status
+- Reminder UI
+- History logs
+- Clean structured layout
+
+---
+
+📋 DAILY LOGS PAGE
+
+- Water tracking
+- Sleep tracking
+- Mood logging
+- Symptoms
+- History timeline
+- Input UI
+
+---
+
+🔮 PREDICTIONS PAGE
+
+- Future risk graph
+- Forecast insights
+- AI prediction explanation
+- Warning indicators
+- Suggested actions
+
+---
+
+⚙️ SETTINGS PAGE
+
+- Profile info
+- Pregnancy details
+- Preferences
+- Notifications
+- Emergency contacts
+
+---
+
+🎬 MOTION (SUBTLE LIKE VERCEL)
+
+- Smooth fade-in
+- Card hover lift
+- Minimal transitions
+- No heavy animations
+
+---
+
+🧈 EXPERIENCE
+
+- Clean scrolling
+- Consistent spacing
+- No visual clutter
+- Strong alignment
+
+---
+
+⚠️ STRICT UI RULES
+
+- Max 3–4 cards per row
+- Maintain spacing consistency
+- Maintain same component style
+- Maintain visual rhythm
+
+---
+
+🏆 FINAL EXPECTATION
+
+The app should feel like:
+
+👉 One consistent premium product
+👉 Clean, minimal, intelligent
+👉 Slightly rich dashboard but not overloaded
+
+---
+
+OUTPUT:
+
+A complete multi-page application that looks like a refined extension of the original Vercel dashboard, with a slightly enhanced but still clean dashboard.
+
+
+
+Make sure I'm writing this again every feature should be there strictly every feature as mentioned should be in that specific section and make every feature like it could be seen and get the feature is there in the section but don't make it complex still make it like easy to use
