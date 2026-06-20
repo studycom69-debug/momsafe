@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Droplets, Moon, Smile, Plus, Minus, BarChart2, Loader2, CheckCircle2, Coffee, GlassWater, UtilityPole as Bottle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { dailyLogs } from "@/lib/mock-data";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
@@ -48,7 +47,7 @@ export default function DailyLogs() {
   const { user } = useAuth();
   const [totalWater, setTotalWater] = useState(0); 
   const [waterInput, setWaterInput] = useState(0); 
-  const [sleepHrs, setSleepHrs] = useState(dailyLogs.sleep.hours);
+  const [sleepHrs, setSleepHrs] = useState(8);
   const [bedtime, setBedtime] = useState("22:00");
   const [wakeTime, setWakeTime] = useState("06:00");
 
@@ -73,8 +72,8 @@ export default function DailyLogs() {
     setSleepHrs(Number(totalHours.toFixed(1)));
   }, [bedtime, wakeTime]);
 
-  const [mood, setMood] = useState(dailyLogs.mood - 1);
-  const [symptoms, setSymptoms] = useState<string[]>(dailyLogs.symptoms.filter(s => s.severity > 0).map(s => s.name));
+  const [mood, setMood] = useState(2);
+  const [symptoms, setSymptoms] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [history, setHistory] = useState<LogHistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
@@ -444,8 +443,7 @@ export default function DailyLogs() {
   }, [user]);
 
   async function saveWaterIntake(userId: string, waterValue: number) {
-    console.log("Saving water:", waterValue);
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("water_intake")
       .insert([
         {
@@ -460,7 +458,6 @@ export default function DailyLogs() {
       console.error("WATER SAVE ERROR:", error);
       return false;
     }
-    console.log("Water saved:", data);
     return true;
   }
 
@@ -500,7 +497,6 @@ export default function DailyLogs() {
               sleep_hours: sleepHrs,
               recorded_at: now,
             };
-            console.log("Sleep Payload:", sleepPayload);
             await supabase.from("sleep_data").insert(sleepPayload);
           }
         } catch (err) {
@@ -515,7 +511,6 @@ export default function DailyLogs() {
           mood: moodLabels[mood],
           created_at: now,
         };
-        console.log("Mood Payload:", moodPayload);
         await supabase.from("mood_logs").insert(moodPayload);
       } catch (err) {
         console.error("Mood log failed:", err);
@@ -533,7 +528,6 @@ export default function DailyLogs() {
               severity: 1,
               recorded_at: now,
             };
-            console.log("Symptom Payload:", symptomPayload);
             const { error } = await supabase.from("symptoms").insert(symptomPayload);
             if (!error) {
               // Trigger alerts ONLY when health score is < 50
@@ -554,7 +548,6 @@ export default function DailyLogs() {
         }
       }
 
-      console.log("Data saved successfully");
       toast.success("Daily logs saved successfully!");
       setWaterInput(0); 
       await fetchHistory(); 
