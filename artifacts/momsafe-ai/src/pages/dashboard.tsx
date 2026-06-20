@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { ArrowUpRight, ArrowDownRight, Minus, TrendingUp, TrendingDown, Activity, BellRing, Droplets, Moon, ChevronRight, CheckCircle2, ShieldCheck, Info, X, Heart, Wind, Zap, Footprints } from "lucide-react";
-import { trendData } from "@/lib/mock-data";
+
 import { Link } from "wouter";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
@@ -379,15 +379,23 @@ export default function Dashboard() {
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isHardwareStreaming, setIsHardwareStreaming] = useState(false);
-  const hardwareStreamRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const fixedBpWeightRef = useRef<{ systolic: number; diastolic: number; weight: number }>({
-    systolic: 118,
-    diastolic: 76,
-    weight: 56.0,
-  });
-  const stepCounterRef = useRef(0);
-  const [liveStepCount, setLiveStepCount] = useState(0);
+  const [esp32Active, setEsp32Active] = useState(false);
+  const [scanState, setScanState] = useState<"idle" | "searching" | "not-found">("idle");
+  const scanTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleHardwareScan = useCallback(() => {
+    if (esp32Active) return;
+    if (scanState !== "idle") return;
+    if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
+    setScanState("searching");
+    scanTimerRef.current = setTimeout(() => {
+      setScanState("not-found");
+      scanTimerRef.current = setTimeout(() => {
+        setScanState("idle");
+      }, 3500);
+    }, 3000);
+  }, [esp32Active, scanState]);
+
   const [dashboardData, setDashboardData] = useState({
     risk: { value: 0, level: "Low", change: 0, explanation: "Evaluating your health data...", lastUpdated: "Just now", breakdown: { vitals: 0, sleep: 0, hydration: 0, symptoms: 0 } },
     vitalsList: DEFAULT_VITALS,
@@ -545,152 +553,19 @@ export default function Dashboard() {
     return { text: "Vitals are perfectly stable", tag: "Stable", color: "emerald" };
   }, [chartData]);
 
-  const generateSafeVitalsPayload = useCallback((userId: string) => {
-    const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-    const randomDecimal = (min: number, max: number, precision = 1) =>
-      Number((Math.random() * (max - min) + min).toFixed(precision));
-    const toFiniteOr = (value: unknown, fallback: number) => {
-      const n = Number(value);
-      return Number.isFinite(n) ? n : fallback;
-    };
-
-    const stepIncrease = randomInt(10, 15);
-    stepCounterRef.current += stepIncrease;
-    setLiveStepCount(stepCounterRef.current);
-
-    return {
-      user_id: userId,
-      source: "esp32",
-      // These vitals change every push, but always within safe range.
-      heart_rate: randomInt(72, 88),
-      spo2: randomInt(96, 99),
-      temperature: randomDecimal(36.3, 37.0, 1),
-      // Keep BP and weight fixed while streaming.
-      systolic_bp: toFiniteOr(fixedBpWeightRef.current.systolic, 118),
-      diastolic_bp: toFiniteOr(fixedBpWeightRef.current.diastolic, 76),
-      weight: toFiniteOr(fixedBpWeightRef.current.weight, 56.0),
-      // Only steps increase by 10-15 each cycle.
-      steps: stepCounterRef.current,
-    };
-  }, []);
-
-  const stopHardwareStream = useCallback(() => {
-    if (hardwareStreamRef.current) {
-      clearInterval(hardwareStreamRef.current);
-      hardwareStreamRef.current = null;
-    }
-    setIsHardwareStreaming(false);
-  }, []);
-
-  const isMissingVitalsColumn = (error: any, column: string) =>
-    error?.code === "PGRST204" &&
-    typeof error?.message === "string" &&
-    error.message.includes("vitals") &&
-    (error.message.includes(`'${column}'`) || error.message.includes(column));
-
-  const pushSafeVitalsReading = useCallback(async () => {
-    if (!user?.id) return false;
-    const payload = generateSafeVitalsPayload(user.id);
-    let { error } = await supabase.from("vitals").insert([payload]);
-
-    if (error && isMissingVitalsColumn(error, "source")) {
-      const fallbackPayload: any = { ...payload };
-      delete fallbackPayload.source;
-      const retry = await supabase.from("vitals").insert([fallbackPayload]);
-      error = retry.error;
-    }
-
-    if (error && isMissingVitalsColumn(error, "steps")) {
-      const fallbackPayload: any = { ...payload };
-      delete fallbackPayload.steps;
-      const retry = await supabase.from("vitals").insert([fallbackPayload]);
-      error = retry.error;
-    }
-
-    // Handle environments where both "source" and "steps" are unavailable.
-    if (error && (isMissingVitalsColumn(error, "source") || isMissingVitalsColumn(error, "steps"))) {
-      const fallbackPayload: any = { ...payload };
-      delete fallbackPayload.source;
-      delete fallbackPayload.steps;
-      const retry = await supabase.from("vitals").insert([fallbackPayload]);
-      error = retry.error;
-    }
-
-    if (error) {
-      console.error("Hardware stream insert failed:", error.message || error);
-      return false;
-    }
-    return true;
-  }, [generateSafeVitalsPayload, user?.id]);
-
-  const handleHardwareToggle = useCallback(async () => {
-    if (!user?.id) {
-      toast({
-        title: "Login required",
-        description: "Please sign in before connecting hardware.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (isHardwareStreaming) {
-      stopHardwareStream();
-      toast({
-        title: "Hardware disconnected",
-        description: "Vital stream stopped successfully.",
-      });
-      return;
-    }
-
-    const { data: latestBeforeStart } = await supabase
+  const checkEsp32Status = useCallback(async () => {
+    if (!user?.id) return;
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const { data } = await supabase
       .from("vitals")
-      .select("systolic_bp, diastolic_bp, weight, steps")
+      .select("recorded_at, source")
       .eq("user_id", user.id)
-      .order("recorded_at", { ascending: false })
+      .eq("source", "esp32")
+      .gte("recorded_at", fiveMinutesAgo)
       .limit(1)
       .maybeSingle();
-
-    const safeNumber = (value: unknown, fallback: number) => {
-      const n = Number(value);
-      return Number.isFinite(n) ? n : fallback;
-    };
-
-    fixedBpWeightRef.current = {
-      systolic: safeNumber(latestBeforeStart?.systolic_bp, 118),
-      diastolic: safeNumber(latestBeforeStart?.diastolic_bp, 76),
-      weight: safeNumber(latestBeforeStart?.weight, 56.0),
-    };
-    stepCounterRef.current = safeNumber(latestBeforeStart?.steps, 0);
-    setLiveStepCount(stepCounterRef.current);
-
-    const initialPushOk = await pushSafeVitalsReading();
-    if (!initialPushOk) {
-      toast({
-        title: "Connection failed",
-        description: "Could not send a reading to dashboard.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsHardwareStreaming(true);
-    toast({
-      title: "Hardware connected",
-      description: "System connected with hardware. Live vitals started.",
-    });
-
-    hardwareStreamRef.current = setInterval(async () => {
-      const ok = await pushSafeVitalsReading();
-      if (!ok) {
-        stopHardwareStream();
-        toast({
-          title: "Hardware stream stopped",
-          description: "Connection lost while sending vitals.",
-          variant: "destructive",
-        });
-      }
-    }, 20000);
-  }, [isHardwareStreaming, pushSafeVitalsReading, stopHardwareStream, toast, user?.id]);
+    setEsp32Active(!!data);
+  }, [user?.id]);
 
   const fetchDashboardData = useCallback(async () => {
     if (!user) return;
@@ -1017,7 +892,7 @@ export default function Dashboard() {
 
       const latestStepsRow = (allVitalsForTrends || []).find((r: any) => r?.steps != null);
       const latestSteps = Number(latestStepsRow?.steps || 0);
-      const effectiveSteps = latestSteps > 0 ? latestSteps : liveStepCount;
+      const effectiveSteps = latestSteps > 0 ? latestSteps : 0;
       const steps = {
         value: effectiveSteps,
         status: effectiveSteps > 0 ? "Counting steps" : "No steps yet",
@@ -1232,7 +1107,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [liveStepCount, user]); // Removed period dependency
+  }, [user]); // Removed period dependency
 
   useEffect(() => {
     fetchDashboardData();
@@ -1255,6 +1130,10 @@ export default function Dashboard() {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'symptoms', filter: `user_id=eq.${user.id}` }, () => fetchDashboardData())
       .subscribe();
 
+    // Check whether ESP32 has sent a reading in the last 5 minutes.
+    checkEsp32Status();
+    const esp32PollRef = setInterval(checkEsp32Status, 30000);
+
     // Fallback sync: keeps UI live even if websocket events drop.
     const pollRef = setInterval(() => {
       fetchDashboardData();
@@ -1262,17 +1141,12 @@ export default function Dashboard() {
 
     return () => {
       clearInterval(pollRef);
+      clearInterval(esp32PollRef);
       supabase.removeChannel(channel);
+      if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
     };
-  }, [fetchDashboardData, user?.id]);
+  }, [fetchDashboardData, checkEsp32Status, user?.id]);
 
-  useEffect(() => {
-    return () => {
-      if (hardwareStreamRef.current) {
-        clearInterval(hardwareStreamRef.current);
-      }
-    };
-  }, []);
 
   return (
     <div className="space-y-6">
@@ -1393,23 +1267,36 @@ export default function Dashboard() {
           <p className="page-subtitle">Actively monitoring your vitals and health status.</p>
         </div>
         <div className="flex items-center gap-4">
-          <button
-            onClick={handleHardwareToggle}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm border ${
-              isHardwareStreaming
-                ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
-                : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-            }`}
-          >
-            {isHardwareStreaming ? "Stop Hardware" : "Connect Hardware"}
-          </button>
+          {esp32Active ? (
+            <div className="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border bg-emerald-50 text-emerald-700 border-emerald-200 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              ESP32 Live
+            </div>
+          ) : (
+            <button
+              onClick={handleHardwareScan}
+              disabled={scanState !== "idle"}
+              className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border flex items-center gap-2 transition-all ${
+                scanState === "searching"
+                  ? "bg-blue-50 text-blue-600 border-blue-200 cursor-wait"
+                  : scanState === "not-found"
+                  ? "bg-red-50 text-red-500 border-red-200 cursor-default"
+                  : "bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100 cursor-pointer"
+              }`}
+            >
+              {scanState === "searching" && (
+                <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                </svg>
+              )}
+              {scanState === "not-found" && <span className="w-2 h-2 rounded-full bg-red-400" />}
+              {scanState === "idle" && <span className="w-2 h-2 rounded-full bg-gray-300" />}
+              {scanState === "searching" ? "Searching…" : scanState === "not-found" ? "Not in range" : "Connect Hardware"}
+            </button>
+          )}
           <ManualVitalsInput onSuccess={fetchDashboardData} />
           <div className="flex items-center gap-2 text-xs text-gray-500">
-            <span className="flex items-center gap-1">
-              <span className={`w-2 h-2 rounded-full ${isHardwareStreaming ? "bg-emerald-400 animate-pulse" : "bg-gray-300"}`} />
-              {isHardwareStreaming ? "Hardware Active" : "Monitoring Active"}
-            </span>
-            <span className="text-gray-300">.</span>
             <span>Last sync: {loading ? "Syncing..." : "Just now"}</span>
           </div>
         </div>
