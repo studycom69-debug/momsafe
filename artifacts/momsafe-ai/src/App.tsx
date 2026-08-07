@@ -7,8 +7,9 @@ import {
   Redirect,
 } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
+import { supabase } from "@/lib/supabase";
 import AppLayout from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/dashboard";
 import Vitals from "@/pages/vitals";
@@ -22,6 +23,7 @@ import LocationPage from "@/pages/LocationPage";
 import Settings from "@/pages/settings";
 import Help from "@/pages/help";
 import Login from "@/pages/login";
+import Onboarding from "@/pages/onboarding";
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -29,11 +31,30 @@ const queryClient = new QueryClient();
 
 function Router() {
   const { user, loading } = useAuth();
+  const [profileChecked, setProfileChecked] = useState(false);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
 
-  if (loading) {
+  useEffect(() => {
+    if (!user) {
+      setProfileChecked(false);
+      setNeedsOnboarding(false);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("users")
+        .select("full_name")
+        .eq("id", user.id)
+        .maybeSingle();
+      setNeedsOnboarding(!data?.full_name);
+      setProfileChecked(true);
+    })();
+  }, [user]);
+
+  if (loading || (user && !profileChecked)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
       </div>
     );
   }
@@ -50,6 +71,17 @@ function Router() {
         </Route>
         <Route>
           <Redirect to="/" />
+        </Route>
+      </Switch>
+    );
+  }
+
+  if (needsOnboarding) {
+    return (
+      <Switch>
+        <Route path="/onboarding" component={Onboarding} />
+        <Route>
+          <Redirect to="/onboarding" />
         </Route>
       </Switch>
     );
