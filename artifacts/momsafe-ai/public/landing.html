@@ -3269,13 +3269,75 @@
                         });
                     });
 
-                // Handle get-app buttons
+                // Handle get-app buttons — show "Coming Soon" modal
                 document
                     .querySelectorAll('[data-action="get-app"]')
                     .forEach((btn) => {
                         btn.addEventListener("click", () => {
-                            window.location.href = "/login";
+                            document
+                                .getElementById("ms-app-modal")
+                                .classList.add("ms-modal-open");
+                            document.getElementById("ms-email-input").focus();
                         });
+                    });
+
+                // Modal close
+                document
+                    .getElementById("ms-modal-close")
+                    .addEventListener("click", () => {
+                        document
+                            .getElementById("ms-app-modal")
+                            .classList.remove("ms-modal-open");
+                        resetModalState();
+                    });
+                document
+                    .getElementById("ms-app-modal")
+                    .addEventListener("click", (e) => {
+                        if (
+                            e.target === document.getElementById("ms-app-modal")
+                        ) {
+                            document
+                                .getElementById("ms-app-modal")
+                                .classList.remove("ms-modal-open");
+                            resetModalState();
+                        }
+                    });
+
+                function resetModalState() {
+                    document.getElementById("ms-modal-form").style.display = "";
+                    document.getElementById("ms-modal-success").style.display =
+                        "none";
+                    document.getElementById("ms-email-input").value = "";
+                    document.getElementById("ms-email-error").style.display =
+                        "none";
+                }
+
+                // Modal submit
+                document
+                    .getElementById("ms-notify-btn")
+                    .addEventListener("click", () => {
+                        const email = document
+                            .getElementById("ms-email-input")
+                            .value.trim();
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(email)) {
+                            document.getElementById(
+                                "ms-email-error",
+                            ).style.display = "block";
+                            return;
+                        }
+                        document.getElementById(
+                            "ms-email-error",
+                        ).style.display = "none";
+                        // Store locally so user feels acknowledged
+                        try {
+                            localStorage.setItem("ms_waitlist_email", email);
+                        } catch (e) {}
+                        document.getElementById("ms-modal-form").style.display =
+                            "none";
+                        document.getElementById(
+                            "ms-modal-success",
+                        ).style.display = "block";
                     });
                 const observerOptions = {
                     root: null,
@@ -3365,5 +3427,428 @@
                 }
             });
         </script>
+        <!-- App Coming Soon Modal -->
+        <div
+            id="ms-app-modal"
+            style="
+                display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 9999;
+                background: rgba(15, 23, 42, 0.6);
+                backdrop-filter: blur(6px);
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            "
+        >
+            <div
+                style="
+                    background: #ffffff;
+                    border-radius: 28px;
+                    width: 100%;
+                    max-width: 480px;
+                    padding: 36px;
+                    box-shadow: 0 40px 120px -20px rgba(0, 0, 0, 0.3);
+                    position: relative;
+                "
+            >
+                <!-- Close -->
+                <button
+                    id="ms-modal-close"
+                    style="
+                        position: absolute;
+                        top: 16px;
+                        right: 16px;
+                        background: #f1f5f9;
+                        border: none;
+                        border-radius: 12px;
+                        width: 36px;
+                        height: 36px;
+                        cursor: pointer;
+                        font-size: 18px;
+                        color: #64748b;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    "
+                >
+                    &#x2715;
+                </button>
+
+                <!-- Form State -->
+                <div id="ms-modal-form">
+                    <!-- Icon -->
+                    <div
+                        style="
+                            width: 56px;
+                            height: 56px;
+                            background: linear-gradient(
+                                135deg,
+                                #10b981,
+                                #0d9488
+                            );
+                            border-radius: 18px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin-bottom: 20px;
+                        "
+                    >
+                        <span style="font-size: 26px">&#128241;</span>
+                    </div>
+
+                    <!-- Heading -->
+                    <h2
+                        style="
+                            margin: 0 0 8px;
+                            font-size: 24px;
+                            font-weight: 800;
+                            color: #0f172a;
+                            letter-spacing: -0.03em;
+                            line-height: 1.2;
+                        "
+                    >
+                        App is on its way!
+                    </h2>
+                    <p
+                        style="
+                            margin: 0 0 20px;
+                            font-size: 14px;
+                            color: #64748b;
+                            font-weight: 500;
+                            line-height: 1.6;
+                        "
+                    >
+                        The MomSafe mobile app is coming soon for iOS &amp;
+                        Android. Drop your email and we&apos;ll let you know the
+                        moment it launches.
+                    </p>
+
+                    <!-- Pilot Benefits Banner -->
+                    <div
+                        style="
+                            background: #f0fdf4;
+                            border: 1px solid #bbf7d0;
+                            border-radius: 16px;
+                            padding: 16px 18px;
+                            margin-bottom: 24px;
+                        "
+                    >
+                        <p
+                            style="
+                                margin: 0 0 10px;
+                                font-size: 11px;
+                                font-weight: 800;
+                                text-transform: uppercase;
+                                letter-spacing: 0.12em;
+                                color: #16a34a;
+                            "
+                        >
+                            &#127381; You&apos;re here early &mdash; Pilot
+                            Benefits
+                        </p>
+                        <ul
+                            style="
+                                margin: 0;
+                                padding-left: 0;
+                                list-style: none;
+                                display: flex;
+                                flex-direction: column;
+                                gap: 7px;
+                            "
+                        >
+                            <li
+                                style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 9px;
+                                    font-size: 13px;
+                                    font-weight: 600;
+                                    color: #166534;
+                                "
+                            >
+                                <span style="color: #22c55e">&#10003;</span>
+                                Lifetime free access to all premium features
+                            </li>
+                            <li
+                                style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 9px;
+                                    font-size: 13px;
+                                    font-weight: 600;
+                                    color: #166534;
+                                "
+                            >
+                                <span style="color: #22c55e">&#10003;</span>
+                                Priority support from our health team
+                            </li>
+                            <li
+                                style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 9px;
+                                    font-size: 13px;
+                                    font-weight: 600;
+                                    color: #166534;
+                                "
+                            >
+                                <span style="color: #22c55e">&#10003;</span>
+                                Early access to new features before anyone else
+                            </li>
+                            <li
+                                style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 9px;
+                                    font-size: 13px;
+                                    font-weight: 600;
+                                    color: #166534;
+                                "
+                            >
+                                <span style="color: #22c55e">&#10003;</span>
+                                Founding member badge in the app
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Email Input -->
+                    <div style="margin-bottom: 8px">
+                        <div style="display: flex; gap: 10px">
+                            <input
+                                id="ms-email-input"
+                                type="email"
+                                placeholder="your@email.com"
+                                style="
+                                    flex: 1;
+                                    padding: 13px 16px;
+                                    border-radius: 14px;
+                                    border: 1.5px solid #e2e8f0;
+                                    background: #f8fafc;
+                                    font-size: 14px;
+                                    font-weight: 500;
+                                    color: #0f172a;
+                                    outline: none;
+                                    transition: border-color 0.2s;
+                                "
+                                onfocus="this.style.borderColor = '#10b981'"
+                                onblur="this.style.borderColor = '#e2e8f0'"
+                            />
+                            <button
+                                id="ms-notify-btn"
+                                style="
+                                    background: #0f172a;
+                                    color: #fff;
+                                    border: none;
+                                    border-radius: 14px;
+                                    padding: 13px 20px;
+                                    font-size: 12px;
+                                    font-weight: 800;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.1em;
+                                    cursor: pointer;
+                                    white-space: nowrap;
+                                    transition: background 0.2s;
+                                "
+                                onmouseover="this.style.background = '#1e293b'"
+                                onmouseout="this.style.background = '#0f172a'"
+                            >
+                                Notify Me
+                            </button>
+                        </div>
+                        <p
+                            id="ms-email-error"
+                            style="
+                                display: none;
+                                margin: 6px 0 0;
+                                font-size: 12px;
+                                color: #ef4444;
+                                font-weight: 600;
+                            "
+                        >
+                            Please enter a valid email address.
+                        </p>
+                    </div>
+
+                    <!-- Divider -->
+                    <div
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            margin: 20px 0;
+                        "
+                    >
+                        <div
+                            style="flex: 1; height: 1px; background: #f1f5f9"
+                        ></div>
+                        <span
+                            style="
+                                font-size: 11px;
+                                font-weight: 700;
+                                color: #cbd5e1;
+                                text-transform: uppercase;
+                                letter-spacing: 0.1em;
+                            "
+                            >Or</span
+                        >
+                        <div
+                            style="flex: 1; height: 1px; background: #f1f5f9"
+                        ></div>
+                    </div>
+
+                    <!-- Web App CTA -->
+                    <a
+                        href="/login"
+                        style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 10px;
+                            padding: 14px;
+                            border-radius: 14px;
+                            border: 1.5px solid #e2e8f0;
+                            text-decoration: none;
+                            background: #f8fafc;
+                            transition: all 0.2s;
+                        "
+                        onmouseover="
+                            this.style.borderColor = '#10b981';
+                            this.style.background = '#f0fdf4';
+                        "
+                        onmouseout="
+                            this.style.borderColor = '#e2e8f0';
+                            this.style.background = '#f8fafc';
+                        "
+                    >
+                        <span style="font-size: 18px">&#127760;</span>
+                        <div style="text-align: left">
+                            <p
+                                style="
+                                    margin: 0;
+                                    font-size: 13px;
+                                    font-weight: 800;
+                                    color: #0f172a;
+                                "
+                            >
+                                Use the Web App in the meantime
+                            </p>
+                            <p
+                                style="
+                                    margin: 0;
+                                    font-size: 11px;
+                                    font-weight: 500;
+                                    color: #64748b;
+                                "
+                            >
+                                Sign up free &mdash; full access, no download
+                                needed
+                            </p>
+                        </div>
+                        <span
+                            style="
+                                margin-left: auto;
+                                color: #10b981;
+                                font-size: 16px;
+                            "
+                            >&#8594;</span
+                        >
+                    </a>
+                </div>
+
+                <!-- Success State -->
+                <div
+                    id="ms-modal-success"
+                    style="display: none; text-align: center; padding: 12px 0"
+                >
+                    <div
+                        style="
+                            width: 64px;
+                            height: 64px;
+                            background: #f0fdf4;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin: 0 auto 20px;
+                            font-size: 32px;
+                        "
+                    >
+                        &#127881;
+                    </div>
+                    <h2
+                        style="
+                            margin: 0 0 8px;
+                            font-size: 22px;
+                            font-weight: 800;
+                            color: #0f172a;
+                        "
+                    >
+                        You&apos;re on the list!
+                    </h2>
+                    <p
+                        style="
+                            margin: 0 0 24px;
+                            font-size: 14px;
+                            color: #64748b;
+                            font-weight: 500;
+                            line-height: 1.6;
+                        "
+                    >
+                        We&apos;ll email you the moment the app drops. As a
+                        pilot member, you&apos;ll get access before everyone
+                        else.
+                    </p>
+                    <div
+                        style="
+                            background: #f0fdf4;
+                            border: 1px solid #bbf7d0;
+                            border-radius: 14px;
+                            padding: 14px 18px;
+                            margin-bottom: 24px;
+                            text-align: left;
+                        "
+                    >
+                        <p
+                            style="
+                                margin: 0;
+                                font-size: 12px;
+                                font-weight: 700;
+                                color: #16a34a;
+                            "
+                        >
+                            &#127381; Your pilot benefits are locked in. Till
+                            then &mdash;
+                        </p>
+                    </div>
+                    <a
+                        href="/login"
+                        style="
+                            display: block;
+                            padding: 14px;
+                            background: #0f172a;
+                            color: #fff;
+                            border-radius: 14px;
+                            text-decoration: none;
+                            font-size: 12px;
+                            font-weight: 800;
+                            text-transform: uppercase;
+                            letter-spacing: 0.12em;
+                        "
+                        >Sign up &amp; use the web app now &#8594;</a
+                    >
+                </div>
+            </div>
+        </div>
+
+        <style>
+            #ms-app-modal {
+                display: none;
+            }
+            #ms-app-modal.ms-modal-open {
+                display: flex;
+            }
+        </style>
     </body>
 </html>
