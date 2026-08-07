@@ -198,6 +198,20 @@ function VitalCard({
         }
         ${isProblematic && activeStatus !== "normal" ? "ring-4 ring-offset-2 ring-red-500/20 animate-pulse-subtle" : ""}
       `}
+      style={
+        activeStatus === "normal"
+          ? {
+              background:
+                {
+                  "Heart Rate": "rgba(255,228,230,0.35)",
+                  "Blood Pressure": "rgba(204,251,241,0.35)",
+                  SpO2: "rgba(224,231,255,0.35)",
+                  Temperature: "rgba(254,243,199,0.35)",
+                  Weight: "rgba(241,245,249,0.5)",
+                }[vital.label] ?? "rgba(255,255,255,0.72)",
+            }
+          : {}
+      }
     >
       <motion.div
         whileTap={{ scale: 0.98 }}
@@ -2021,6 +2035,10 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
+      {/* Atmospheric background glow */}
+      <div className="fixed top-0 right-0 w-[700px] h-[500px] bg-teal-500/5 rounded-full blur-[100px] -z-10 pointer-events-none" />
+      <div className="fixed bottom-0 left-56 w-[400px] h-[400px] bg-teal-300/5 rounded-full blur-[80px] -z-10 pointer-events-none" />
+
       {/* Page header */}
       <div className="flex items-start justify-between">
         <div>
@@ -2032,10 +2050,10 @@ export default function Dashboard() {
         <div className="flex items-center gap-4">
           <button
             onClick={handleHardwareToggle}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm border ${
+            className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all border shimmer-btn ${
               isHardwareStreaming
                 ? "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
-                : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                : "border-[#bcc9c6] text-[#00685f] hover:bg-[rgba(0,104,95,0.06)]"
             }`}
           >
             {isHardwareStreaming ? "Stop Hardware" : "Connect Hardware"}
@@ -2061,14 +2079,14 @@ export default function Dashboard() {
           whileHover={{ scale: 1.01, translateY: -2 }}
           onClick={() => setIsRiskModalOpen(true)}
           className={`col-span-2 card p-6 cursor-pointer transition-all duration-300 relative overflow-hidden group
-            ${
-              dashboardData.risk.level === "Low"
-                ? "border-emerald-100 bg-gradient-to-br from-white to-emerald-50/30 hover:shadow-emerald-100/50"
-                : dashboardData.risk.level === "Moderate"
-                  ? "border-amber-100 bg-gradient-to-br from-white to-amber-50/30 hover:shadow-amber-100/50"
-                  : "border-red-100 bg-gradient-to-br from-white to-red-50/30 hover:shadow-red-100/50"
-            }
-            shadow-sm hover:shadow-xl`}
+              ${
+                dashboardData.risk.level === "Low"
+                  ? "border-teal-100/60 hover:shadow-teal-100/50"
+                  : dashboardData.risk.level === "Moderate"
+                    ? "border-amber-100 hover:shadow-amber-100/50"
+                    : "border-red-100 hover:shadow-red-100/50"
+              }
+              hover:shadow-xl`}
         >
           <div className="flex items-start justify-between mb-6 relative z-10">
             <div className="flex items-center gap-2.5">
