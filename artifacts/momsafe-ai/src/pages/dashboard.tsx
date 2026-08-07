@@ -961,7 +961,7 @@ export default function Dashboard() {
     return true;
   }, [generateSafeVitalsPayload, user?.id]);
 
-  const handleHardwareToggle = useCallback(async () => {
+  const handleHardwareToggle = useCallback(() => {
     if (!user?.id) {
       toast({
         title: "Login required",
@@ -980,70 +980,13 @@ export default function Dashboard() {
       return;
     }
 
-    // Show "not in range" for users without the physical ESP32 device
     toast({
       title: "Hardware not in range",
       description:
         "Please ensure your MomSafe device is nearby and powered on.",
       variant: "destructive",
     });
-    return;
-
-    const { data: latestBeforeStart } = await supabase
-      .from("vitals")
-      .select("systolic_bp, diastolic_bp, weight, steps")
-      .eq("user_id", user.id)
-      .order("recorded_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    const safeNumber = (value: unknown, fallback: number) => {
-      const n = Number(value);
-      return Number.isFinite(n) ? n : fallback;
-    };
-
-    fixedBpWeightRef.current = {
-      systolic: safeNumber(latestBeforeStart?.systolic_bp, 118),
-      diastolic: safeNumber(latestBeforeStart?.diastolic_bp, 76),
-      weight: safeNumber(latestBeforeStart?.weight, 56.0),
-    };
-    stepCounterRef.current = safeNumber(latestBeforeStart?.steps, 0);
-    setLiveStepCount(stepCounterRef.current);
-
-    const initialPushOk = await pushSafeVitalsReading();
-    if (!initialPushOk) {
-      toast({
-        title: "Connection failed",
-        description: "Could not send a reading to dashboard.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsHardwareStreaming(true);
-    toast({
-      title: "Hardware connected",
-      description: "System connected with hardware. Live vitals started.",
-    });
-
-    hardwareStreamRef.current = setInterval(async () => {
-      const ok = await pushSafeVitalsReading();
-      if (!ok) {
-        stopHardwareStream();
-        toast({
-          title: "Hardware stream stopped",
-          description: "Connection lost while sending vitals.",
-          variant: "destructive",
-        });
-      }
-    }, 20000);
-  }, [
-    isHardwareStreaming,
-    pushSafeVitalsReading,
-    stopHardwareStream,
-    toast,
-    user?.id,
-  ]);
+  }, [isHardwareStreaming, stopHardwareStream, toast, user?.id]);
 
   const fetchDashboardData = useCallback(async () => {
     if (!user) return;
