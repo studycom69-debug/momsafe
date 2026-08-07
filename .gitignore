@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local debug artifacts / build logs
+build_log.txt
+build_output.txt
+eslint-report.txt
+eslint_log.txt
+formatted_lint_errors.txt
+lint.json
+lint_output.txt
+utf8_lint.txt
+
+# design reference files (keep in working dir only, not in repo)
+boom
+landing
