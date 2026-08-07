@@ -3306,16 +3306,37 @@
                         document.getElementById(
                             "ms-email-error",
                         ).style.display = "none";
-                        // Store locally so user feels acknowledged
                         try {
                             localStorage.setItem("ms_waitlist_email", email);
                         } catch (e) {}
-                        document.getElementById("ms-modal-form").style.display =
-                            "none";
-                        document.getElementById(
-                            "ms-modal-success",
-                        ).style.display = "block";
+
+                        // Close modal
+                        document
+                            .getElementById("ms-app-modal")
+                            .classList.remove("ms-modal-open");
+                        resetModalState();
+
+                        // Show top toast
+                        showSubscribeToast(email);
                     });
+
+                function showSubscribeToast(email) {
+                    const toast = document.getElementById("ms-top-toast");
+                    const emailEl = document.getElementById("ms-toast-email");
+                    if (emailEl) emailEl.textContent = email;
+                    toast.classList.add("ms-toast-visible");
+                    // Auto-dismiss after 6s
+                    setTimeout(() => hideSubscribeToast(), 6000);
+                }
+
+                function hideSubscribeToast() {
+                    const toast = document.getElementById("ms-top-toast");
+                    toast.classList.remove("ms-toast-visible");
+                }
+
+                document
+                    .getElementById("ms-toast-close")
+                    .addEventListener("click", hideSubscribeToast);
                 const observerOptions = {
                     root: null,
                     rootMargin: "0px",
@@ -3404,6 +3425,86 @@
                 }
             });
         </script>
+        <!-- Top Subscribe Toast -->
+        <div
+            id="ms-top-toast"
+            style="
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 99999;
+                display: flex;
+                justify-content: center;
+                pointer-events: none;
+            "
+        >
+            <div
+                style="
+                    pointer-events: auto;
+                    background: linear-gradient(135deg, #00685f, #0d9488);
+                    color: #fff;
+                    padding: 14px 20px;
+                    border-radius: 0 0 20px 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 14px;
+                    box-shadow: 0 8px 32px -8px rgba(0, 104, 95, 0.45);
+                    max-width: 560px;
+                    width: calc(100% - 32px);
+                "
+            >
+                <span style="font-size: 22px; flex-shrink: 0">&#127881;</span>
+                <div style="flex: 1">
+                    <p
+                        style="
+                            margin: 0;
+                            font-size: 14px;
+                            font-weight: 800;
+                            letter-spacing: -0.01em;
+                        "
+                    >
+                        You&apos;re on the waitlist!
+                    </p>
+                    <p
+                        style="
+                            margin: 2px 0 0;
+                            font-size: 12px;
+                            font-weight: 500;
+                            opacity: 0.85;
+                        "
+                    >
+                        We&apos;ll notify
+                        <span
+                            id="ms-toast-email"
+                            style="font-weight: 700"
+                        ></span>
+                        the moment the MomSafe app launches. Your pilot benefits
+                        are locked in. &#10024;
+                    </p>
+                </div>
+                <button
+                    id="ms-toast-close"
+                    style="
+                        background: rgba(255, 255, 255, 0.2);
+                        border: none;
+                        border-radius: 10px;
+                        width: 30px;
+                        height: 30px;
+                        cursor: pointer;
+                        color: #fff;
+                        font-size: 16px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                    "
+                >
+                    &#x2715;
+                </button>
+            </div>
+        </div>
+
         <!-- App Coming Soon Modal -->
         <div
             id="ms-app-modal"
@@ -3423,70 +3524,151 @@
                     background: #ffffff;
                     border-radius: 28px;
                     width: 100%;
-                    max-width: 480px;
-                    padding: 36px;
-                    box-shadow: 0 40px 120px -20px rgba(0, 0, 0, 0.3);
+                    max-width: 500px;
+                    padding: 0;
+                    box-shadow:
+                        0 40px 120px -20px rgba(0, 0, 0, 0.28),
+                        0 0 0 1px rgba(255, 255, 255, 0.9) inset;
                     position: relative;
+                    overflow: hidden;
                 "
             >
-                <!-- Close -->
+                <!-- Gradient header strip -->
+                <div
+                    style="
+                        background: linear-gradient(
+                            135deg,
+                            #00685f 0%,
+                            #0d9488 60%,
+                            #14b8a6 100%
+                        );
+                        padding: 28px 28px 24px;
+                        position: relative;
+                        overflow: hidden;
+                    "
+                >
+                    <div
+                        style="
+                            position: absolute;
+                            top: -30px;
+                            right: -30px;
+                            width: 120px;
+                            height: 120px;
+                            background: rgba(255, 255, 255, 0.08);
+                            border-radius: 50%;
+                        "
+                    ></div>
+                    <div
+                        style="
+                            position: absolute;
+                            bottom: -20px;
+                            left: 20px;
+                            width: 80px;
+                            height: 80px;
+                            background: rgba(255, 255, 255, 0.06);
+                            border-radius: 50%;
+                        "
+                    ></div>
+                    <div
+                        style="
+                            display: flex;
+                            align-items: center;
+                            gap: 14px;
+                            position: relative;
+                        "
+                    >
+                        <div
+                            style="
+                                width: 48px;
+                                height: 48px;
+                                background: rgba(255, 255, 255, 0.2);
+                                border-radius: 14px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 22px;
+                            "
+                        >
+                            &#128241;
+                        </div>
+                        <div>
+                            <div
+                                style="
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 8px;
+                                    margin-bottom: 4px;
+                                "
+                            >
+                                <p
+                                    style="
+                                        margin: 0;
+                                        font-size: 11px;
+                                        font-weight: 700;
+                                        color: rgba(255, 255, 255, 0.7);
+                                        text-transform: uppercase;
+                                        letter-spacing: 0.1em;
+                                    "
+                                >
+                                    MomSafe Mobile
+                                </p>
+                                <span
+                                    style="
+                                        background: rgba(255, 255, 255, 0.2);
+                                        color: #fff;
+                                        border-radius: 999px;
+                                        padding: 2px 8px;
+                                        font-size: 10px;
+                                        font-weight: 800;
+                                        text-transform: uppercase;
+                                        letter-spacing: 0.08em;
+                                    "
+                                    >Coming Soon</span
+                                >
+                            </div>
+                            <h2
+                                style="
+                                    margin: 0;
+                                    font-size: 22px;
+                                    font-weight: 800;
+                                    color: #fff;
+                                    letter-spacing: -0.02em;
+                                    line-height: 1.2;
+                                "
+                            >
+                                App is on its way!
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Close (on gradient header) -->
                 <button
                     id="ms-modal-close"
                     style="
                         position: absolute;
                         top: 16px;
                         right: 16px;
-                        background: #f1f5f9;
+                        background: rgba(255, 255, 255, 0.2);
                         border: none;
-                        border-radius: 12px;
-                        width: 36px;
-                        height: 36px;
+                        border-radius: 10px;
+                        width: 32px;
+                        height: 32px;
                         cursor: pointer;
-                        font-size: 18px;
-                        color: #64748b;
+                        font-size: 16px;
+                        color: #fff;
                         display: flex;
                         align-items: center;
                         justify-content: center;
+                        z-index: 10;
                     "
                 >
                     &#x2715;
                 </button>
 
                 <!-- Form State -->
-                <div id="ms-modal-form">
-                    <!-- Icon -->
-                    <div
-                        style="
-                            width: 56px;
-                            height: 56px;
-                            background: linear-gradient(
-                                135deg,
-                                #10b981,
-                                #0d9488
-                            );
-                            border-radius: 18px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            margin-bottom: 20px;
-                        "
-                    >
-                        <span style="font-size: 26px">&#128241;</span>
-                    </div>
-
-                    <!-- Heading -->
-                    <h2
-                        style="
-                            margin: 0 0 8px;
-                            font-size: 24px;
-                            font-weight: 800;
-                            color: #0f172a;
-                            letter-spacing: -0.03em;
-                            line-height: 1.2;
-                        "
-                    >
-                        App is on its way!
-                    </h2>
+                <div id="ms-modal-form" style="padding: 24px 28px 28px">
+                    <!-- Subtitle -->
                     <p
                         style="
                             margin: 0 0 20px;
@@ -3497,7 +3679,7 @@
                         "
                     >
                         The MomSafe mobile app is coming soon for iOS &amp;
-                        Android. Drop your email and we&apos;ll let you know the
+                        Android. Drop your email and we&apos;ll notify you the
                         moment it launches.
                     </p>
 
@@ -3733,88 +3915,8 @@
                     </a>
                 </div>
 
-                <!-- Success State -->
-                <div
-                    id="ms-modal-success"
-                    style="display: none; text-align: center; padding: 12px 0"
-                >
-                    <div
-                        style="
-                            width: 64px;
-                            height: 64px;
-                            background: #f0fdf4;
-                            border-radius: 50%;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            margin: 0 auto 20px;
-                            font-size: 32px;
-                        "
-                    >
-                        &#127881;
-                    </div>
-                    <h2
-                        style="
-                            margin: 0 0 8px;
-                            font-size: 22px;
-                            font-weight: 800;
-                            color: #0f172a;
-                        "
-                    >
-                        You&apos;re on the list!
-                    </h2>
-                    <p
-                        style="
-                            margin: 0 0 24px;
-                            font-size: 14px;
-                            color: #64748b;
-                            font-weight: 500;
-                            line-height: 1.6;
-                        "
-                    >
-                        We&apos;ll email you the moment the app drops. As a
-                        pilot member, you&apos;ll get access before everyone
-                        else.
-                    </p>
-                    <div
-                        style="
-                            background: #f0fdf4;
-                            border: 1px solid #bbf7d0;
-                            border-radius: 14px;
-                            padding: 14px 18px;
-                            margin-bottom: 24px;
-                            text-align: left;
-                        "
-                    >
-                        <p
-                            style="
-                                margin: 0;
-                                font-size: 12px;
-                                font-weight: 700;
-                                color: #16a34a;
-                            "
-                        >
-                            &#127381; Your pilot benefits are locked in. Till
-                            then &mdash;
-                        </p>
-                    </div>
-                    <a
-                        href="/login"
-                        style="
-                            display: block;
-                            padding: 14px;
-                            background: #0f172a;
-                            color: #fff;
-                            border-radius: 14px;
-                            text-decoration: none;
-                            font-size: 12px;
-                            font-weight: 800;
-                            text-transform: uppercase;
-                            letter-spacing: 0.12em;
-                        "
-                        >Sign up &amp; use the web app now &#8594;</a
-                    >
-                </div>
+                <!-- Success State (hidden - we use top toast instead) -->
+                <div id="ms-modal-success" style="display: none"></div>
             </div>
         </div>
 
@@ -3824,6 +3926,34 @@
             }
             #ms-app-modal.ms-modal-open {
                 display: flex;
+            }
+
+            /* Top toast */
+            #ms-top-toast > div {
+                transform: translateY(-110%);
+                transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+            #ms-top-toast.ms-toast-visible > div {
+                transform: translateY(0);
+            }
+
+            /* Modal inner card scroll on small screens */
+            #ms-app-modal > div {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            /* Pill badge */
+            .ms-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 10px;
+                border-radius: 999px;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
             }
         </style>
     </body>
