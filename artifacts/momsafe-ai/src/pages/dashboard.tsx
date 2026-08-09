@@ -34,7 +34,7 @@ import { trendData } from "@/lib/mock-data";
 import { Link } from "wouter";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { formatDistanceToNow, format, addWeeks } from "date-fns";
 import { ManualVitalsInput } from "@/components/vitals/ManualVitalsInput";
 import { calculateRiskScore, RiskHealthData } from "@/lib/ai/riskEngine";
@@ -616,7 +616,7 @@ export default function Dashboard() {
   const [focusedVital, setFocusedVital] = useState<Vital | null>(null);
   const [expandedMetric, setExpandedMetric] = useState<string | null>(null);
   const { user } = useAuth();
-  const { toast } = useToast();
+
   const [isHardwareStreaming, setIsHardwareStreaming] = useState(false);
   const hardwareStreamRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fixedBpWeightRef = useRef<{
@@ -963,30 +963,25 @@ export default function Dashboard() {
 
   const handleHardwareToggle = useCallback(() => {
     if (!user?.id) {
-      toast({
-        title: "Login required",
+      toast.error("Login required", {
         description: "Please sign in before connecting hardware.",
-        variant: "destructive",
       });
       return;
     }
 
     if (isHardwareStreaming) {
       stopHardwareStream();
-      toast({
-        title: "Hardware disconnected",
+      toast.success("Hardware disconnected", {
         description: "Vital stream stopped successfully.",
       });
       return;
     }
 
-    toast({
-      title: "Hardware not in range",
+    toast.error("Hardware not in range", {
       description:
         "Please ensure your MomSafe device is nearby and powered on.",
-      variant: "destructive",
     });
-  }, [isHardwareStreaming, stopHardwareStream, toast, user?.id]);
+  }, [isHardwareStreaming, stopHardwareStream, user?.id]);
 
   const fetchDashboardData = useCallback(async () => {
     if (!user) return;
