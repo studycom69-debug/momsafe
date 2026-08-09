@@ -1,0 +1,304 @@
+Design a world-class, premium, high-end AI-powered maternal health platform UI (MomSafe AI) that feels like a combination of:
+
+- Stripe Dashboard (clean + structured)
+- Apple Health (calm + clinical + data-rich)
+- Notion AI (intelligent + adaptive)
+
+This must feel like a funded startup product, not a basic UI.
+
+---
+
+⚠️ STRICT MASTER RULES (NON-NEGOTIABLE)
+
+- DO NOT create a basic UI
+- DO NOT reduce features
+- DO NOT dump everything on dashboard
+- DO NOT create empty sections
+- DO NOT create random lists (everything must be designed properly)
+- DO NOT compromise spacing or hierarchy
+
+If space becomes crowded:
+→ Use tabs / expandable sections / layered cards
+→ DO NOT REMOVE FEATURES
+
+---
+
+🔥 CORE EXPECTATION
+
+- 9–10 FULL pages
+- Each page = 8–10 well-designed, meaningful features
+- Every feature must be visually represented (not just text)
+- The UI must feel deep, intelligent, and premium
+
+---
+
+🎨 DESIGN SYSTEM (VERY IMPORTANT)
+
+- Background: #F9FAFB (soft neutral)
+- Cards: pure white (#FFFFFF)
+- Borders: subtle (#E5E7EB)
+- Typography:
+  - Strong bold headings
+  - Soft gray descriptions
+- Radius: rounded-2xl / 3xl
+- Shadows: soft, layered, premium
+- NO bright colors
+
+ONLY use color for:
+
+- Red → critical
+- Yellow → warning
+- Green → stable
+- Blue → primary actions
+
+---
+
+🧠 DASHBOARD (ULTRA-REFINED — POWERFUL BUT CONTROLLED)
+
+The dashboard should feel like a command center, NOT a data dump.
+
+MUST INCLUDE (ALL):
+
+1. HERO MRI CARD:
+   
+   - Large risk score
+   - Risk level
+   - Animated count-up
+   - AI explanation (short)
+   - Confidence %
+   - Risk change (+/-)
+
+2. SMART VITAL PREVIEW GRID (4–5 only):
+   
+   - Heart Rate
+   - Blood Pressure
+   - SpO2
+   - Temperature
+   - (optional one more)
+     EACH with:
+   - value
+   - mini sparkline
+   - trend arrow
+   - status dot
+
+3. ADVANCED TREND GRAPH:
+   
+   - Smooth animated graph
+   - Toggle (24h / 7d)
+
+4. ALERT PREVIEW:
+   
+   - Top 2–3 alerts
+   - Severity color
+   - quick action
+
+5. AI INSIGHT PANEL:
+   
+   - “What to do now”
+   - 2–3 smart recommendations
+   - actionable UI buttons
+
+6. QUICK SUMMARY:
+   
+   - current condition
+   - last update
+   - short recap
+
+7. MICRO ACTIVITY FEED:
+   
+   - last 3–4 events
+   - subtle timeline
+
+8. STATUS BAR:
+   
+   - system health
+   - monitoring active
+   - last sync
+
+👉 Dashboard = elegant, powerful, not crowded
+
+---
+
+📊 VITALS INTELLIGENCE PAGE
+
+Make this feel like a monitoring system:
+
+- Full vitals grid
+- Each vital has:
+  - detailed graph
+  - deviation %
+  - normal range band
+  - history logs
+- Comparison mode
+- Trend overlays
+- AI interpretation of vitals
+- Anomaly highlights
+- Time filters
+
+---
+
+🚨 ALERTS & ESCALATION SYSTEM
+
+Design like a mission control feed:
+
+- Active / Acknowledged / Resolved tabs
+- Alert cards (rich UI)
+- Timeline with severity
+- Escalation levels
+- Alert detail modal
+- Action buttons (acknowledge/respond)
+- Highlight critical alerts visually
+- System escalation indicator
+
+---
+
+📈 ANALYTICS & INTELLIGENCE
+
+- Multi-layer graphs
+- Risk trajectory
+- Correlation between vitals
+- AI insights panel
+- Anomaly detection markers
+- Filters & toggles
+- Weekly / monthly insights
+- Summary cards
+
+---
+
+🤖 AI GUIDANCE SYSTEM (MAKE THIS FEEL INSANE)
+
+- Personalized recommendations
+- Preventive care suggestions
+- Daily AI plan
+- “Do this now” panel
+- Smart alerts
+- Context-aware insights
+- Action buttons (log / adjust / follow)
+- AI explanation UI
+
+---
+
+🥗 NUTRITION INTELLIGENCE
+
+Make it deep, not basic:
+
+- Meal tracking (breakfast/lunch/dinner)
+- Calories + macros (protein, carbs, fibre)
+- Daily targets
+- Weekly nutrition chart
+- Food suggestions (AI)
+- Nutrient breakdown
+- Progress visualization
+- Deficiency insights
+
+---
+
+💊 MEDICATION SYSTEM (IMPORTANT — DESIGN HEAVY)
+
+NOT a list — a system:
+
+- Prescription cards
+- Daily schedule timeline (visual)
+- Taken / missed indicators
+- Reminder UI
+- Medicine detail panel
+- History logs
+- Missed dose alerts
+- Daily tracker
+
+---
+
+📋 DAILY LOGS SYSTEM
+
+- Water intake tracker (visual)
+- Sleep tracker
+- Mood tracker
+- Symptom logging
+- Daily summary
+- Timeline view
+- Quick input UI
+- History
+
+---
+
+🔮 PREDICTIONS ENGINE
+
+- Future risk graph
+- Forecast trends
+- Scenario simulation UI
+- “What may happen next”
+- AI prediction explanation
+- Confidence %
+- Warning indicators
+- Suggested preventive actions
+
+---
+
+⚙️ SETTINGS / PROFILE
+
+- Profile data
+- Pregnancy details
+- Preferences
+- Notification settings
+- Emergency contacts
+- App configuration
+
+---
+
+🎬 MOTION & EXPERIENCE (MANDATORY)
+
+- Use Framer Motion across entire app
+- Page transitions (smooth fade + slide)
+- Card hover (lift + shadow)
+- Button press animation
+- Section stagger animations
+
+---
+
+🧈 BUTTERY EXPERIENCE
+
+- Smooth scrolling everywhere
+- No sudden jumps
+- Subtle scroll-based animations
+- Fluid navigation
+
+---
+
+📊 UI ANIMATIONS
+
+- Count-up numbers
+- Animated charts
+- Progress bars filling
+- Soft pulsing indicators
+
+---
+
+✨ MICRO INTERACTIONS
+
+- Hover effects
+- Icon animations
+- Tooltips
+- Click feedback
+- Active state highlights
+
+---
+
+🏆 FINAL EXPECTATION
+
+The UI should feel:
+
+- Premium
+- Deep
+- Intelligent
+- Smooth
+- High-end
+- Launch-ready
+
+User should feel:
+👉 “This is not a normal app… this is something serious”
+
+---
+
+OUTPUT:
+
+A fully designed, multi-page, high-end SaaS UI system that is feature-rich, visually clean, and extremely well-structured.

@@ -1,0 +1,9 @@
+CompileFlags:
+  CompilationDatabase: None
+  Add: [-x, c++, -std=gnu++17]
+
+---
+If:
+  PathMatch: .*\.ino
+Diagnostics:
+  Suppress: [pp_file_not_found, unknown_typename, undeclared_var_use, no_template, fatal_too_many_errors, fe_expected_compiler_job]
