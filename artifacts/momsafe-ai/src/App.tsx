@@ -1,5 +1,11 @@
 /// <reference types="vite/client" />
-import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
+import {
+  Switch,
+  Route,
+  Router as WouterRouter,
+  useLocation,
+  Redirect,
+} from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
@@ -35,7 +41,13 @@ function Router() {
   if (!user) {
     return (
       <Switch>
-        <Route path="/" component={Login} />
+        <Route path="/login" component={Login} />
+        <Route path="/">
+          {() => {
+            window.location.replace("/landing.html");
+            return null;
+          }}
+        </Route>
         <Route>
           <Redirect to="/" />
         </Route>
