@@ -8,6 +8,7 @@ import {
 } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import AppLayout from "@/components/layout/AppLayout";
@@ -117,6 +118,7 @@ export default function App() {
           <Router />
         </WouterRouter>
         <Toaster position="top-right" richColors />
+        <VercelAnalytics />
       </AuthProvider>
     </QueryClientProvider>
   );
