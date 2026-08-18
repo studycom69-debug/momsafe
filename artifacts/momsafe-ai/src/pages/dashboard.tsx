@@ -913,10 +913,20 @@ export default function Dashboard() {
       heart_rate: randomInt(72, 88),
       spo2: randomInt(96, 99),
       temperature: randomDecimal(36.3, 37.0, 1),
-      // Keep BP and weight fixed while streaming.
-      systolic_bp: toFiniteOr(fixedBpWeightRef.current.systolic, 118),
-      diastolic_bp: toFiniteOr(fixedBpWeightRef.current.diastolic, 76),
-      weight: toFiniteOr(fixedBpWeightRef.current.weight, 56.0),
+      // Keep the simulated readings in a calm, normal range.
+      systolic_bp: randomInt(112, 126),
+      diastolic_bp: randomInt(70, 82),
+      weight: randomDecimal(
+        Math.max(
+          45,
+          toFiniteOr(fixedBpWeightRef.current.weight, 56.0) - 0.3,
+        ),
+        Math.min(
+          120,
+          toFiniteOr(fixedBpWeightRef.current.weight, 56.0) + 0.3,
+        ),
+        1,
+      ),
       // Only steps increase by 10-15 each cycle.
       steps: stepCounterRef.current,
     };
@@ -991,11 +1001,32 @@ export default function Dashboard() {
       return;
     }
 
-    toast.error("Hardware not in range", {
-      description:
-        "Please ensure your MomSafe device is nearby and powered on.",
+    setIsHardwareStreaming(true);
+
+    const publishReading = async () => {
+      const success = await pushSafeVitalsReading();
+      if (!success) {
+        stopHardwareStream();
+        toast.error("Hardware sync paused", {
+          description: "The latest simulated reading could not be saved.",
+        });
+      }
+    };
+
+    void publishReading();
+    hardwareStreamRef.current = setInterval(() => {
+      void publishReading();
+    }, 5000);
+
+    toast.success("Hardware connected", {
+      description: "Receiving normal-range vitals every few seconds.",
     });
-  }, [isHardwareStreaming, stopHardwareStream, user?.id]);
+  }, [
+    isHardwareStreaming,
+    pushSafeVitalsReading,
+    stopHardwareStream,
+    user?.id,
+  ]);
 
   const fetchDashboardData = useCallback(async () => {
     if (!user) return;
