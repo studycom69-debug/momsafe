@@ -1,6 +1,6 @@
 <div align="center">
 
-<a href="https://momsafe.vercel.app">
+<a href="https://momsafe.in">
   <img src="https://raw.githubusercontent.com/studycom69-debug/momsafe/main/.canvas/assets/momsafe%20logo.png" alt="MomSafe AI" width="140" style="border-radius: 28px; filter: drop-shadow(0px 12px 32px rgba(99, 102, 241, 0.4));"/>
 </a>
 
@@ -15,8 +15,8 @@
 
 <!-- Startup Primary CTAs -->
 <p align="center">
-  <a href="https://momsafe.vercel.app">
-    <img src="https://img.shields.io/badge/LAUNCH%20APP-MOMSAFE.VERCEL.APP-6366F1?style=for-the-badge&logo=vercel&logoColor=white&labelColor=090D16" alt="Launch Live App"/>
+  <a href="https://momsafe.in">
+    <img src="https://img.shields.io/badge/LIVE%20PLATFORM-MOMSAFE.IN-6366F1?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=090D16" alt="Live Platform"/>
   </a>
   <a href="#-the-momsafe-ecosystem">
     <img src="https://img.shields.io/badge/EXPLORE-THE%20ECOSYSTEM-10B981?style=for-the-badge&logo=target&logoColor=white&labelColor=090D16" alt="Ecosystem"/>
@@ -317,8 +317,8 @@ We are actively partnering with **obstetricians, maternal health researchers, an
 
 <!-- Footer Action Ribbon -->
 <p align="center">
-  <a href="https://momsafe.vercel.app">
-    <img src="https://img.shields.io/badge/LAUNCH%20APP-MOMSAFE.VERCEL.APP-6366F1?style=for-the-badge&logo=vercel&logoColor=white&labelColor=090D16" alt="Launch Live App"/>
+  <a href="https://momsafe.in">
+    <img src="https://img.shields.io/badge/LAUNCH%20APP-MOMSAFE.IN-6366F1?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=090D16" alt="Launch Live Platform"/>
   </a>
   <a href="https://github.com/studycom69-debug/momsafe/stargazers">
     <img src="https://img.shields.io/badge/STAR%20ON%20GITHUB-⭐-F59E0B?style=for-the-badge&logo=github&logoColor=white&labelColor=090D16" alt="Star on GitHub"/>
