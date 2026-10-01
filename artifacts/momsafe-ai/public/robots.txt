@@ -1,0 +1,25 @@
+# Robots.txt for MomSafe AI (https://www.momsafe.in/)
+User-agent: *
+Allow: /
+Allow: /landing.html
+Allow: /privacy
+Allow: /privacy.html
+Allow: /terms
+Allow: /terms.html
+
+# Disallow authenticated, dashboard, and private application routes
+Disallow: /dashboard
+Disallow: /vitals
+Disallow: /alerts
+Disallow: /analytics
+Disallow: /ai-guidance
+Disallow: /nutrition
+Disallow: /medication
+Disallow: /daily-logs
+Disallow: /hospitals
+Disallow: /settings
+Disallow: /help
+Disallow: /onboarding
+Disallow: /login
+
+Sitemap: https://www.momsafe.in/sitemap.xml
