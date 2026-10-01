@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terms of Service | MomSafe AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#003527",
+                        "primary-container": "#064e3b",
+                        "primary-fixed": "#b0f0d6",
+                        "primary-fixed-dim": "#95d3ba",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#80bea6",
+                        surface: "#f7f9fb",
+                        background: "#f7f9fb",
+                        "surface-container": "#eceef0",
+                        "surface-container-low": "#f2f4f6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "on-surface": "#191c1e",
+                        "on-surface-variant": "#404944",
+                        outline: "#707974",
+                        error: "#ba1a1a",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "system-ui", "sans-serif"],
+                        display: ["Plus Jakarta Sans", "Inter", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { opacity: 0; transform: translateY(8px); animation: pageIn 600ms cubic-bezier(.2,.7,.2,1) 30ms forwards; }
+        @keyframes pageIn { to { opacity: 1; transform: translateY(0); } }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(18px); filter: blur(2px); }
+          to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+        }
+        .hero-fade > * { opacity: 0; animation: fadeUp 700ms cubic-bezier(.2,.7,.2,1) forwards; }
+        .hero-fade > *:nth-child(1) { animation-delay: 120ms; }
+        .hero-fade > *:nth-child(2) { animation-delay: 220ms; }
+        .hero-fade > *:nth-child(3) { animation-delay: 320ms; }
+        .hero-fade > *:nth-child(4) { animation-delay: 420ms; }
+        .hero-fade > *:nth-child(5) { animation-delay: 520ms; }
+
+        .reveal { opacity: 0; transform: translateY(22px); filter: blur(2px);
+                 transition: opacity 700ms cubic-bezier(.2,.7,.2,1),
+                             transform 700ms cubic-bezier(.2,.7,.2,1),
+                             filter 700ms cubic-bezier(.2,.7,.2,1);
+                 will-change: opacity, transform, filter; }
+        .reveal.visible { opacity: 1; transform: translateY(0); filter: blur(0); }
+
+        header { opacity: 0; animation: pageIn 600ms cubic-bezier(.2,.7,.2,1) 80ms forwards; }
+    </style>
+
+    <meta name="description" content="Terms of Service for MomSafe AI — usage rules, medical disclaimers, limitations of liability, account terms, and your legal agreement with MomSafe AI." />
+    <meta name="theme-color" content="#003527" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/favicon.svg" color="#003527" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MomSafe AI" />
+    <meta property="og:title" content="Terms of Service | MomSafe AI" />
+    <meta property="og:description" content="Legal Terms of Service governing your use of MomSafe AI — eligibility, disclaimers, limitations of liability, termination, and dispute resolution." />
+    <meta property="og:url" content="https://momsafe.in/terms" />
+    <meta property="og:image" content="https://momsafe.in/opengraph.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Terms of Service | MomSafe AI" />
+    <meta name="twitter:description" content="Legal Terms of Service governing MomSafe AI usage — eligibility, medical disclaimers, and liability." />
+    <meta name="twitter:image" content="https://momsafe.in/opengraph.jpg" />
+</head>
+<body class="bg-background text-on-surface font-sans antialiased min-h-screen">
+    <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-xl border-b border-outline/10">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                </div>
+                <span class="font-display font-bold text-xl text-on-surface">MomSafe</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="/login" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Log in</a>
+                <a href="/landing.html" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">&larr; Back to home</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-16">
+        <div class="mb-12 hero-fade">
+            <p class="text-sm font-semibold uppercase tracking-wider text-primary/80 mb-3">Legal</p>
+            <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-5">Terms of Service</h1>
+            <p class="text-lg text-on-surface-variant leading-relaxed">Last updated: September 30, 2026</p>
+            <p class="text-lg text-on-surface-variant leading-relaxed mt-2">
+                Welcome to MomSafe AI. These Terms of Service ("Terms") are a binding legal agreement between you ("you" or "your") and MomSafe AI ("MomSafe", "we", "us", or "our")
+                governing your access to and use of the MomSafe AI web application, website at momsafe.in and momsafe.vercel.app, and related products, features, APIs,
+                and services (collectively, the "Service"). Please read these Terms carefully before using the Service. By accessing or using the Service, you agree to be bound by these Terms.
+                If you do not agree to all of the provisions below, you may not use the Service.
+            </p>
+        </div>
+
+        <div class="prose prose-slate max-w-none">
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">1. Eligibility and Account Creation</h2>
+                <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10 mb-6">
+                    <h3 class="font-semibold text-on-surface mb-3">1.1 Eligibility</h3>
+                    <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                        <li>You must be at least 18 years of age (or the age of majority in your jurisdiction) to use the Service.</li>
+                        <li>You must be legally capable of forming a binding contract with us.</li>
+                        <li>The Service is intended for use by pregnant and postpartum individuals and their authorized caregivers. It is not intended for use by minors.</li>
+                        <li>You may not use the Service if any applicable law prohibits you from doing so.</li>
+                    </ul>
+                </div>
+                <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10">
+                    <h3 class="font-semibold text-on-surface mb-3">1.2 Accounts and Registration</h3>
+                    <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                        <li>To use certain features of the Service, you must create an account using an email address and password or a supported third-party identity provider (e.g., Google OAuth).</li>
+                        <li>You are responsible for maintaining the confidentiality of your account credentials and for all activities performed under your account.</li>
+                        <li>You agree to provide accurate, current, and complete information during registration and to update it promptly to keep it accurate, current, and complete.</li>
+                        <li>You agree to notify us immediately of any unauthorized use of your account or any other security breach by emailing <a href="mailto:support@momsafe.in" class="text-primary font-medium underline">support@momsafe.in</a>.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">2. License to Use the Service</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    Subject to your compliance with these Terms and any applicable fees, we grant you a limited, non-exclusive, non-transferable, non-sublicensable, revocable license
+                    to access and use the Service for your personal, non-commercial purposes. We and our licensors reserve all rights not expressly granted to you in these Terms.
+                    You agree that you will not, and will not permit any third party to:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                    <li>Reproduce, distribute, publicly display, publicly perform, communicate to the public, modify, adapt, translate, or create derivative works of, the Service or any portion thereof, except as expressly permitted herein.</li>
+                    <li>Reverse engineer, decompile, disassemble, or otherwise attempt to derive the source code, underlying ideas, algorithms, or trade secrets of the Service, except to the extent that such restriction is prohibited by applicable law.</li>
+                    <li>Use the Service to build a competing product or service, or to copy any features, interfaces, functions, or graphics for use in another product or service.</li>
+                    <li>Access, tamper with, or use non-public areas of the Service, our computer systems, or the technical delivery systems of our providers.</li>
+                    <li>Probe, scan, or test the vulnerability of any system or network, or breach or circumvent any security or authentication measures.</li>
+                    <li>Use any robot, crawler, spider, scraper, or other automated means to access the Service for any purpose, except as we may permit in writing.</li>
+                    <li>Introduce or upload viruses, malware, ransomware, or any other harmful code or material to the Service.</li>
+                    <li>Use the Service for any unlawful, harmful, fraudulent, discriminatory, abusive, harassing, deceptive, or objectionable purpose, or in violation of any applicable local, state, national, or international law or regulation.</li>
+                </ul>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">3. User Content and Data</h2>
+                <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10 mb-6">
+                    <h3 class="font-semibold text-on-surface mb-3">3.1 Ownership and License</h3>
+                    <p class="text-on-surface-variant leading-relaxed mb-3">
+                        You retain full ownership of any health logs, vitals, notes, images, and other content that you upload, submit, or store through the Service ("User Content").
+                        By submitting User Content, you grant MomSafe a worldwide, non-exclusive, royalty-free, transferable, sublicensable license to use, host, store, reproduce, modify,
+                        adapt, publish, transmit, process, perform, display, and distribute such User Content solely for the purposes of:
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                        <li>Operating, maintaining, and providing the Service to you and authorized users.</li>
+                        <li>Generating personalized AI guidance, dashboards, alerts, and inferences for you within the Service.</li>
+                        <li>Improving, testing, and refining features and algorithms of the Service using aggregated, de-identified data.</li>
+                        <li>Complying with our legal obligations as described in our Privacy Policy.</li>
+                    </ul>
+                </div>
+                <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10">
+                    <h3 class="font-semibold text-on-surface mb-3">3.2 Your Responsibilities</h3>
+                    <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                        <li>You are solely responsible for the accuracy, completeness, and lawfulness of your User Content.</li>
+                        <li>You represent and warrant that your User Content does not infringe or violate the intellectual property, privacy, publicity, or other rights of any person.</li>
+                        <li>You may not submit User Content that is unlawful, threatening, hateful, discriminatory, fraudulent, or that violates any applicable law.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">4. Medical and Health-Related Disclaimers</h2>
+                <div class="bg-error/5 border border-error/20 rounded-2xl p-6 mb-6">
+                    <h3 class="font-semibold text-error mb-3">READ THIS SECTION CAREFULLY</h3>
+                    <ol class="list-decimal list-inside space-y-3 text-on-surface-variant leading-relaxed">
+                        <li><strong>Not medical advice:</strong> the Service is a consumer wellness and information product. It is not a medical device, clinical decision support tool, or substitute for professional medical advice, diagnosis, or treatment.</li>
+                        <li><strong>Not an emergency service:</strong> the Service is not designed for, and must not be used for, medical emergencies, urgent care, or life-threatening situations. In the event of a medical emergency, call your local emergency number immediately.</li>
+                        <li><strong>No physician-patient relationship:</strong> no physician-patient, clinician-client, or fiduciary relationship is created between you and MomSafe, its employees, its affiliates, or any contributor to the Service as a result of using the Service or these Terms.</li>
+                        <li><strong>AI outputs are informational:</strong> all AI-generated guidance, risk scores, insights, recommendations, and alerts are generated by predictive models based on general medical knowledge and your self-reported inputs. They may be inaccurate, incomplete, or out of date, and must never be relied upon to the exclusion of consultation with a qualified healthcare professional.</li>
+                        <li><strong>Reliance at your own risk:</strong> any reliance upon the Service, including AI output or vitals interpretation, is solely at your own risk. Always consult a qualified healthcare provider before making any decisions related to medication, diet, activity level, clinical tests, or any aspect of your or your child's care.</li>
+                    </ol>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">5. Service Availability, Modifications, and Fees</h2>
+                <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                    <li>We strive to keep the Service available on a continuous basis, but we do not guarantee that the Service will be uninterrupted, available at any given time, secure, or error-free.</li>
+                    <li>We reserve the right, at our sole discretion, to modify, suspend, or discontinue any part of the Service (including any feature, data, or integration) at any time, with or without notice, except where prohibited by law.</li>
+                    <li>We may from time to time offer premium, paid features or subscription tiers. Any fees, billing terms, and cancellation policies will be disclosed at the point of purchase and are incorporated by reference into these Terms.</li>
+                    <li>You are responsible for any taxes, duties, or third-party charges associated with your use of the Service and any payment card or account you use.</li>
+                </ul>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">6. Intellectual Property</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    The Service, including all code, software, documentation, APIs, trademarks, service marks, logos, brand assets, designs, graphics, user interfaces, text, audiovisual content,
+                    and all other materials or components therein, are owned by MomSafe or our licensors and are protected by copyright, trademark, patent, trade secret, and other intellectual property laws.
+                    Nothing in these Terms transfers to you any right, title, or interest in or to MomSafe's intellectual property or any third-party content on the Service.
+                </p>
+                <p class="text-on-surface-variant leading-relaxed">
+                    "MomSafe", "MomSafe AI", the MomSafe logos, and any product or service names displayed on the Service are trademarks or registered trademarks of MomSafe AI.
+                    You may not use, copy, reproduce, republish, or distribute any MomSafe trademarks without our prior written permission.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">7. Third-Party Services and Integrations</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    The Service may display, link to, or integrate with websites, products, or services owned or operated by third parties, including Supabase (database, authentication,
+                    serverless functions), Vercel (hosting and deployment), Google (OAuth and identity), Leaflet/OpenStreetMap (maps), and hardware devices such as ESP32-based sensors.
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                    <li>We do not control, endorse, or assume responsibility for the content, privacy policies, practices, or terms of service of any third-party website or service.</li>
+                    <li>Your use of any third-party service is governed solely by that third party's own terms and policies.</li>
+                    <li>You expressly relieve MomSafe from any and all liability arising from your use of any third-party website or service, or from any data shared with such third parties by you or on your behalf.</li>
+                </ul>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">8. Termination</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    We may suspend or terminate your access to the Service, immediately and without prior notice or liability, if we determine, in our sole discretion, that you have breached these Terms,
+                    that your use of the Service creates a risk to MomSafe or other users, or that such action is required by law or for the safety of any person.
+                </p>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    You may terminate your account at any time by using the account deletion features within the Service or by emailing
+                    <a href="mailto:support@momsafe.in" class="text-primary font-medium underline">support@momsafe.in</a>. Upon termination:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                    <li>Your right to use the Service immediately ceases.</li>
+                    <li>We may delete or de-identify your User Content in accordance with our data retention practices and Privacy Policy.</li>
+                    <li>Provisions of these Terms that by their nature should survive termination, including but not limited to disclaimers, limitations of liability, intellectual property rights, and dispute resolution terms, shall survive.</li>
+                </ul>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">9. Disclaimers of Warranties</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, THE SERVICE IS PROVIDED ON AN "AS IS", "AS AVAILABLE", AND "WITH ALL FAULTS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+                    WHETHER EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE. MOMSAFE AND ITS AFFILIATES, LICENSORS, SERVICE PROVIDERS, EMPLOYEES, AGENTS, OFFICERS, AND DIRECTORS (COLLECTIVELY, THE "MOMSAFE PARTIES")
+                    HEREBY DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT, QUALITY OF INFORMATION,
+                    TITLE, AND NON-INFRINGEMENT OF THIRD-PARTY RIGHTS.
+                </p>
+                <p class="text-on-surface-variant leading-relaxed">
+                    WITHOUT LIMITING THE FOREGOING, THE MOMSAFE PARTIES DO NOT WARRANT THAT: (A) THE SERVICE WILL MEET YOUR REQUIREMENTS OR BE CONSTANTLY AVAILABLE;
+                    (B) THE SERVICE WILL OPERATE WITHOUT INTERRUPTION, ERRORS, OMISSIONS, OR INACCURACIES; (C) ANY DATA, OUTPUT, OR AI GUIDANCE PROVIDED BY THE SERVICE WILL BE ACCURATE, RELIABLE,
+                    COMPLETE, OR CURRENT; OR (D) THAT THE SERVICE OR ITS INFRASTRUCTURE IS FREE OF VIRUSES, HARMFUL COMPONENTS, OR SECURITY VULNERABILITIES.
+                    SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF IMPLIED WARRANTIES, SO THE ABOVE EXCLUSIONS MAY NOT APPLY TO YOU.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">10. Limitation of Liability</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL THE MOMSAFE PARTIES BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES,
+                    INCLUDING BUT NOT LIMITED TO LOST PROFITS, LOST REVENUE, LOST DATA, BUSINESS INTERRUPTION, COST OF SUBSTITUTE GOODS OR SERVICES, OR ANY PERSONAL INJURY,
+                    ARISING OUT OF OR RELATING TO THESE TERMS OR YOUR USE OF, OR INABILITY TO USE, THE SERVICE, EVEN IF THE MOMSAFE PARTIES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES,
+                    AND REGARDLESS OF THE LEGAL THEORY (CONTRACT, TORT, OR OTHERWISE) UPON WHICH THE CLAIM IS BASED.
+                </p>
+                <p class="text-on-surface-variant leading-relaxed">
+                    IN NO EVENT WILL THE AGGREGATE, TOTAL LIABILITY OF THE MOMSAFE PARTIES ARISING OUT OF OR RELATING TO THESE TERMS OR THE SERVICE EXCEED THE TOTAL AMOUNT, IF ANY,
+                    THAT YOU HAVE PAID TO MOMSAFE IN THE SIX (6) MONTHS IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO THE CLAIM, OR ONE HUNDRED U.S. DOLLARS (US$100) IF NO SUCH FEES HAVE BEEN PAID.
+                    THE LIMITATIONS AND EXCLUSIONS IN THIS SECTION APPLY EVEN IF ANY REMEDY FAILS OF ITS ESSENTIAL PURPOSE.
+                    SOME JURISDICTIONS DO NOT ALLOW THE LIMITATION OR EXCLUSION OF LIABILITY FOR INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO SUCH LIMITATIONS OR EXCLUSIONS MAY NOT APPLY TO YOU.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">11. Indemnification</h2>
+                <p class="text-on-surface-variant leading-relaxed">
+                    You agree to defend, indemnify, and hold harmless the MomSafe Parties from and against any and all claims, actions, suits, proceedings, liabilities, losses, damages, penalties,
+                    fines, costs, and expenses (including reasonable attorneys' fees) arising out of or relating to: (a) your access to, or use of, the Service in violation of these Terms or applicable law;
+                    (b) your User Content or any information you submit through the Service; (c) your violation of the rights of any third party, including intellectual property, privacy, or publicity rights;
+                    (d) any dispute between you and any third party; or (e) any misrepresentation made by you. MomSafe reserves the right to assume the exclusive defense and control of any matter subject
+                    to indemnification by you, and you agree to cooperate with our defense of such claims at your expense.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">12. Governing Law and Dispute Resolution</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    Except to the extent superseded by applicable consumer protection law in your jurisdiction of residence, these Terms and any dispute, controversy, or claim arising out of or relating
+                    to these Terms, their formation, breach, interpretation, or termination, or to the Service (collectively, "Disputes"), will be governed by and construed in accordance with
+                    the laws of the Republic of India, without regard to its conflict of laws rules.
+                </p>
+                <p class="text-on-surface-variant leading-relaxed">
+                    Any Dispute that cannot be resolved informally through good-faith negotiation within thirty (30) days will be resolved exclusively by the competent courts located in Bengaluru, Karnataka, India,
+                    and you and MomSafe irrevocably submit to the personal jurisdiction and venue of such courts. If you are a consumer resident in the European Economic Area, United Kingdom, or other jurisdiction
+                    with mandatory consumer jurisdiction rules, nothing in this clause shall deprive you of the protection of any mandatory provisions of the law of your place of habitual residence,
+                    including rights to commence proceedings in your local courts.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">13. General Provisions</h2>
+                <div class="grid gap-4">
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
+                        <h4 class="font-semibold text-on-surface mb-2">13.1 Entire Agreement and Order of Precedence</h4>
+                        <p class="text-on-surface-variant leading-relaxed">These Terms, together with the MomSafe AI Privacy Policy and any additional terms referenced herein, constitute the entire agreement between you and MomSafe regarding the Service and supersede all prior or contemporaneous understandings, communications, and agreements, whether oral or written, on that subject.</p>
+                    </div>
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
+                        <h4 class="font-semibold text-on-surface mb-2">13.2 Changes to the Terms</h4>
+                        <p class="text-on-surface-variant leading-relaxed">We may modify these Terms from time to time. If changes are material, we will provide notice through the Service or by email, and the revised Terms will be effective as of the "Last updated" date at the top of this page. Your continued use of the Service after the effective date of the revised Terms constitutes your acceptance of the changes.</p>
+                    </div>
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
+                        <h4 class="font-semibold text-on-surface mb-2">13.3 Severability and Waiver</h4>
+                        <p class="text-on-surface-variant leading-relaxed">If any provision of these Terms is held to be invalid, illegal, or unenforceable for any reason, the remaining provisions will remain in full force and effect. No failure or delay by MomSafe in exercising any right, power, or remedy under these Terms will operate as a waiver of any such right, power, or remedy.</p>
+                    </div>
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
+                        <h4 class="font-semibold text-on-surface mb-2">13.4 Assignment</h4>
+                        <p class="text-on-surface-variant leading-relaxed">You may not assign or transfer these Terms, by operation of law or otherwise, without MomSafe's prior written consent. MomSafe may assign or transfer these Terms, in whole or in part, without restriction.</p>
+                    </div>
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
+                        <h4 class="font-semibold text-on-surface mb-2">13.5 Notices</h4>
+                        <p class="text-on-surface-variant leading-relaxed">MomSafe may provide you with notices, including those regarding changes to these Terms or the Service, by email, in-app notification, postal mail, or postings on our website. All such notices will be deemed given and received when sent or posted, as applicable.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">14. Contact Information</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-6">
+                    If you have questions, complaints, or requests regarding these Terms or the Service, please contact us:
+                </p>
+                <div class="bg-primary/5 border border-primary/20 rounded-2xl p-6">
+                    <p class="text-on-surface font-semibold mb-2">MomSafe AI</p>
+                    <p class="text-on-surface-variant leading-relaxed">Email (General): <a href="mailto:support@momsafe.in" class="text-primary font-medium underline">support@momsafe.in</a></p>
+                    <p class="text-on-surface-variant leading-relaxed">Email (Privacy): <a href="mailto:privacy@momsafe.in" class="text-primary font-medium underline">privacy@momsafe.in</a></p>
+                    <p class="text-on-surface-variant leading-relaxed mt-2">Website: <a href="https://momsafe.in" class="text-primary font-medium underline">https://momsafe.in</a></p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="border-t border-outline/10 mt-16 reveal">
+        <div class="max-w-5xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p class="text-sm text-on-surface-variant">&copy; 2026 MomSafe AI. All rights reserved.</p>
+            <div class="flex items-center gap-6 text-sm">
+                <a href="/privacy.html" class="text-on-surface-variant hover:text-primary font-medium transition-colors">Privacy Policy</a>
+                <a href="/terms.html" class="text-on-surface-variant hover:text-primary font-medium transition-colors">Terms of Service</a>
+                <a href="/login" class="text-on-surface-variant hover:text-primary font-medium transition-colors">Log in</a>
+                <a href="/landing.html" class="text-on-surface-variant hover:text-primary font-medium transition-colors">Home</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+        document.querySelectorAll('main section').forEach(function (el) { el.classList.add('reveal'); });
+        (function () {
+            if (!('IntersectionObserver' in window)) {
+                document.querySelectorAll('.reveal').forEach(function (e) { e.classList.add('visible'); });
+                return;
+            }
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        var delay = parseInt(entry.target.getAttribute('data-delay')) || 0;
+                        setTimeout(function () { entry.target.classList.add('visible'); }, delay);
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.reveal').forEach(function (el, i) {
+                el.setAttribute('data-delay', String((i % 3) * 60));
+                io.observe(el);
+            });
+        })();
+    </script>
+</body>
+</html>

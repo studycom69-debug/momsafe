@@ -4,53 +4,109 @@ import { supabase } from "@/lib/supabase";
 import { Heart } from "lucide-react";
 
 const ANIM_STYLE = `
-  .animated-ring-1 {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 480px;
-    height: 480px;
-    margin-left: -240px;
-    margin-top: -240px;
-    border: 1px solid rgba(176, 240, 214, 0.4);
-    border-radius: 50%;
-    animation: spin-slow 20s linear infinite;
+  .tablet-float {
+    animation: floatY 6s ease-in-out infinite;
+    transform-style: preserve-3d;
   }
-  .animated-ring-2 {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 520px;
-    height: 520px;
-    margin-left: -260px;
-    margin-top: -260px;
-    border: 1px solid rgba(176, 240, 214, 0.2);
-    border-radius: 50%;
-    animation: spin-slow-reverse 30s linear infinite;
+  @keyframes floatY {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
   }
-  .phone-mockup {
-    box-shadow: 0 40px 80px -20px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  .tablet-mockup {
+    box-shadow:
+      0 60px 120px -30px rgba(0,0,0,0.35),
+      0 30px 60px -20px rgba(0,0,0,0.22),
+      0 8px 24px -8px rgba(0,0,0,0.18);
   }
-  .phone-notch {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 80px;
-    height: 24px;
-    background: black;
-    border-radius: 12px;
-    z-index: 30;
+  .heart-beat {
+    animation: heartBeat 1.2s ease-in-out infinite;
+    transform-origin: center;
   }
-  .ambient-shadow {
+  @keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    14%      { transform: scale(1.28); }
+    28%      { transform: scale(1); }
+    42%      { transform: scale(1.2); }
+    70%      { transform: scale(1); }
+  }
+  .number-tick {
+    animation: tickerSwap 4s ease-in-out infinite;
+  }
+  @keyframes tickerSwap {
+    0%, 42%, 100% { opacity: 1; }
+    48%           { opacity: 0; transform: translateY(-3px); }
+    54%           { opacity: 0; transform: translateY(3px); }
+    60%           { opacity: 1; transform: translateY(0); }
+  }
+  .wearable-dot {
+    position: relative;
+  }
+  .wearable-dot::after {
+    content: "";
     position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 200px;
-    height: 30px;
-    background: radial-gradient(ellipse at center, rgba(0,0,0,0.25) 0%, transparent 70%);
-    pointer-events: none;
+    inset: -3px;
+    border-radius: 9999px;
+    background: rgba(16,185,129,0.35);
+    animation: dotPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes dotPulse {
+    0%   { transform: scale(0.8); opacity: 0.8; }
+    70%  { transform: scale(2.2); opacity: 0; }
+    100% { transform: scale(2.2); opacity: 0; }
+  }
+  .sparkline-draw path {
+    stroke-dasharray: 160;
+    stroke-dashoffset: 0;
+    animation: drawLine 3.2s cubic-bezier(.4,0,.2,1) infinite;
+  }
+  @keyframes drawLine {
+    0%   { stroke-dashoffset: 160; }
+    60%  { stroke-dashoffset: 0; }
+    100% { stroke-dashoffset: 0; }
+  }
+  .wearable-sync-shimmer {
+    background: linear-gradient(90deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.55) 50%, rgba(16,185,129,0) 100%);
+    background-size: 200% 100%;
+    animation: synchShim 2.4s linear infinite;
+  }
+  @keyframes synchShim {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+  .slide-in-feed > * {
+    opacity: 0;
+    transform: translateX(-12px);
+    animation: feedSlideIn 9s ease-in-out infinite;
+  }
+  .slide-in-feed > *:nth-child(1) { animation-delay: 0s; }
+  .slide-in-feed > *:nth-child(2) { animation-delay: 1.5s; }
+  .slide-in-feed > *:nth-child(3) { animation-delay: 3s; }
+  @keyframes feedSlideIn {
+    0%, 5%   { opacity: 0; transform: translateX(-12px); }
+    18%, 90% { opacity: 1; transform: translateX(0); }
+    95%, 100% { opacity: 0.95; }
+  }
+  .check-pop {
+    animation: popCheck 1.8s ease-out infinite;
+  }
+  @keyframes popCheck {
+    0%, 10%  { transform: scale(0); opacity: 0; }
+    40%, 90% { transform: scale(1); opacity: 1; }
+  }
+  .sync-dot {
+    animation: syncFlash 1.6s ease-in-out infinite;
+  }
+  @keyframes syncFlash {
+    0%, 100% { opacity: 0.3; }
+    50%      { opacity: 1; }
+  }
+  .macro-bar-fill {
+    animation: barGrow 1.5s cubic-bezier(.25,.46,.45,.94) forwards;
+    transform-origin: left;
+  }
+  @keyframes barGrow {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
   }
 `;
 
@@ -139,7 +195,16 @@ export default function Login() {
         </nav>
 
         {/* Left Panel: Visuals & Branding */}
-        <div className="hidden md:flex flex-1 relative bg-white overflow-hidden items-center justify-center border-r border-md3-outline-variant/30">
+        <div
+          className="hidden md:flex flex-1 relative overflow-hidden items-center justify-center border-r border-md3-outline-variant/30"
+          style={{
+            background: [
+              'radial-gradient(ellipse 70% 55% at 30% 35%, rgba(245, 232, 248, 0.75) 0%, transparent 60%)',
+              'radial-gradient(ellipse 60% 50% at 75% 70%, rgba(226, 248, 240, 0.70) 0%, transparent 60%)',
+              'linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%)',
+            ].join(', '),
+          }}
+        >
           <div className="absolute top-0 left-0 right-0 px-8 py-6 z-30 flex items-center justify-between">
             <div
               className="flex items-center gap-3 cursor-pointer"
@@ -210,150 +275,356 @@ export default function Login() {
             <circle cx="120" cy="80" fill="currentColor" r="2" />
           </svg>
 
-          {/* Orbiting Cluster */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] flex items-center justify-center">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] pointer-events-none z-0">
-              <svg width="100%" height="100%" viewBox="0 0 700 700">
-                <defs>
-                  <radialGradient id="glow-new" cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor="#F5C6D6" stopOpacity="0.8" />
-                    <stop offset="60%" stopColor="#EAC9EE" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
-                  </radialGradient>
-                </defs>
-                <circle cx="350" cy="350" r="320" fill="url(#glow-new)" />
-                <circle
-                  cx="350"
-                  cy="350"
-                  r="230"
-                  fill="none"
-                  stroke="#C9B8D6"
-                  strokeWidth="1.5"
-                  strokeDasharray="6 8"
-                  opacity="0.55"
-                />
-                <circle
-                  cx="350"
-                  cy="350"
-                  r="180"
-                  fill="none"
-                  stroke="#C9B8D6"
-                  strokeWidth="1.5"
-                  strokeDasharray="6 8"
-                  opacity="0.75"
-                />
-              </svg>
-            </div>
 
-            <div className="animated-ring-1" />
-            <div className="animated-ring-2" />
+          {/* Tablet Mockup — fills the panel */}
+          <div className="absolute inset-0 flex items-center justify-center p-10 pt-20 pb-10">
+            <div className="tablet-float w-full h-full max-w-[900px] max-h-[620px] relative">
+              {/* Tablet Frame — solid black bezel */}
+              <div
+                className="tablet-mockup relative w-full h-full rounded-[24px] bg-black overflow-hidden flex flex-col"
+                style={{ padding: '14px' }}
+              >
+                {/* Camera dot (top center, inside the bezel) */}
+                <div
+                  className="absolute top-[5px] left-1/2 -translate-x-1/2 w-[7px] h-[7px] rounded-full z-30"
+                  style={{ background: 'radial-gradient(circle at 35% 35%, #3a3d42 0%, #0a0b0d 70%, #000 100%)' }}
+                />
 
-            {/* Phone Mockup */}
-            <div className="relative z-10 w-[280px] h-[580px] bg-black rounded-[48px] phone-mockup overflow-hidden p-2 border border-md3-outline-variant/30">
-              <div className="w-full h-full bg-white rounded-[40px] relative overflow-hidden flex flex-col">
-                <div className="phone-notch" />
-                <div className="flex justify-between items-center px-6 pt-3 pb-1 z-20 text-[11px] font-medium text-black">
-                  <span>9:41</span>
-                  <div className="flex items-center space-x-1">
-                    <span className="material-symbols-outlined text-[14px]">
-                      signal_cellular_4_bar
-                    </span>
-                    <span className="material-symbols-outlined text-[14px]">
-                      wifi
-                    </span>
-                    <span className="material-symbols-outlined text-[14px]">
-                      battery_full
-                    </span>
-                  </div>
-                </div>
-                <div className="flex-1 flex flex-col px-6 pt-16 pb-8 z-10">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <p className="text-[10px] text-md3-on-surface-variant/70 font-medium">
-                        Good morning,
-                      </p>
-                      <h3 className="text-lg font-bold text-md3-on-surface">
-                        Helen
-                      </h3>
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-md3-primary-fixed flex items-center justify-center border border-md3-outline-variant/30">
-                      <span className="material-symbols-outlined text-md3-primary text-xl">
-                        person
-                      </span>
-                    </div>
-                  </div>
-                  <div className="bg-md3-surface-container-low rounded-3xl p-4 mb-6 flex items-center space-x-4 border border-md3-outline-variant/20">
-                    <div className="relative w-16 h-16 flex items-center justify-center">
-                      <svg className="w-full h-full transform -rotate-90">
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="transparent"
-                          className="text-md3-outline-variant/20"
-                        />
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="transparent"
-                          strokeDasharray="175.9"
-                          strokeDashoffset="14"
-                          className="text-md3-primary"
-                        />
-                      </svg>
-                      <span className="absolute text-sm font-bold text-md3-primary">
-                        92
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-[11px] font-bold text-md3-on-surface">
-                        Proactive Health Score
-                      </p>
-                      <p className="text-[10px] text-md3-on-surface-variant/70">
-                        Excellent condition today
-                      </p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white border border-md3-outline-variant/30 rounded-2xl p-3 space-y-1">
-                      <div className="flex items-center space-x-1 text-md3-primary">
-                        <span className="material-symbols-outlined text-sm">
-                          favorite
-                        </span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider">
-                          Vitals
-                        </span>
+                {/* Inner Screen */}
+                <div className="relative flex-1 rounded-[12px] overflow-hidden bg-gradient-to-br from-[#f8fafb] via-white to-[#f0faf5] flex flex-col">
+
+                  {/* Status Bar */}
+                  <div className="flex justify-between items-center px-5 py-2.5 bg-white/80 backdrop-blur-sm border-b border-slate-200/60 flex-shrink-0">
+                    <div className="flex items-center gap-2.5">
+                      <div className="bg-gradient-to-br from-emerald-500 to-teal-700 p-1.5 rounded-xl text-white shadow-md shadow-emerald-500/25">
+                        <Heart className="w-3.5 h-3.5" fill="white" />
                       </div>
-                      <div className="text-lg font-bold">
-                        72{" "}
-                        <span className="text-[10px] font-normal text-md3-on-surface-variant">
-                          BPM
-                        </span>
+                      <span className="font-black tracking-tight text-[14px] text-slate-900">MomSafe Dashboard</span>
+                    </div>
+                    <div className="flex items-center gap-4 text-[11px] text-slate-500 font-semibold">
+                      <span>Tuesday, Oct 1 &middot; 9:41 AM</span>
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[16px]">wifi</span>
+                        <span className="material-symbols-outlined text-[16px]">battery_full</span>
                       </div>
                     </div>
-                    <div className="bg-white border border-md3-outline-variant/30 rounded-2xl p-3 space-y-1">
-                      <div className="flex items-center space-x-1 text-md3-secondary">
-                        <span className="material-symbols-outlined text-sm">
-                          bedtime
-                        </span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider">
-                          Sleep
+                  </div>
+
+                  {/* Dashboard Content — 2 col × 3 row grid */}
+                  <div className="flex-1 grid grid-cols-2 grid-rows-3 gap-3 p-4 min-h-0 overflow-hidden">
+
+                    {/* Card 1: Greeting + Quick Summary */}
+                    <div className="row-span-1 rounded-2xl bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-100/80 p-4 flex flex-col justify-between overflow-hidden">
+                      <div>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <div className="text-[20px] font-black text-slate-900 tracking-tight leading-tight">Good morning,</div>
+                            <div className="text-[20px] font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-700 to-teal-500 tracking-tight">Helen.</div>
+                          </div>
+                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center ring-2 ring-white shadow-sm flex-shrink-0">
+                            <span className="material-symbols-outlined text-slate-600 text-[22px]">account_circle</span>
+                          </div>
+                        </div>
+                        <div className="text-[11px] text-slate-500 mt-1.5 font-medium">Week 24 &middot; 2nd Trimester &middot; Day 168</div>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <div className="flex-1 bg-white/80 rounded-xl px-3 py-2 border border-emerald-100/60">
+                          <div className="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Next Checkup</div>
+                          <div className="text-[13px] font-black text-slate-800 mt-0.5">Oct 8</div>
+                        </div>
+                        <div className="flex-1 bg-white/80 rounded-xl px-3 py-2 border border-emerald-100/60">
+                          <div className="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Due Date</div>
+                          <div className="text-[13px] font-black text-slate-800 mt-0.5">Jan 14</div>
+                        </div>
+                        <div className="flex-1 bg-white/80 rounded-xl px-3 py-2 border border-emerald-100/60">
+                          <div className="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Days Left</div>
+                          <div className="text-[13px] font-black text-emerald-700 mt-0.5">105</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 2: Live Vitals */}
+                    <div className="row-span-1 rounded-2xl bg-gradient-to-br from-rose-50 via-white to-emerald-50 border border-rose-100/70 p-4 flex flex-col overflow-hidden relative">
+                      <div className="absolute top-0 right-0 w-32 h-32 -translate-y-6 translate-x-8 rounded-full bg-rose-200/25 blur-2xl pointer-events-none" />
+                      <div className="flex items-center justify-between relative z-10">
+                        <div className="flex items-center gap-2">
+                          <span className="heart-beat">
+                            <Heart className="w-4 h-4 text-rose-500" fill="#f43f5e" />
+                          </span>
+                          <span className="text-[12px] font-black text-rose-700 tracking-wide uppercase">Live Vitals</span>
+                          <span className="wearable-dot ml-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[9px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80">
+                          <span className="material-symbols-outlined text-[11px]">watch</span>
+                          MomSafe Wearable streaming
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3 mt-3 relative z-10">
+                        <div>
+                          <div className="flex items-baseline gap-1">
+                            <span className="number-tick text-[28px] font-black text-rose-700 leading-none">78</span>
+                            <span className="text-[11px] font-bold text-rose-500">bpm</span>
+                          </div>
+                          <div className="text-[10px] text-rose-500/80 font-semibold">Heart Rate</div>
+                        </div>
+                        <div>
+                          <div className="flex items-baseline gap-1">
+                            <span className="number-tick text-[28px] font-black text-sky-700 leading-none">98</span>
+                            <span className="text-[11px] font-bold text-sky-500">%</span>
+                          </div>
+                          <div className="text-[10px] text-sky-500/80 font-semibold">SpO₂ Oxygen</div>
+                        </div>
+                        <div>
+                          <div className="flex items-baseline gap-1">
+                            <span className="number-tick text-[28px] font-black text-violet-700 leading-none">112/74</span>
+                          </div>
+                          <div className="text-[10px] text-violet-500/80 font-semibold">Blood Pressure</div>
+                        </div>
+                      </div>
+
+                      {/* Sparkline chart */}
+                      <div className="flex-1 min-h-0 mt-2 sparkline-draw relative z-10">
+                        <svg viewBox="0 0 600 120" className="w-full h-full" preserveAspectRatio="none">
+                          <defs>
+                            <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#fb7185" stopOpacity="0.3" />
+                              <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+                            </linearGradient>
+                            <linearGradient id="sparkStroke" x1="0" y1="0" x2="1" y2="0">
+                              <stop offset="0%" stopColor="#fb7185" stopOpacity="0.6" />
+                              <stop offset="50%" stopColor="#a78bfa" stopOpacity="1" />
+                              <stop offset="100%" stopColor="#10b981" stopOpacity="1" />
+                            </linearGradient>
+                          </defs>
+                          <line x1="0" y1="30" x2="600" y2="30" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4 5" />
+                          <line x1="0" y1="60" x2="600" y2="60" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4 5" />
+                          <line x1="0" y1="90" x2="600" y2="90" stroke="#f1f5f9" strokeWidth="1" strokeDasharray="4 5" />
+                          <path
+                            d="M0,85 C60,50 110,90 170,65 S280,20 340,55 S460,100 520,40 S580,70 600,50 L600,120 L0,120 Z"
+                            fill="url(#sparkFill)"
+                          />
+                          <path
+                            d="M0,85 C60,50 110,90 170,65 S280,20 340,55 S460,100 520,40 S580,70 600,50"
+                            fill="none"
+                            stroke="url(#sparkStroke)"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                          />
+                          <circle cx="600" cy="50" r="4" fill="#10b981" stroke="white" strokeWidth="2" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Card 3: Nutrition — Daily Macro Breakdown */}
+                    <div className="row-span-1 rounded-2xl bg-gradient-to-br from-amber-50 via-white to-orange-50 border border-amber-100/80 p-4 flex flex-col overflow-hidden">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-amber-600 text-[18px]">restaurant</span>
+                          <span className="text-[12px] font-black text-amber-800 tracking-wide uppercase">Nutrition</span>
+                        </div>
+                        <span className="text-[9px] px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center gap-0.5">
+                          <span className="material-symbols-outlined text-[10px]">trending_up</span>
+                          On Track
                         </span>
                       </div>
-                      <div className="text-lg font-bold">7h 42m</div>
+
+                      {/* Calorie ring + macros */}
+                      <div className="flex gap-4 mt-3 flex-1 min-h-0">
+                        {/* Calorie ring */}
+                        <div className="flex flex-col items-center justify-center flex-shrink-0">
+                          <div className="relative w-[80px] h-[80px]">
+                            <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                              <circle cx="50" cy="50" r="40" fill="none" stroke="#fde68a" strokeWidth="10" />
+                              <circle cx="50" cy="50" r="40" fill="none" stroke="#f59e0b" strokeWidth="10" strokeDasharray="251.3" strokeDashoffset="40" strokeLinecap="round" />
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <span className="number-tick text-[18px] font-black text-amber-800 leading-none">1,850</span>
+                              <span className="text-[9px] font-semibold text-amber-600">/ 2,200</span>
+                            </div>
+                          </div>
+                          <span className="text-[9px] font-bold text-amber-700 mt-1">Calories</span>
+                        </div>
+
+                        {/* Macro bars */}
+                        <div className="flex-1 flex flex-col justify-center gap-3 min-w-0">
+                          {[
+                            { label: 'Protein', value: 72, max: 95, color: 'from-rose-400 to-rose-500', bg: 'bg-rose-100', text: 'text-rose-700', unit: 'g' },
+                            { label: 'Carbs', value: 240, max: 300, color: 'from-sky-400 to-sky-500', bg: 'bg-sky-100', text: 'text-sky-700', unit: 'g' },
+                            { label: 'Fats', value: 58, max: 75, color: 'from-amber-400 to-amber-500', bg: 'bg-amber-100', text: 'text-amber-700', unit: 'g' },
+                            { label: 'Iron', value: 22, max: 27, color: 'from-emerald-400 to-emerald-500', bg: 'bg-emerald-100', text: 'text-emerald-700', unit: 'mg' },
+                          ].map((m) => (
+                            <div key={m.label} className="flex items-center gap-2.5">
+                              <span className={`text-[10px] font-bold ${m.text} w-[40px] text-right`}>{m.label}</span>
+                              <div className={`flex-1 h-[8px] ${m.bg} rounded-full overflow-hidden`}>
+                                <div
+                                  className={`macro-bar-fill h-full bg-gradient-to-r ${m.color} rounded-full`}
+                                  style={{ width: `${(m.value / m.max) * 100}%` }}
+                                />
+                              </div>
+                              <span className={`text-[10px] font-bold ${m.text} w-[45px]`}>{m.value}{m.unit}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="mt-auto flex justify-center w-full">
-                    <div className="w-1/3 h-1 bg-md3-on-surface/20 rounded-full" />
+
+                    {/* Card 4: Today's Care Plan */}
+                    <div className="row-span-1 rounded-2xl bg-white border border-slate-200/80 p-4 flex flex-col overflow-hidden">
+                      <div className="flex items-center justify-between mb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-violet-700 text-[18px]">medication</span>
+                          <span className="text-[12px] font-black text-slate-800 tracking-tight">Today's Care Plan</span>
+                        </div>
+                        <div className="flex gap-0.5">
+                          <div className="sync-dot w-1.5 h-1.5 rounded-full bg-violet-500" style={{ animationDelay: '0s' }} />
+                          <div className="sync-dot w-1.5 h-1.5 rounded-full bg-violet-500" style={{ animationDelay: '0.2s' }} />
+                          <div className="sync-dot w-1.5 h-1.5 rounded-full bg-violet-500" style={{ animationDelay: '0.4s' }} />
+                        </div>
+                      </div>
+                      <div className="slide-in-feed flex flex-col gap-2 flex-1 min-h-0 overflow-hidden">
+                        {/* Prenatal vitamin — done */}
+                        <div className="flex items-center gap-2.5 bg-emerald-50/60 rounded-xl p-2.5 border border-emerald-100">
+                          <div className="check-pop w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0 shadow-sm shadow-emerald-400/30">
+                            <span className="material-symbols-outlined text-white text-[16px]">check</span>
+                          </div>
+                          <div className="flex-grow min-w-0">
+                            <div className="text-[12px] font-bold text-slate-800">Prenatal multivitamin</div>
+                            <div className="text-[10px] text-slate-500">1 tab &middot; w/ breakfast</div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <div className="text-[10px] font-bold text-emerald-600">8:00 AM</div>
+                            <div className="text-[9px] text-emerald-500 font-semibold flex items-center justify-end gap-0.5">
+                              <span className="material-symbols-outlined text-[9px]">check_circle</span>
+                              Done
+                            </div>
+                          </div>
+                        </div>
+                        {/* Folic acid — next */}
+                        <div className="flex items-center gap-2.5 bg-violet-50/50 rounded-xl p-2.5 border-2 border-violet-200">
+                          <div className="w-8 h-8 rounded-xl border-2 border-violet-300 flex items-center justify-center flex-shrink-0 bg-white">
+                            <div className="w-2.5 h-2.5 rounded-full bg-violet-500 wearable-dot" />
+                          </div>
+                          <div className="flex-grow min-w-0">
+                            <div className="text-[12px] font-bold text-slate-800">Folic acid 400 mcg</div>
+                            <div className="text-[10px] text-slate-500">Neural tube support</div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <div className="text-[10px] font-bold text-violet-700">1:00 PM</div>
+                            <div className="text-[9px] text-violet-500 font-semibold">
+                              <span className="px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 font-semibold text-[8px]">Next</span>
+                            </div>
+                          </div>
+                        </div>
+                        {/* Dr. appointment */}
+                        <div className="flex items-center gap-2.5 bg-white rounded-xl p-2.5 border border-slate-200">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0 shadow-sm shadow-emerald-400/30">
+                            <span className="material-symbols-outlined text-white text-[16px]">event_available</span>
+                          </div>
+                          <div className="flex-grow min-w-0">
+                            <div className="text-[12px] font-bold text-slate-800">Dr. Kapoor — check-in</div>
+                            <div className="text-[10px] text-slate-500">Glucose + 24w review</div>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <div className="text-[10px] font-bold text-emerald-700">2:30 PM</div>
+                            <div className="text-[9px] text-emerald-500 font-semibold flex items-center justify-end gap-0.5">
+                              <span className="material-symbols-outlined text-[9px]">video_call</span>
+                              Link ready
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 5: MomSafe Wearable Sync */}
+                    <div className="row-span-1 rounded-2xl bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200/70 p-4 flex flex-col overflow-hidden relative">
+                      <div className="absolute inset-0 wearable-sync-shimmer opacity-25 pointer-events-none rounded-2xl" />
+                      <div className="flex items-center gap-3 relative z-10">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center shadow-lg shadow-emerald-500/30 flex-shrink-0">
+                          <Heart className="w-5 h-5 text-white" fill="white" />
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <div className="text-[13px] font-black text-slate-800 leading-tight">MomSafe Wearable</div>
+                          <div className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1.5 mt-0.5">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 wearable-dot" />
+                            Connected &middot; Live sync
+                          </div>
+                        </div>
+                        <span className="text-[9px] px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 font-bold border border-emerald-200/80">Active</span>
+                      </div>
+                      <div className="mt-3 grid grid-cols-4 gap-2 relative z-10 flex-1 min-h-0">
+                        {[
+                          { val: '98%', label: 'Battery', color: 'text-emerald-700' },
+                          { val: '5.2k', label: 'Steps', color: 'text-sky-700' },
+                          { val: '142', label: 'Calories', color: 'text-rose-600' },
+                          { val: '24°C', label: 'Skin Temp', color: 'text-violet-700' },
+                        ].map((s) => (
+                          <div key={s.label} className="bg-white/80 rounded-xl p-2.5 text-center border border-emerald-100/60 flex flex-col items-center justify-center">
+                            <div className={`text-[14px] font-black ${s.color} leading-none`}>{s.val}</div>
+                            <div className="text-[8px] text-slate-500 font-semibold mt-1 uppercase tracking-wider">{s.label}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-0.5 mt-2.5 justify-center relative z-10">
+                        {[0, 0.12, 0.24, 0.36, 0.48].map((d, i) => (
+                          <div key={i} className="sync-dot w-1.5 h-1.5 rounded-full bg-emerald-500" style={{ animationDelay: `${d}s` }} />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Card 6: Pregnancy Risk Score */}
+                    <div className="row-span-1 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-100 border border-emerald-200/70 p-4 flex flex-col overflow-hidden">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-emerald-700 text-[18px]">health_and_safety</span>
+                          <span className="text-[12px] font-black text-emerald-800 tracking-wide uppercase">Pregnancy Risk</span>
+                        </div>
+                        <span className="text-[9px] px-2.5 py-1 rounded-full bg-emerald-600 text-white font-bold shadow-sm shadow-emerald-400/40">Low Risk</span>
+                      </div>
+                      <div className="flex items-center gap-4 mt-3 flex-1 min-h-0">
+                        {/* Big number */}
+                        <div className="flex flex-col items-center flex-shrink-0">
+                          <div className="flex items-end gap-0.5">
+                            <span className="number-tick text-[42px] font-black text-emerald-800 leading-none">2.1</span>
+                            <span className="text-[16px] font-bold text-emerald-700 mb-1.5">%</span>
+                          </div>
+                          <div className="text-[10px] text-emerald-700/85 font-semibold mt-1">Stable across 14 biomarkers</div>
+                        </div>
+                        {/* Progress bars */}
+                        <div className="flex-1 flex flex-col justify-center gap-3 min-w-0">
+                          <div>
+                            <div className="flex justify-between text-[9px] font-semibold text-emerald-700/80 mb-1">
+                              <span>Overall Risk</span><span>14%</span>
+                            </div>
+                            <div className="h-2.5 w-full bg-emerald-200/70 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full shadow-sm shadow-emerald-400/50" style={{ width: '14%' }} />
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-[9px] font-semibold text-emerald-700/70 mb-1">
+                              <span>Trimester Progress</span><span>60%</span>
+                            </div>
+                            <div className="h-2.5 w-full bg-emerald-200/70 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full" style={{ width: '60%' }} />
+                            </div>
+                          </div>
+                          <div>
+                            <div className="flex justify-between text-[9px] font-semibold text-emerald-700/70 mb-1">
+                              <span>Vitals Score</span><span>92%</span>
+                            </div>
+                            <div className="h-2.5 w-full bg-emerald-200/70 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-emerald-400 to-green-400 rounded-full" style={{ width: '92%' }} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </div>
-              <div className="ambient-shadow" />
             </div>
           </div>
         </div>
@@ -462,13 +733,19 @@ export default function Login() {
               </div>
               <p className="text-center text-[11px] text-md3-on-surface-variant/70 px-4">
                 By continuing, you agree to our{" "}
-                <span className="text-md3-primary font-medium hover:underline cursor-pointer">
+                <a
+                  href="/terms.html"
+                  className="text-md3-primary font-medium hover:underline cursor-pointer"
+                >
                   Terms of Service
-                </span>{" "}
+                </a>{" "}
                 and{" "}
-                <span className="text-md3-primary font-medium hover:underline cursor-pointer">
+                <a
+                  href="/privacy.html"
+                  className="text-md3-primary font-medium hover:underline cursor-pointer"
+                >
                   Privacy Policy
-                </span>
+                </a>
               </p>
             </div>
           </div>

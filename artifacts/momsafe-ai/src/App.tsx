@@ -65,6 +65,18 @@ function Router() {
     return (
       <Switch>
         <Route path="/login" component={Login} />
+        <Route path="/terms">
+          {() => {
+            window.location.replace("/terms.html");
+            return null;
+          }}
+        </Route>
+        <Route path="/privacy">
+          {() => {
+            window.location.replace("/privacy.html");
+            return null;
+          }}
+        </Route>
         <Route path="/">
           {() => {
             window.location.replace("/landing.html");
@@ -103,6 +115,18 @@ function Router() {
         <Route path="/hospitals" component={LocationPage} />
         <Route path="/settings" component={Settings} />
         <Route path="/help" component={Help} />
+        <Route path="/terms">
+          {() => {
+            window.location.href = "/terms.html";
+            return null;
+          }}
+        </Route>
+        <Route path="/privacy">
+          {() => {
+            window.location.href = "/privacy.html";
+            return null;
+          }}
+        </Route>
         <Route path="/">
           <Redirect to="/dashboard" />
         </Route>

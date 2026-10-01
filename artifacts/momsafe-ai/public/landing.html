@@ -5,6 +5,34 @@
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
         <title>MomSafe AI - Your AI Pregnancy Companion</title>
+        <meta name="description" content="MomSafe AI — your AI pregnancy companion for a safer journey. Daily health tracking, personalized AI guidance, proactive risk alerts, and wearable vitals monitoring." />
+        <meta name="theme-color" content="#003527" />
+        <meta name="color-scheme" content="light" />
+
+        <!-- Favicons -->
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="mask-icon" href="/favicon.svg" color="#003527" />
+
+        <!-- Open Graph -->
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="MomSafe AI" />
+        <meta property="og:title" content="MomSafe AI — Your AI Pregnancy Companion" />
+        <meta property="og:description" content="Daily health tracking, personalized AI guidance, proactive risk alerts, and wearable vitals monitoring for a safer pregnancy journey." />
+        <meta property="og:url" content="https://momsafe.in/" />
+        <meta property="og:image" content="https://momsafe.in/opengraph.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="MomSafe AI — Your AI Pregnancy Companion" />
+        <meta name="twitter:description" content="Daily health tracking, personalized AI guidance, proactive risk alerts, wearable vitals monitoring." />
+        <meta name="twitter:image" content="https://momsafe.in/opengraph.jpg" />
+
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap"
@@ -3171,7 +3199,7 @@
                 </div>
                 <!-- Footer Links Area -->
                 <div
-                    class="w-full px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 gap-12"
+                    class="w-full px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-3 gap-12"
                 >
                     <!-- Col 1: Brand -->
                     <div class="flex flex-col gap-6">
@@ -3203,7 +3231,7 @@
                     <!-- Col 2: Quick Links (5 pages) -->
                     <div class="flex flex-col gap-4">
                         <h4 class="text-[18px] font-bold text-white mb-2">
-                            Quick Links
+                            Product
                         </h4>
                         <a
                             class="text-[16px] text-white/70 hover:text-white transition-colors cursor-pointer"
@@ -3229,6 +3257,37 @@
                             class="text-[16px] text-white/70 hover:text-white transition-colors cursor-pointer"
                             href="/login?redirect=/risk-history"
                             >Health Trends</a
+                        >
+                    </div>
+                    <!-- Col 3: Company + Legal -->
+                    <div class="flex flex-col gap-4">
+                        <h4 class="text-[18px] font-bold text-white mb-2">
+                            Company &amp; Legal
+                        </h4>
+                        <a
+                            class="text-[16px] text-white/70 hover:text-white transition-colors cursor-pointer"
+                            href="#features"
+                            >Features</a
+                        >
+                        <a
+                            class="text-[16px] text-white/70 hover:text-white transition-colors cursor-pointer"
+                            href="#how-it-works"
+                            >About</a
+                        >
+                        <a
+                            class="text-[16px] text-white/70 hover:text-white transition-colors cursor-pointer"
+                            href="/privacy.html"
+                            >Privacy</a
+                        >
+                        <a
+                            class="text-[16px] text-white/70 hover:text-white transition-colors cursor-pointer"
+                            href="/terms.html"
+                            >Terms of Service</a
+                        >
+                        <a
+                            class="text-[16px] text-white/70 hover:text-white transition-colors cursor-pointer"
+                            href="mailto:support@momsafe.in"
+                            >Contact Us</a
                         >
                     </div>
                 </div>
@@ -3506,426 +3565,389 @@
         </div>
 
         <!-- App Coming Soon Modal -->
-        <div
-            id="ms-app-modal"
-            style="
-                position: fixed;
-                inset: 0;
-                z-index: 9999;
-                background: rgba(15, 23, 42, 0.6);
-                backdrop-filter: blur(6px);
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            "
-        >
-            <div
-                style="
-                    background: #ffffff;
-                    border-radius: 28px;
-                    width: 100%;
-                    max-width: 500px;
-                    padding: 0;
-                    box-shadow:
-                        0 40px 120px -20px rgba(0, 0, 0, 0.28),
-                        0 0 0 1px rgba(255, 255, 255, 0.9) inset;
-                    position: relative;
-                    overflow: hidden;
-                "
-            >
-                <!-- Gradient header strip -->
-                <div
-                    style="
-                        background: linear-gradient(
-                            135deg,
-                            #00685f 0%,
-                            #0d9488 60%,
-                            #14b8a6 100%
-                        );
-                        padding: 28px 28px 24px;
-                        position: relative;
-                        overflow: hidden;
-                    "
-                >
-                    <div
-                        style="
-                            position: absolute;
-                            top: -30px;
-                            right: -30px;
-                            width: 120px;
-                            height: 120px;
-                            background: rgba(255, 255, 255, 0.08);
-                            border-radius: 50%;
-                        "
-                    ></div>
-                    <div
-                        style="
-                            position: absolute;
-                            bottom: -20px;
-                            left: 20px;
-                            width: 80px;
-                            height: 80px;
-                            background: rgba(255, 255, 255, 0.06);
-                            border-radius: 50%;
-                        "
-                    ></div>
-                    <div
-                        style="
-                            display: flex;
-                            align-items: center;
-                            gap: 14px;
-                            position: relative;
-                        "
-                    >
-                        <div
-                            style="
-                                width: 48px;
-                                height: 48px;
-                                background: rgba(255, 255, 255, 0.2);
-                                border-radius: 14px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                font-size: 22px;
-                            "
-                        >
-                            &#128241;
-                        </div>
-                        <div>
-                            <div
-                                style="
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 8px;
-                                    margin-bottom: 4px;
-                                "
-                            >
-                                <p
-                                    style="
-                                        margin: 0;
-                                        font-size: 11px;
-                                        font-weight: 700;
-                                        color: rgba(255, 255, 255, 0.7);
-                                        text-transform: uppercase;
-                                        letter-spacing: 0.1em;
-                                    "
-                                >
-                                    MomSafe Mobile
-                                </p>
-                                <span
-                                    style="
-                                        background: rgba(255, 255, 255, 0.2);
-                                        color: #fff;
-                                        border-radius: 999px;
-                                        padding: 2px 8px;
-                                        font-size: 10px;
-                                        font-weight: 800;
-                                        text-transform: uppercase;
-                                        letter-spacing: 0.08em;
-                                    "
-                                    >Coming Soon</span
-                                >
-                            </div>
-                            <h2
-                                style="
-                                    margin: 0;
-                                    font-size: 22px;
-                                    font-weight: 800;
-                                    color: #fff;
-                                    letter-spacing: -0.02em;
-                                    line-height: 1.2;
-                                "
-                            >
-                                App is on its way!
-                            </h2>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Close (on gradient header) -->
-                <button
-                    id="ms-modal-close"
-                    style="
-                        position: absolute;
-                        top: 16px;
-                        right: 16px;
-                        background: rgba(255, 255, 255, 0.2);
-                        border: none;
-                        border-radius: 10px;
-                        width: 32px;
-                        height: 32px;
-                        cursor: pointer;
-                        font-size: 16px;
-                        color: #fff;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        z-index: 10;
-                    "
-                >
-                    &#x2715;
+        <div id="ms-app-modal" class="ms-modal-overlay">
+            <div class="ms-modal-dialog">
+                <!-- Close Button -->
+                <button id="ms-modal-close" class="ms-btn-close" aria-label="Close modal" title="Close">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                 </button>
 
-                <!-- Form State -->
-                <div id="ms-modal-form" style="padding: 24px 28px 28px">
-                    <!-- Subtitle -->
-                    <p
-                        style="
-                            margin: 0 0 20px;
-                            font-size: 14px;
-                            color: #64748b;
-                            font-weight: 500;
-                            line-height: 1.6;
-                        "
-                    >
-                        The MomSafe mobile app is coming soon for iOS &amp;
-                        Android. Drop your email and we&apos;ll notify you the
-                        moment it launches.
-                    </p>
-
-                    <!-- Pilot Benefits Banner -->
-                    <div
-                        style="
-                            background: #f0fdf4;
-                            border: 1px solid #bbf7d0;
-                            border-radius: 16px;
-                            padding: 16px 18px;
-                            margin-bottom: 24px;
-                        "
-                    >
-                        <p
-                            style="
-                                margin: 0 0 10px;
-                                font-size: 11px;
-                                font-weight: 800;
-                                text-transform: uppercase;
-                                letter-spacing: 0.12em;
-                                color: #16a34a;
-                            "
-                        >
-                            &#127381; You&apos;re here early &mdash; Pilot
-                            Benefits
-                        </p>
-                        <ul
-                            style="
-                                margin: 0;
-                                padding-left: 0;
-                                list-style: none;
-                                display: flex;
-                                flex-direction: column;
-                                gap: 7px;
-                            "
-                        >
-                            <li
-                                style="
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 9px;
-                                    font-size: 13px;
-                                    font-weight: 600;
-                                    color: #166534;
-                                "
-                            >
-                                <span style="color: #22c55e">&#10003;</span>
-                                Lifetime free access to all premium features
-                            </li>
-                            <li
-                                style="
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 9px;
-                                    font-size: 13px;
-                                    font-weight: 600;
-                                    color: #166534;
-                                "
-                            >
-                                <span style="color: #22c55e">&#10003;</span>
-                                Priority support from our health team
-                            </li>
-                            <li
-                                style="
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 9px;
-                                    font-size: 13px;
-                                    font-weight: 600;
-                                    color: #166534;
-                                "
-                            >
-                                <span style="color: #22c55e">&#10003;</span>
-                                Early access to new features before anyone else
-                            </li>
-                            <li
-                                style="
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 9px;
-                                    font-size: 13px;
-                                    font-weight: 600;
-                                    color: #166534;
-                                "
-                            >
-                                <span style="color: #22c55e">&#10003;</span>
-                                Founding member badge in the app
-                            </li>
-                        </ul>
+                <div id="ms-modal-form" class="ms-modal-content">
+                    <!-- Top Brand Header -->
+                    <div class="ms-modal-brand">
+                        <div class="ms-app-squircle">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                            </svg>
+                        </div>
+                        <div class="ms-brand-meta">
+                            <span class="ms-pill-platform">MOMSAFE MOBILE &middot; COMING SOON</span>
+                            <h2 class="ms-modal-heading">App is on its way</h2>
+                        </div>
                     </div>
 
-                    <!-- Email Input -->
-                    <div style="margin-bottom: 8px">
-                        <div style="display: flex; gap: 10px">
+                    <p class="ms-modal-intro">
+                        The MomSafe companion app is currently in active pilot testing for iOS and Android. Reserve your invite to lock in founding pilot benefits the moment it launches.
+                    </p>
+
+                    <!-- Pilot Benefits Container -->
+                    <div class="ms-benefits-box">
+                        <div class="ms-benefits-title-row">
+                            <span class="ms-benefits-heading">&#127381; You&apos;re here early &mdash; Pilot Benefits</span>
+                        </div>
+                        <div class="ms-benefits-grid">
+                            <div class="ms-benefit-item">
+                                <span class="ms-benefit-check">&#10003;</span>
+                                <div class="ms-benefit-text">
+                                    <strong>Lifetime free access</strong> to all premium features
+                                </div>
+                            </div>
+                            <div class="ms-benefit-item">
+                                <span class="ms-benefit-check">&#10003;</span>
+                                <div class="ms-benefit-text">
+                                    <strong>Priority support</strong> from our health team
+                                </div>
+                            </div>
+                            <div class="ms-benefit-item">
+                                <span class="ms-benefit-check">&#10003;</span>
+                                <div class="ms-benefit-text">
+                                    <strong>Early access</strong> to new features before anyone else
+                                </div>
+                            </div>
+                            <div class="ms-benefit-item">
+                                <span class="ms-benefit-check">&#10003;</span>
+                                <div class="ms-benefit-text">
+                                    <strong>Founding member badge</strong> in the app
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Email Input & Submit -->
+                    <div class="ms-email-section">
+                        <div class="ms-input-cluster">
                             <input
                                 id="ms-email-input"
                                 type="email"
                                 placeholder="your@email.com"
-                                style="
-                                    flex: 1;
-                                    padding: 13px 16px;
-                                    border-radius: 14px;
-                                    border: 1.5px solid #e2e8f0;
-                                    background: #f8fafc;
-                                    font-size: 14px;
-                                    font-weight: 500;
-                                    color: #0f172a;
-                                    outline: none;
-                                    transition: border-color 0.2s;
-                                "
-                                onfocus="this.style.borderColor = '#10b981'"
-                                onblur="this.style.borderColor = '#e2e8f0'"
+                                autocomplete="email"
                             />
-                            <button
-                                id="ms-notify-btn"
-                                style="
-                                    background: #0f172a;
-                                    color: #fff;
-                                    border: none;
-                                    border-radius: 14px;
-                                    padding: 13px 20px;
-                                    font-size: 12px;
-                                    font-weight: 800;
-                                    text-transform: uppercase;
-                                    letter-spacing: 0.1em;
-                                    cursor: pointer;
-                                    white-space: nowrap;
-                                    transition: background 0.2s;
-                                "
-                                onmouseover="this.style.background = '#1e293b'"
-                                onmouseout="this.style.background = '#0f172a'"
-                            >
+                            <button id="ms-notify-btn" class="ms-btn-submit">
                                 Notify Me
                             </button>
                         </div>
-                        <p
-                            id="ms-email-error"
-                            style="
-                                display: none;
-                                margin: 6px 0 0;
-                                font-size: 12px;
-                                color: #ef4444;
-                                font-weight: 600;
-                            "
-                        >
+                        <p id="ms-email-error" class="ms-field-error">
                             Please enter a valid email address.
                         </p>
                     </div>
 
-                    <!-- Divider -->
-                    <div
-                        style="
-                            display: flex;
-                            align-items: center;
-                            gap: 12px;
-                            margin: 20px 0;
-                        "
-                    >
-                        <div
-                            style="flex: 1; height: 1px; background: #f1f5f9"
-                        ></div>
-                        <span
-                            style="
-                                font-size: 11px;
-                                font-weight: 700;
-                                color: #cbd5e1;
-                                text-transform: uppercase;
-                                letter-spacing: 0.1em;
-                            "
-                            >Or</span
-                        >
-                        <div
-                            style="flex: 1; height: 1px; background: #f1f5f9"
-                        ></div>
+                    <!-- Subtle Separator -->
+                    <div class="ms-divider-line">
+                        <span>OR</span>
                     </div>
 
-                    <!-- Web App CTA -->
-                    <a
-                        href="/login"
-                        style="
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            gap: 10px;
-                            padding: 14px;
-                            border-radius: 14px;
-                            border: 1.5px solid #e2e8f0;
-                            text-decoration: none;
-                            background: #f8fafc;
-                            transition: all 0.2s;
-                        "
-                        onmouseover="
-                            this.style.borderColor = '#10b981';
-                            this.style.background = '#f0fdf4';
-                        "
-                        onmouseout="
-                            this.style.borderColor = '#e2e8f0';
-                            this.style.background = '#f8fafc';
-                        "
-                    >
-                        <span style="font-size: 18px">&#127760;</span>
-                        <div style="text-align: left">
-                            <p
-                                style="
-                                    margin: 0;
-                                    font-size: 13px;
-                                    font-weight: 800;
-                                    color: #0f172a;
-                                "
-                            >
-                                Use the Web App in the meantime
-                            </p>
-                            <p
-                                style="
-                                    margin: 0;
-                                    font-size: 11px;
-                                    font-weight: 500;
-                                    color: #64748b;
-                                "
-                            >
-                                Sign up free &mdash; full access, no download
-                                needed
-                            </p>
+                    <!-- Web App Fallback -->
+                    <a href="/login" class="ms-webapp-promo">
+                        <div class="ms-webapp-icon-wrap">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
                         </div>
-                        <span
-                            style="
-                                margin-left: auto;
-                                color: #10b981;
-                                font-size: 16px;
-                            "
-                            >&#8594;</span
-                        >
+                        <div class="ms-webapp-content">
+                            <div class="ms-webapp-title">Use the Web App in the meantime</div>
+                            <div class="ms-webapp-desc">Sign up free &mdash; full access, no download needed</div>
+                        </div>
+                        <span class="ms-webapp-arrow">&rarr;</span>
                     </a>
                 </div>
 
-                <!-- Success State (hidden - we use top toast instead) -->
+                <!-- Success placeholder -->
                 <div id="ms-modal-success" style="display: none"></div>
             </div>
         </div>
 
         <style>
-            #ms-app-modal {
+            /* Backdrop & Dialog */
+            #ms-app-modal.ms-modal-overlay {
                 display: none;
+                position: fixed;
+                inset: 0;
+                z-index: 9999;
+                background: rgba(15, 23, 42, 0.55);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                align-items: center;
+                justify-content: center;
+                padding: 16px;
+                opacity: 0;
+                transition: opacity 0.2s ease-out;
             }
             #ms-app-modal.ms-modal-open {
                 display: flex;
+                opacity: 1;
+            }
+
+            .ms-modal-dialog {
+                background: #ffffff;
+                border-radius: 24px;
+                width: 100%;
+                max-width: 480px;
+                padding: 28px 28px 24px;
+                position: relative;
+                box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(15, 23, 42, 0.08);
+                transform: scale(0.97) translateY(8px);
+                transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            #ms-app-modal.ms-modal-open .ms-modal-dialog {
+                transform: scale(1) translateY(0);
+            }
+
+            /* Close Button */
+            .ms-btn-close {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                background: #f1f5f9;
+                border: none;
+                color: #64748b;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.15s ease;
+            }
+            .ms-btn-close:hover {
+                background: #e2e8f0;
+                color: #0f172a;
+            }
+
+            /* Brand & Header */
+            .ms-modal-brand {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                margin-bottom: 12px;
+            }
+            .ms-app-squircle {
+                width: 46px;
+                height: 46px;
+                border-radius: 14px;
+                background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 6px 16px -3px rgba(5, 150, 105, 0.35);
+                flex-shrink: 0;
+            }
+            .ms-brand-meta {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+            }
+            .ms-pill-platform {
+                font-size: 10.5px;
+                font-weight: 700;
+                color: #059669;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+            .ms-modal-heading {
+                margin: 0;
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: 21px;
+                font-weight: 700;
+                color: #0f172a;
+                letter-spacing: -0.02em;
+                line-height: 1.25;
+            }
+
+            .ms-modal-intro {
+                margin: 0 0 18px;
+                font-size: 13.5px;
+                color: #475569;
+                line-height: 1.55;
+            }
+
+            /* Benefits Box */
+            .ms-benefits-box {
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 16px;
+                padding: 14px 16px;
+                margin-bottom: 20px;
+            }
+            .ms-benefits-title-row {
+                margin-bottom: 10px;
+            }
+            .ms-benefits-heading {
+                font-size: 11px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                color: #059669;
+            }
+            .ms-benefits-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+            }
+            .ms-benefit-item {
+                display: flex;
+                align-items: baseline;
+                gap: 9px;
+            }
+            .ms-benefit-check {
+                color: #10b981;
+                font-weight: 700;
+                font-size: 13px;
+                flex-shrink: 0;
+            }
+            .ms-benefit-text {
+                font-size: 13px;
+                color: #334155;
+                line-height: 1.45;
+            }
+            .ms-benefit-text strong {
+                color: #0f172a;
+                font-weight: 600;
+            }
+
+            /* Input Cluster */
+            .ms-email-section {
+                margin-bottom: 16px;
+            }
+            .ms-input-cluster {
+                display: flex;
+                gap: 8px;
+            }
+            #ms-email-input {
+                flex: 1;
+                padding: 11px 14px;
+                border-radius: 12px;
+                border: 1.5px solid #cbd5e1;
+                background: #ffffff;
+                font-size: 14px;
+                color: #0f172a;
+                outline: none;
+                transition: all 0.15s ease;
+            }
+            #ms-email-input:focus {
+                border-color: #059669;
+                box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+            }
+            .ms-btn-submit {
+                background: #0f172a;
+                color: #ffffff;
+                border: none;
+                border-radius: 12px;
+                padding: 11px 18px;
+                font-size: 12.5px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                cursor: pointer;
+                white-space: nowrap;
+                transition: all 0.15s ease;
+            }
+            .ms-btn-submit:hover {
+                background: #1e293b;
+            }
+            .ms-btn-submit:active {
+                transform: scale(0.98);
+            }
+            .ms-field-error {
+                display: none;
+                margin: 6px 0 0;
+                font-size: 12px;
+                color: #dc2626;
+                font-weight: 500;
+            }
+
+            /* Divider */
+            .ms-divider-line {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                margin: 18px 0;
+            }
+            .ms-divider-line::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: #f1f5f9;
+            }
+            .ms-divider-line span {
+                position: relative;
+                background: #ffffff;
+                padding: 0 10px;
+                font-size: 10.5px;
+                font-weight: 700;
+                color: #94a3b8;
+                letter-spacing: 0.08em;
+            }
+
+            /* Webapp Card */
+            .ms-webapp-promo {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 14px;
+                border-radius: 14px;
+                border: 1px solid #e2e8f0;
+                text-decoration: none;
+                background: #f8fafc;
+                transition: all 0.15s ease;
+            }
+            .ms-webapp-promo:hover {
+                border-color: #cbd5e1;
+                background: #f1f5f9;
+            }
+            .ms-webapp-icon-wrap {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+                background: #e0f2fe;
+                color: #0284c7;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .ms-webapp-content {
+                flex: 1;
+                min-width: 0;
+            }
+            .ms-webapp-title {
+                font-size: 13px;
+                font-weight: 700;
+                color: #0f172a;
+            }
+            .ms-webapp-desc {
+                font-size: 11.5px;
+                color: #64748b;
+                margin-top: 1px;
+            }
+            .ms-webapp-arrow {
+                color: #94a3b8;
+                font-size: 15px;
+                transition: transform 0.15s ease;
+            }
+            .ms-webapp-promo:hover .ms-webapp-arrow {
+                color: #059669;
+                transform: translateX(2px);
             }
 
             /* Top toast */
@@ -3935,25 +3957,6 @@
             }
             #ms-top-toast.ms-toast-visible > div {
                 transform: translateY(0);
-            }
-
-            /* Modal inner card scroll on small screens */
-            #ms-app-modal > div {
-                max-height: 90vh;
-                overflow-y: auto;
-            }
-
-            /* Pill badge */
-            .ms-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-                padding: 4px 10px;
-                border-radius: 999px;
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 0.06em;
-                text-transform: uppercase;
             }
         </style>
     </body>

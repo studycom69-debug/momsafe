@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacy Policy | MomSafe AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#003527",
+                        "primary-container": "#064e3b",
+                        "primary-fixed": "#b0f0d6",
+                        "primary-fixed-dim": "#95d3ba",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#80bea6",
+                        surface: "#f7f9fb",
+                        background: "#f7f9fb",
+                        "surface-container": "#eceef0",
+                        "surface-container-low": "#f2f4f6",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "on-surface": "#191c1e",
+                        "on-surface-variant": "#404944",
+                        outline: "#707974",
+                        error: "#ba1a1a",
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "system-ui", "sans-serif"],
+                        display: ["Plus Jakarta Sans", "Inter", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { opacity: 0; transform: translateY(8px); animation: pageIn 600ms cubic-bezier(.2,.7,.2,1) 30ms forwards; }
+        @keyframes pageIn { to { opacity: 1; transform: translateY(0); } }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(18px); filter: blur(2px); }
+          to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+        }
+        .hero-fade > * { opacity: 0; animation: fadeUp 700ms cubic-bezier(.2,.7,.2,1) forwards; }
+        .hero-fade > *:nth-child(1) { animation-delay: 120ms; }
+        .hero-fade > *:nth-child(2) { animation-delay: 220ms; }
+        .hero-fade > *:nth-child(3) { animation-delay: 320ms; }
+        .hero-fade > *:nth-child(4) { animation-delay: 420ms; }
+        .hero-fade > *:nth-child(5) { animation-delay: 520ms; }
+
+        .reveal { opacity: 0; transform: translateY(22px); filter: blur(2px);
+                 transition: opacity 700ms cubic-bezier(.2,.7,.2,1),
+                             transform 700ms cubic-bezier(.2,.7,.2,1),
+                             filter 700ms cubic-bezier(.2,.7,.2,1);
+                 will-change: opacity, transform, filter; }
+        .reveal.visible { opacity: 1; transform: translateY(0); filter: blur(0); }
+
+        header { opacity: 0; animation: pageIn 600ms cubic-bezier(.2,.7,.2,1) 80ms forwards; }
+    </style>
+
+    <meta name="description" content="Privacy Policy for MomSafe AI — how we collect, use, store, and protect your personal and health data during pregnancy and postnatal care." />
+    <meta name="theme-color" content="#003527" />
+    <meta name="color-scheme" content="light" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/favicon.svg" color="#003527" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MomSafe AI" />
+    <meta property="og:title" content="Privacy Policy | MomSafe AI" />
+    <meta property="og:description" content="How MomSafe AI collects, uses, discloses, and protects your personal and health-related data during pregnancy and postnatal care." />
+    <meta property="og:url" content="https://momsafe.in/privacy" />
+    <meta property="og:image" content="https://momsafe.in/opengraph.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Privacy Policy | MomSafe AI" />
+    <meta name="twitter:description" content="How MomSafe AI collects, uses, discloses, and protects your personal and health data." />
+    <meta name="twitter:image" content="https://momsafe.in/opengraph.jpg" />
+</head>
+<body class="bg-background text-on-surface font-sans antialiased min-h-screen">
+    <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-xl border-b border-outline/10">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                </div>
+                <span class="font-display font-bold text-xl text-on-surface">MomSafe</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="/login" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Log in</a>
+                <a href="/landing.html" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">&larr; Back to home</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-16">
+        <div class="mb-12 hero-fade">
+            <p class="text-sm font-semibold uppercase tracking-wider text-primary/80 mb-3">Legal</p>
+            <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-5">Privacy Policy</h1>
+            <p class="text-lg text-on-surface-variant leading-relaxed">
+                Last updated: September 30, 2026
+            </p>
+            <p class="text-lg text-on-surface-variant leading-relaxed mt-2">
+                MomSafe AI ("MomSafe", "we", "us", or "our") operates the MomSafe AI web application and related services (collectively, the "Service").
+                This Privacy Policy explains how we collect, use, disclose, and safeguard your information, including sensitive personal and health-related data,
+                when you use our Service. Please read this policy carefully. If you do not agree with the terms of this Privacy Policy, please do not access the Service.
+            </p>
+        </div>
+
+        <div class="prose prose-slate max-w-none">
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">1. Information We Collect</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    We collect several types of information from and about users of our Service, including the following:
+                </p>
+                <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10 mb-6">
+                    <h3 class="font-semibold text-on-surface mb-3">1.1 Personal Information You Provide</h3>
+                    <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                        <li><strong>Account and profile data:</strong> full name, email address, gestational age or due date, pregnancy-related profile information, and any information you provide during onboarding.</li>
+                        <li><strong>Authentication data:</strong> when you sign in with Google or other OAuth providers, we receive your display name, email address, and a unique user identifier.</li>
+                        <li><strong>User-generated content:</strong> health logs, daily journal entries, medication records, nutrition entries, mood inputs, and any notes or files you upload.</li>
+                        <li><strong>Communications:</strong> messages, support requests, and feedback you send to us.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10 mb-6">
+                    <h3 class="font-semibold text-on-surface mb-3">1.2 Health and Wellness Data</h3>
+                    <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                        <li><strong>Vitals and biometrics:</strong> heart rate, blood pressure, blood oxygen, weight, temperature, glucose, kick counts, sleep duration and quality, and similar measurements you enter manually or that are transmitted from connected devices (such as ESP32 sensors or wearables).</li>
+                        <li><strong>Nutrition data:</strong> meals logged, calories, macronutrients, hydration, caffeine intake, and dietary restrictions.</li>
+                        <li><strong>Medication and supplement data:</strong> medication names, dosages, frequency, adherence records, and prescriptions where provided.</li>
+                        <li><strong>Location information:</strong> approximate location when you use the "nearby hospitals" or location-based features of the Service.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10">
+                    <h3 class="font-semibold text-on-surface mb-3">1.3 Information Collected Automatically</h3>
+                    <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                        <li><strong>Usage data:</strong> browser type, device information, IP address, pages visited, time spent on features, referring/exit pages, and clickstream data.</li>
+                        <li><strong>Cookies and similar technologies:</strong> we use local storage, session tokens, and analytics cookies (e.g., Vercel Analytics) to deliver functionality and understand aggregate usage patterns.</li>
+                        <li><strong>Performance data:</strong> error reports, crash logs, and telemetry used to diagnose issues and improve the Service.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">2. How We Use Your Information</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    We use the information we collect to operate, maintain, improve, and develop the Service. Specifically, we use your information for the following purposes:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed mb-6">
+                    <li><strong>To provide the Service:</strong> create and manage your account, authenticate you, deliver dashboards, and maintain your health records.</li>
+                    <li><strong>AI guidance and personalized insights:</strong> analyze health inputs with our risk and guidance engines to surface personalized tips, alerts, and educational content. These outputs are informational only and do not constitute medical advice.</li>
+                    <li><strong>Risk alerts and notifications:</strong> detect out-of-range vitals, medication reminders, appointment prompts, and emergency contact escalations where configured.</li>
+                    <li><strong>Analytics and product improvement:</strong> perform internal analytics to understand feature usage, troubleshoot bugs, and design new capabilities. Aggregated or de-identified data may be used for research purposes.</li>
+                    <li><strong>Communications:</strong> send service announcements, security notices, and response to support inquiries. We may send marketing emails only with your explicit consent, and you can opt out at any time.</li>
+                    <li><strong>Legal compliance, safety, and enforcement:</strong> comply with applicable laws, regulations, and lawful requests; protect the safety, rights, and property of MomSafe, our users, and the public; and detect, investigate, and prevent fraudulent, abusive, or unlawful activity.</li>
+                    <li><strong>With your consent:</strong> for any other purpose disclosed at the point of collection or authorized by you in writing.</li>
+                </ul>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">3. Disclosure of Your Information</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    We may disclose your personal information in the following circumstances:
+                </p>
+                <div class="grid gap-4">
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
+                        <h4 class="font-semibold text-on-surface mb-2">3.1 With your explicit consent</h4>
+                        <p class="text-on-surface-variant leading-relaxed">We will share personal information and health data with third parties (such as your care provider or emergency contact) only when you explicitly instruct us to do so through the Service.</p>
+                    </div>
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
+                        <h4 class="font-semibold text-on-surface mb-2">3.2 With service providers</h4>
+                        <p class="text-on-surface-variant leading-relaxed">We share data with vendors and subcontractors that perform services on our behalf, including hosting (Supabase, Vercel), infrastructure, analytics, and email delivery providers. Each provider is bound by contractual obligations to protect the confidentiality and security of your data.</p>
+                    </div>
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
+                        <h4 class="font-semibold text-on-surface mb-2">3.3 For legal and safety reasons</h4>
+                        <p class="text-on-surface-variant leading-relaxed">We may disclose information in response to subpoenas, court orders, or other legal process; to comply with applicable law; or to protect the vital interests of any person where disclosure is necessary or permitted by law.</p>
+                    </div>
+                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
+                        <h4 class="font-semibold text-on-surface mb-2">3.4 Business transfers</h4>
+                        <p class="text-on-surface-variant leading-relaxed">In connection with any merger, acquisition, financing, divestiture, or sale of all or a portion of our business or assets, your information may be transferred as part of that transaction, subject to applicable law and any applicable confidentiality requirements.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">4. Data Retention and Deletion</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    We retain your personal and health data for as long as your account is active or as needed to provide the Service. Upon account deactivation or deletion,
+                    we will delete or de-identify your information within a reasonable period, except for data we are required or permitted to retain by applicable law,
+                    regulation, or internal recordkeeping policy. Backups and disaster-recovery copies may persist for an additional retention window before being purged.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">5. Data Security</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    The security of your personal and health information is important to us. We implement commercially reasonable administrative, technical, and physical safeguards
+                    to protect against unauthorized access, use, alteration, or disclosure, including:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                    <li>Encryption of data in transit (TLS 1.2+) and at rest (AES-256) via our infrastructure providers.</li>
+                    <li>Role-based access controls and least-privilege principles for internal systems.</li>
+                    <li>Automated monitoring for anomalous activity, abuse, and security incidents.</li>
+                    <li>Regular security assessments and vulnerability management.</li>
+                </ul>
+                <p class="text-on-surface-variant leading-relaxed mt-4">
+                    No method of transmission over the Internet or electronic storage is 100% secure, however, and we cannot guarantee absolute security.
+                    If you have reason to believe your interaction with us is no longer secure, please notify us immediately at the contact address below.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">6. Your Choices and Rights</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-4">
+                    Depending on your jurisdiction, you may have certain rights regarding your personal information:
+                </p>
+                <ul class="list-disc list-inside space-y-2 text-on-surface-variant leading-relaxed">
+                    <li><strong>Access and correction:</strong> request access to, or correction of, the personal information we hold about you.</li>
+                    <li><strong>Deletion:</strong> request deletion of your account and personal information, subject to our retention obligations.</li>
+                    <li><strong>Data portability:</strong> request an export of your personal data in a structured, commonly used, and machine-readable format.</li>
+                    <li><strong>Restriction and objection:</strong> request restriction of, or objection to, certain processing activities where permitted by law.</li>
+                    <li><strong>Withdrawal of consent:</strong> withdraw any consent previously provided, without affecting the lawfulness of processing based on consent before withdrawal.</li>
+                    <li><strong>Marketing communications:</strong> opt out of promotional emails by following the unsubscribe link in any marketing message.</li>
+                </ul>
+                <p class="text-on-surface-variant leading-relaxed mt-4">
+                    To exercise these rights, please contact us at <a href="mailto:privacy@momsafe.in" class="text-primary font-medium underline">privacy@momsafe.in</a>.
+                    We will respond to requests in accordance with applicable timelines and requirements under law.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">7. Children's Privacy</h2>
+                <p class="text-on-surface-variant leading-relaxed">
+                    The Service is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.
+                    If you are a parent or guardian and believe we may have information about or from a child under 13, please contact us so we can delete that information immediately.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">8. Cross-Border Data Transfers</h2>
+                <p class="text-on-surface-variant leading-relaxed">
+                    Your information may be processed in, and transferred to and stored in, countries other than your own. Our infrastructure providers may operate globally.
+                    By using the Service, you consent to the transfer of information to countries that may have data protection laws different from those in your jurisdiction.
+                    We will take reasonable steps to ensure your information is treated securely and in accordance with this Privacy Policy and applicable law.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">9. No Medical Advice Disclaimer</h2>
+                <p class="text-on-surface-variant leading-relaxed">
+                    The Service, including any AI guidance, risk scoring, alerts, and educational outputs, is for informational and wellness purposes only.
+                    It is <strong>not</strong> a substitute for professional medical advice, diagnosis, or treatment.
+                    Always seek the advice of your physician, obstetrician, or other qualified health provider with any questions regarding a medical condition, symptoms,
+                    medication changes, or the health of you or your child.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">10. Changes to This Privacy Policy</h2>
+                <p class="text-on-surface-variant leading-relaxed">
+                    We may update this Privacy Policy from time to time to reflect changes in our practices, features, or legal requirements.
+                    We will notify you of material changes by updating the "Last updated" date at the top of this page and, where appropriate,
+                    by providing a more prominent notice such as an in-app banner or email notification.
+                    Your continued use of the Service after changes become effective constitutes acceptance of the revised Privacy Policy.
+                </p>
+            </section>
+
+            <section>
+                <h2 class="font-display text-2xl font-bold text-on-surface mb-4">11. Contact Us</h2>
+                <p class="text-on-surface-variant leading-relaxed mb-6">
+                    If you have any questions, comments, or concerns about this Privacy Policy, our data practices, or your rights, or you wish to submit a complaint, please contact us using the details below:
+                </p>
+                <div class="bg-primary/5 border border-primary/20 rounded-2xl p-6">
+                    <p class="text-on-surface font-semibold mb-2">MomSafe AI</p>
+                    <p class="text-on-surface-variant leading-relaxed">Email (Privacy): <a href="mailto:privacy@momsafe.in" class="text-primary font-medium underline">privacy@momsafe.in</a></p>
+                    <p class="text-on-surface-variant leading-relaxed">Email (General Support): <a href="mailto:support@momsafe.in" class="text-primary font-medium underline">support@momsafe.in</a></p>
+                    <p class="text-on-surface-variant leading-relaxed mt-2">Website: <a href="https://momsafe.in" class="text-primary font-medium underline">https://momsafe.in</a></p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="border-t border-outline/10 mt-16 reveal">
+        <div class="max-w-5xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p class="text-sm text-on-surface-variant">&copy; 2026 MomSafe AI. All rights reserved.</p>
+            <div class="flex items-center gap-6 text-sm">
+                <a href="/privacy.html" class="text-on-surface-variant hover:text-primary font-medium transition-colors">Privacy Policy</a>
+                <a href="/terms.html" class="text-on-surface-variant hover:text-primary font-medium transition-colors">Terms of Service</a>
+                <a href="/login" class="text-on-surface-variant hover:text-primary font-medium transition-colors">Log in</a>
+                <a href="/landing.html" class="text-on-surface-variant hover:text-primary font-medium transition-colors">Home</a>
+            </div>
+        </div>
+    </footer>
+    <script>
+        document.querySelectorAll('main section').forEach(function (el) { el.classList.add('reveal'); });
+        (function () {
+            if (!('IntersectionObserver' in window)) {
+                document.querySelectorAll('.reveal').forEach(function (e) { e.classList.add('visible'); });
+                return;
+            }
+            var io = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        var delay = parseInt(entry.target.getAttribute('data-delay')) || 0;
+                        setTimeout(function () { entry.target.classList.add('visible'); }, delay);
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+            document.querySelectorAll('.reveal').forEach(function (el, i) {
+                el.setAttribute('data-delay', String((i % 3) * 60));
+                io.observe(el);
+            });
+        })();
+    </script>
+</body>
+</html>
