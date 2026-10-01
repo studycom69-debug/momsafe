@@ -6,6 +6,8 @@ Allow: /privacy
 Allow: /privacy.html
 Allow: /terms
 Allow: /terms.html
+Allow: /about
+Allow: /about.html
 
 # Disallow authenticated, dashboard, and private application routes
 Disallow: /dashboard
