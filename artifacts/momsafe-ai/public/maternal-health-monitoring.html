@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -34,7 +34,7 @@
     <meta name="twitter:description" content="Learn how MomSafe AI supports maternal health monitoring through pregnancy tracking, wearable health data, AI-assisted insights, and connected care tools." />
     <meta name="twitter:image" content="https://www.momsafe.in/opengraph.jpg" />
 
-    <!-- Schema.org Structured Data -->
+    <!-- Schema.org Structured Data (WebPage Schema Only) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -56,6 +56,8 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
     <script>
         tailwind.config = {
@@ -88,630 +90,1073 @@
         };
     </script>
     <style>
-        html { scroll-behavior: smooth; }
-        body { opacity: 0; transform: translateY(8px); animation: pageIn 600ms cubic-bezier(.2,.7,.2,1) 30ms forwards; }
+        html { scroll-behavior: smooth; scroll-padding-top: 130px; }
+        body { opacity: 0; transform: translateY(6px); animation: pageIn 400ms cubic-bezier(.16, 1, 0.3, 1) forwards; }
         @keyframes pageIn { to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(18px); filter: blur(2px); }
-          to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+        .reveal {
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 500ms cubic-bezier(.16, 1, 0.3, 1), transform 500ms cubic-bezier(.16, 1, 0.3, 1);
+            will-change: opacity, transform;
         }
-        .hero-fade > * { opacity: 0; animation: fadeUp 700ms cubic-bezier(.2,.7,.2,1) forwards; }
-        .hero-fade > *:nth-child(1) { animation-delay: 100ms; }
-        .hero-fade > *:nth-child(2) { animation-delay: 180ms; }
-        .hero-fade > *:nth-child(3) { animation-delay: 260ms; }
-        .hero-fade > *:nth-child(4) { animation-delay: 340ms; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
 
-        .reveal { opacity: 0; transform: translateY(22px); filter: blur(2px);
-                 transition: opacity 700ms cubic-bezier(.2,.7,.2,1),
-                             transform 700ms cubic-bezier(.2,.7,.2,1),
-                             filter 700ms cubic-bezier(.2,.7,.2,1);
-                 will-change: opacity, transform, filter; }
-        .reveal.visible { opacity: 1; transform: translateY(0); filter: blur(0); }
-
-        header { opacity: 0; animation: pageIn 600ms cubic-bezier(.2,.7,.2,1) 80ms forwards; }
-
-        details > summary::-webkit-details-marker { display: none; }
+        details summary::-webkit-details-marker { display: none; }
         details[open] summary svg.chevron { transform: rotate(180deg); }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            body, .reveal { animation: none !important; opacity: 1 !important; transform: none !important; transition: none !important; }
+        }
     </style>
 </head>
-<body class="bg-background text-on-surface font-sans antialiased min-h-screen flex flex-col">
-    <!-- Header Navigation -->
-    <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-xl border-b border-outline/10">
-        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2 group" aria-label="MomSafe AI Home">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-sm transition-transform group-hover:scale-105">
+<body class="bg-background text-on-surface font-sans antialiased min-h-screen flex flex-col selection:bg-primary-fixed selection:text-primary overflow-x-hidden">
+    <!-- Primary Header Navigation -->
+    <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-md border-b border-outline/10">
+        <div class="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2.5 group" aria-label="MomSafe AI Home">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-container flex items-center justify-center shadow-sm transition-transform duration-200 group-hover:scale-105">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
                 </div>
-                <span class="font-display font-bold text-xl text-on-surface">MomSafe <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wider ml-1">AI</span></span>
+                <span class="font-display font-bold text-xl text-on-surface tracking-tight">MomSafe <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase tracking-wider ml-0.5">AI</span></span>
             </a>
-            <nav class="flex items-center gap-4 md:gap-6">
-                <a href="/landing.html" class="hidden sm:inline-block text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Home</a>
-                <a href="/landing.html#features" class="hidden md:inline-block text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Features</a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center gap-6">
+                <a href="/landing.html" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Home</a>
+                <a href="/landing.html#features" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Features</a>
                 <a href="/maternal-health-monitoring" class="text-sm font-semibold text-primary">Monitoring</a>
                 <a href="/about" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">About</a>
                 <a href="/login" class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Log in</a>
-                <a href="/landing.html" class="text-sm font-medium px-3.5 py-1.5 rounded-full bg-primary text-white hover:bg-primary-container transition-colors shadow-sm">&larr; Back to home</a>
+                <a href="/landing.html" class="text-sm font-medium px-4 py-2 rounded-full bg-primary text-white hover:bg-primary-container transition-all shadow-sm hover:-translate-y-0.5 active:translate-y-0">&larr; Back to home</a>
             </nav>
+
+            <!-- Mobile Menu Toggle Button -->
+            <button id="mobile-menu-btn" aria-label="Toggle Navigation Menu" aria-expanded="false" class="md:hidden p-2 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+                <svg id="menu-icon-bars" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <!-- Mobile Collapsible Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-outline/10 bg-surface px-6 py-4 space-y-3">
+            <a href="/landing.html" class="block text-sm font-medium text-on-surface-variant hover:text-primary py-1.5">Home</a>
+            <a href="/landing.html#features" class="block text-sm font-medium text-on-surface-variant hover:text-primary py-1.5">Features</a>
+            <a href="/maternal-health-monitoring" class="block text-sm font-semibold text-primary py-1.5">Maternal Health Monitoring</a>
+            <a href="/about" class="block text-sm font-medium text-on-surface-variant hover:text-primary py-1.5">About MomSafe AI</a>
+            <a href="/login" class="block text-sm font-medium text-on-surface-variant hover:text-primary py-1.5">Log in</a>
+            <div class="pt-2">
+                <a href="/landing.html" class="block text-center text-sm font-medium px-4 py-2.5 rounded-full bg-primary text-white hover:bg-primary-container transition-colors shadow-sm">&larr; Back to home</a>
+            </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="max-w-4xl mx-auto px-6 py-14 flex-grow w-full">
-        <!-- Hero / Intro Section -->
-        <div class="mb-14 hero-fade">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-fixed/50 text-primary text-xs font-semibold tracking-wide uppercase mb-4 border border-primary/15">
-                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                Continuity of Care in Maternal Health
-            </div>
-            <h1 class="font-display text-4xl md:text-5xl font-extrabold tracking-tight text-on-surface mb-6 leading-tight">
-                Maternal Health Monitoring with MomSafe AI
-            </h1>
-            <p class="text-lg md:text-xl text-on-surface leading-relaxed font-medium mb-5">
-                Maternal health monitoring means keeping track of vital signs, physical symptoms, and everyday wellness trends throughout each trimester of pregnancy. Between scheduled prenatal checkups, many expectant mothers experience weeks with little visibility into their health. MomSafe AI helps bridge that gap by supporting continuity of care, keeping mothers informed, connected, and supported every single day.
-            </p>
-            <div class="flex flex-wrap gap-2 pt-2">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container-low text-xs font-medium text-on-surface-variant border border-outline/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    Continuous Maternal Support
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container-low text-xs font-medium text-on-surface-variant border border-outline/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    AI-Assisted Trend Interpretation
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-surface-container-low text-xs font-medium text-on-surface-variant border border-outline/10">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                    Doctor &amp; Clinic Connectivity
-                </span>
-            </div>
+    <!-- Sub-Navigation Pill Bar (Sticky on Desktop) -->
+    <aside class="sticky top-[61px] z-30 bg-surface/85 backdrop-blur-md border-b border-outline/10 hidden sm:block" aria-label="Section Navigation">
+        <div class="max-w-6xl mx-auto px-6 py-2.5 flex items-center justify-between gap-4">
+            <div class="text-xs font-semibold uppercase tracking-wider text-on-surface-variant/80 shrink-0">Jump To</div>
+            <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-medium">
+                <a href="#overview" class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Overview</a>
+                <a href="#signals" class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Health Signals</a>
+                <a href="#monitoring" class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">What Is Monitored</a>
+                <a href="#how-it-works" class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">How It Works</a>
+                <a href="#wearable" class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Wearable</a>
+                <a href="#ai-support" class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">AI Support</a>
+                <a href="#connected-care" class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Connected Care</a>
+                <a href="#who-its-for" class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Who It's For</a>
+                <a href="#responsible-use" class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">Safety</a>
+                <a href="#faq" class="px-3 py-1.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors whitespace-nowrap">FAQ</a>
+            </nav>
         </div>
+    </aside>
 
-        <div class="space-y-12">
-            <!-- Section 1: Understanding Maternal Health Monitoring -->
-            <section class="reveal bg-surface-container-lowest rounded-3xl p-8 md:p-10 border border-outline/10 shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-2xl bg-primary-fixed/50 flex items-center justify-center text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+    <main class="flex-grow w-full">
+        <!-- 1. HERO SECTION -->
+        <section id="overview" class="max-w-6xl mx-auto px-6 pt-12 md:pt-16 pb-12 md:pb-16 border-b border-outline/10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+                <!-- Left Hero Content -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary-fixed/60 text-primary text-xs font-semibold tracking-wider uppercase border border-primary/15">
+                        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        MATERNAL HEALTH MONITORING
                     </div>
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface">Understanding Maternal Health Monitoring</h2>
+
+                    <h1 class="font-display text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold tracking-tight text-on-surface leading-[1.12]">
+                        Maternal Health Monitoring with MomSafe AI
+                    </h1>
+
+                    <p class="text-base sm:text-lg text-on-surface-variant leading-relaxed font-normal max-w-2xl">
+                        Maternal health monitoring means keeping track of vital signs, physical symptoms, and everyday wellness trends throughout each trimester of pregnancy. Between scheduled prenatal checkups, many expectant mothers experience weeks with little visibility into their health. MomSafe AI helps bridge that gap by supporting continuity of care, keeping mothers informed, connected, and supported every single day.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                        <a href="#how-it-works" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-primary text-white font-semibold text-sm hover:bg-primary-container transition-all duration-200 shadow-sm hover:-translate-y-0.5 active:translate-y-0">
+                            Explore How MomSafe Works
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                        </a>
+                        <a href="/about" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-surface-container-low text-primary font-semibold text-sm border border-primary/20 hover:bg-primary-fixed/30 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0">
+                            About MomSafe AI
+                        </a>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-y-2 gap-x-5 text-xs text-on-surface-variant/80 pt-3">
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Non-invasive supportive logging
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Continuity between clinic visits
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Strict privacy &amp; user control
+                        </span>
+                    </div>
                 </div>
-                <p class="text-base md:text-lg text-on-surface-variant leading-relaxed mb-6">
-                    Pregnancy is a dynamic biological journey marked by rapid physiological adaptations. Traditional maternal care relies heavily on intermittent clinical consultations, often spaced 4 to 6 weeks apart during the first two trimesters. In everyday life, questions arise between these visits: Are sudden fluctuations in resting heart rate expected? Is unusual tiredness related to sleep or nutrition?
-                </p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <h3 class="font-semibold text-primary text-base mb-1.5">Bridging Care Gaps</h3>
+
+                <!-- Right Hero Visual Panel (Wearable Health Signals Dashboard Preview) -->
+                <div class="lg:col-span-5">
+                    <div class="bg-surface-container-lowest rounded-3xl p-6 sm:p-7 border border-outline/15 shadow-sm space-y-5">
+                        <div class="flex items-center justify-between border-b border-outline/10 pb-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="text-xs uppercase tracking-wider font-bold text-primary">MomSafe Connected Wearable</div>
+                                    <div class="text-sm font-semibold text-on-surface">Physiological Signals Preview</div>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary-fixed/50 text-primary border border-primary/15">
+                                Sample Interface Preview
+                            </span>
+                        </div>
+
+                        <!-- 6 Monitored Indicators Preview Grid -->
+                        <div class="grid grid-cols-2 gap-3 text-left">
+                            <!-- Signal 1 -->
+                            <div class="p-3.5 rounded-2xl bg-surface-container-low border border-outline/10">
+                                <div class="flex items-center justify-between text-xs text-on-surface-variant mb-1">
+                                    <span class="font-medium">Heart Rate</span>
+                                    <svg class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                                </div>
+                                <div class="text-lg font-bold text-on-surface font-display">76 <span class="text-xs font-normal text-on-surface-variant">bpm</span></div>
+                                <div class="text-[11px] text-on-surface-variant/80 mt-0.5">Sample reading</div>
+                            </div>
+
+                            <!-- Signal 2 -->
+                            <div class="p-3.5 rounded-2xl bg-surface-container-low border border-outline/10">
+                                <div class="flex items-center justify-between text-xs text-on-surface-variant mb-1">
+                                    <span class="font-medium">Blood Oxygen</span>
+                                    <svg class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+                                </div>
+                                <div class="text-lg font-bold text-on-surface font-display">98% <span class="text-xs font-normal text-on-surface-variant">SpO₂</span></div>
+                                <div class="text-[11px] text-on-surface-variant/80 mt-0.5">Sample reading</div>
+                            </div>
+
+                            <!-- Signal 3 -->
+                            <div class="p-3.5 rounded-2xl bg-surface-container-low border border-outline/10">
+                                <div class="flex items-center justify-between text-xs text-on-surface-variant mb-1">
+                                    <span class="font-medium">Skin Temp</span>
+                                    <svg class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </div>
+                                <div class="text-lg font-bold text-on-surface font-display">36.6 <span class="text-xs font-normal text-on-surface-variant">°C</span></div>
+                                <div class="text-[11px] text-on-surface-variant/80 mt-0.5">Sample reading</div>
+                            </div>
+
+                            <!-- Signal 4 -->
+                            <div class="p-3.5 rounded-2xl bg-surface-container-low border border-outline/10">
+                                <div class="flex items-center justify-between text-xs text-on-surface-variant mb-1">
+                                    <span class="font-medium">HRV</span>
+                                    <svg class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                </div>
+                                <div class="text-lg font-bold text-on-surface font-display">58 <span class="text-xs font-normal text-on-surface-variant">ms</span></div>
+                                <div class="text-[11px] text-on-surface-variant/80 mt-0.5">Sample reading</div>
+                            </div>
+
+                            <!-- Signal 5 -->
+                            <div class="p-3.5 rounded-2xl bg-surface-container-low border border-outline/10">
+                                <div class="flex items-center justify-between text-xs text-on-surface-variant mb-1">
+                                    <span class="font-medium">Sleep</span>
+                                    <svg class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                                </div>
+                                <div class="text-lg font-bold text-on-surface font-display">7h 45m</div>
+                                <div class="text-[11px] text-on-surface-variant/80 mt-0.5">Trend preview</div>
+                            </div>
+
+                            <!-- Signal 6 -->
+                            <div class="p-3.5 rounded-2xl bg-surface-container-low border border-outline/10">
+                                <div class="flex items-center justify-between text-xs text-on-surface-variant mb-1">
+                                    <span class="font-medium">Activity</span>
+                                    <svg class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                </div>
+                                <div class="text-lg font-bold text-on-surface font-display">4,820 <span class="text-xs font-normal text-on-surface-variant">steps</span></div>
+                                <div class="text-[11px] text-on-surface-variant/80 mt-0.5">Trend preview</div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-surface-container text-[11px] text-on-surface-variant leading-relaxed">
+                            <span class="font-semibold text-primary">Sample Interface Preview:</span> Demonstrates software presentation of maternal physiological indicators with sample readings. Not actual patient telemetry, clinical interpretation, or diagnostic thresholds.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. HEALTH SIGNAL STRIP -->
+        <section id="signals" class="max-w-6xl mx-auto px-6 py-12 border-b border-outline/10" aria-label="Key Health Signals Tracked">
+            <div class="text-center max-w-xl mx-auto mb-8">
+                <div class="text-xs uppercase tracking-wider font-bold text-primary mb-1">Core Indicators</div>
+                <h2 class="font-display text-2xl sm:text-3xl font-bold text-on-surface">Six Core Maternal Health Signals</h2>
+                <p class="text-sm text-on-surface-variant mt-2">Continuous non-invasive physiological monitoring designed for everyday comfort during pregnancy.</p>
+            </div>
+
+            <!-- Horizontal strip on desktop, compact grid on mobile -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
+                <div class="p-4 rounded-2xl bg-surface-container-lowest border border-outline/10 hover:border-primary/30 transition-all duration-200">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    </div>
+                    <div class="font-semibold text-sm text-on-surface mb-1">Heart Rate</div>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">Resting pulse trends &amp; cardiovascular adaptations.</p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-surface-container-lowest border border-outline/10 hover:border-primary/30 transition-all duration-200">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+                    </div>
+                    <div class="font-semibold text-sm text-on-surface mb-1">SpO₂</div>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">Non-invasive blood oxygen saturation levels.</p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-surface-container-lowest border border-outline/10 hover:border-primary/30 transition-all duration-200">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                    <div class="font-semibold text-sm text-on-surface mb-1">Skin Temperature</div>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">Continuous thermal observation &amp; variations.</p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-surface-container-lowest border border-outline/10 hover:border-primary/30 transition-all duration-200">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </div>
+                    <div class="font-semibold text-sm text-on-surface mb-1">HRV</div>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">Heart rate variability for autonomic rest tracking.</p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-surface-container-lowest border border-outline/10 hover:border-primary/30 transition-all duration-200">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                    </div>
+                    <div class="font-semibold text-sm text-on-surface mb-1">Sleep Quality</div>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">Nocturnal rest cycles and recovery staging.</p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-surface-container-lowest border border-outline/10 hover:border-primary/30 transition-all duration-200">
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <div class="font-semibold text-sm text-on-surface mb-1">Activity</div>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">Daily movement trends and prenatal step pacing.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. UNDERSTANDING MATERNAL HEALTH MONITORING & WHAT CAN BE MONITORED -->
+        <section id="monitoring" class="max-w-6xl mx-auto px-6 py-14 md:py-20 border-b border-outline/10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                <!-- Left Intro -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="text-xs uppercase tracking-wider font-bold text-primary">Continuity of Care</div>
+                    <h2 class="font-display text-2xl sm:text-3xl font-bold text-on-surface leading-snug">
+                        Understanding Maternal Health Monitoring
+                    </h2>
+                    <p class="text-sm text-on-surface-variant leading-relaxed font-normal">
+                        Pregnancy is a dynamic biological journey marked by rapid physiological adaptations. Traditional maternal care relies heavily on intermittent clinical consultations, often spaced 4 to 6 weeks apart during the first two trimesters. In everyday life, questions arise between these visits.
+                    </p>
+                    <p class="text-sm text-on-surface-variant leading-relaxed font-normal">
+                        Maternal health technology provides structured routines for expectant mothers to log vitals, track daily feelings, and stay aware of their body's patterns—empowering informed conversations with doctors.
+                    </p>
+
+                    <div class="p-4 rounded-2xl bg-primary-fixed/20 border border-primary/20 text-xs text-on-surface-variant leading-relaxed">
+                        <strong class="text-primary font-semibold">Non-Diagnostic Scope:</strong> All monitoring areas within MomSafe AI are designed for self-tracking, habit support, and doctor-patient communication. They do not claim medical-grade diagnostic precision and do not replace clinical laboratory tests or specialized obstetric ultrasound.
+                    </div>
+                </div>
+
+                <!-- Right What Can Be Monitored Cards -->
+                <div class="lg:col-span-8 space-y-6">
+                    <div>
+                        <h3 class="font-display text-xl font-bold text-on-surface mb-2">What Can Be Monitored</h3>
                         <p class="text-sm text-on-surface-variant leading-relaxed">
-                            Maternal health technology provides structured routines for expectant mothers to log vitals, track daily feelings, and stay aware of their body's patterns between clinic visits.
+                            MomSafe AI is designed around non-diagnostic wellness and supportive tracking. It collects key maternal data points to assist mothers in recognizing trends, recording adherence, and sharing context with healthcare providers:
                         </p>
                     </div>
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <h3 class="font-semibold text-primary text-base mb-1.5">Empowered Health Conversations</h3>
-                        <p class="text-sm text-on-surface-variant leading-relaxed">
-                            Instead of relying on vague memory during a brief appointment, mothers arrive equipped with organized longitudinal timelines to discuss with their obstetrician or midwife.
-                        </p>
-                    </div>
-                </div>
-            </section>
 
-            <!-- Section 2: What Can Be Monitored -->
-            <section class="reveal bg-surface-container-lowest rounded-3xl p-8 md:p-10 border border-outline/10 shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-2xl bg-primary-fixed/50 flex items-center justify-center text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                    </div>
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface">What Can Be Monitored</h2>
-                </div>
-                <p class="text-base md:text-lg text-on-surface-variant leading-relaxed mb-6">
-                    MomSafe AI is designed around non-diagnostic wellness and supportive tracking. It collects key maternal data points to assist mothers in recognizing trends, recording adherence, and sharing context with healthcare providers:
-                </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface text-base mb-1">Maternal Heart Rate</h3>
-                                <p class="text-sm text-on-surface-variant leading-relaxed">
-                                    Continuous and spot-check resting pulse trends, reflecting healthy cardiovascular adaptations and rest quality during pregnancy.
-                                </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-on-surface text-sm mb-1">Maternal Heart Rate</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Continuous and spot-check resting pulse trends, reflecting healthy cardiovascular adaptations and rest quality.</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface text-base mb-1">Blood Oxygen (SpO2)</h3>
-                                <p class="text-sm text-on-surface-variant leading-relaxed">
-                                    Non-invasive peripheral oxygen saturation readings to observe respiratory baseline stability during rest and routine activity.
-                                </p>
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-on-surface text-sm mb-1">Blood Oxygen (SpO2)</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Non-invasive peripheral oxygen saturation readings to observe respiratory baseline stability during rest.</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface text-base mb-1">Skin Temperature</h3>
-                                <p class="text-sm text-on-surface-variant leading-relaxed">
-                                    Continuous skin temperature observation to track physiological thermal patterns and diurnal fluctuations comfortably.
-                                </p>
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-on-surface text-sm mb-1">Skin Temperature</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Continuous skin temperature observation to track physiological thermal patterns and diurnal fluctuations.</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface text-base mb-1">HRV &amp; Sleep Tracking</h3>
-                                <p class="text-sm text-on-surface-variant leading-relaxed">
-                                    Heart rate variability (HRV) and nocturnal sleep tracking to observe autonomic recovery, rest cycles, and prenatal fatigue patterns.
-                                </p>
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-on-surface text-sm mb-1">HRV &amp; Sleep Tracking</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Heart rate variability (HRV) and nocturnal sleep tracking to observe autonomic recovery and rest cycles.</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface text-base mb-1">Daily Physical Activity</h3>
-                                <p class="text-sm text-on-surface-variant leading-relaxed">
-                                    Step counts, light mobility tracking, and movement trends suited for prenatal fitness and recovery pacing.
-                                </p>
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-on-surface text-sm mb-1">Daily Physical Activity</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Step counts, light mobility tracking, and movement trends suited for prenatal fitness and recovery pacing.</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface text-base mb-1">Symptoms &amp; Sensations</h3>
-                                <p class="text-sm text-on-surface-variant leading-relaxed">
-                                    Structured logging for morning nausea, swelling, fatigue, back discomfort, cramping, and mood changes.
-                                </p>
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-on-surface text-sm mb-1">Symptoms &amp; Sensations</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Structured logging for morning nausea, swelling, fatigue, back discomfort, cramping, and mood changes.</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface text-base mb-1">Nutrition &amp; Hydration</h3>
-                                <p class="text-sm text-on-surface-variant leading-relaxed">
-                                    Hydration milestones, meal regularity, and dietary logging focused on maternal and fetal nourishment goals.
-                                </p>
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-on-surface text-sm mb-1">Nutrition &amp; Hydration</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Hydration milestones, meal regularity, and dietary logging focused on maternal and fetal nourishment goals.</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface text-base mb-1">Medication &amp; Supplements</h3>
-                                <p class="text-sm text-on-surface-variant leading-relaxed">
-                                    Adherence schedules and timely reminders for prescribed prenatal vitamins, iron, folic acid, and doctor-approved prescriptions.
-                                </p>
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-on-surface text-sm mb-1">Medication &amp; Supplements</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Adherence schedules and timely reminders for prescribed prenatal vitamins, iron, and doctor-approved prescriptions.</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <div class="flex items-start gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-on-surface text-base mb-1">Daily Health Logs</h3>
-                                <p class="text-sm text-on-surface-variant leading-relaxed">
-                                    Holistic daily notes on sleep duration, emotional wellbeing, fetal kick counts, and contextual personal observations.
-                                </p>
+                        <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10 sm:col-span-2">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-on-surface text-sm mb-1">Daily Health Logs</h4>
+                                    <p class="text-xs text-on-surface-variant leading-relaxed">Holistic daily notes on sleep duration, emotional wellbeing, fetal kick counts, and contextual personal observations.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="mt-6 p-4 rounded-2xl bg-primary-fixed/20 border border-primary/15 text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                    <strong class="text-primary font-semibold">Non-Diagnostic Scope:</strong> All monitoring areas within MomSafe AI are designed for self-tracking, habit support, and doctor-patient communication. They do not claim medical-grade diagnostic precision and are not intended to substitute for clinical laboratory tests or specialized obstetric ultrasound.
-                </div>
-            </section>
-
-            <!-- Section 3: How MomSafe Works -->
-            <section class="reveal bg-surface-container-lowest rounded-3xl p-8 md:p-10 border border-outline/10 shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-2xl bg-primary-fixed/50 flex items-center justify-center text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                    </div>
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface">How MomSafe Works</h2>
-                </div>
-                <p class="text-base md:text-lg text-on-surface-variant leading-relaxed mb-6">
+        <!-- 4. “HOW MOMSAFE WORKS” VISUAL FLOW -->
+        <section id="how-it-works" class="max-w-6xl mx-auto px-6 py-14 md:py-20 border-b border-outline/10">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <div class="text-xs uppercase tracking-wider font-bold text-primary mb-1">Architecture &amp; Flow</div>
+                <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-on-surface">How MomSafe Works</h2>
+                <p class="text-sm sm:text-base text-on-surface-variant mt-3">
                     MomSafe AI connects daily biological measurements with actionable guidance through a streamlined five-stage pipeline:
                 </p>
+            </div>
 
-                <!-- Flowchart Step progression -->
-                <div class="space-y-4">
-                    <div class="flex items-start gap-4 p-4 rounded-2xl bg-surface-container-low border border-outline/10">
-                        <div class="w-9 h-9 rounded-full bg-primary text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">1</div>
-                        <div>
-                            <div class="text-xs uppercase tracking-wider text-primary font-bold mb-0.5">Stage One</div>
-                            <h3 class="font-semibold text-on-surface text-base mb-1">Health Data Collection</h3>
-                            <p class="text-sm text-on-surface-variant leading-relaxed">
-                                Key physiological indicators are captured through the MomSafe connected maternal health wearable or convenient manual entries (heart rate, SpO₂, skin temperature, HRV, sleep, and activity).
-                            </p>
+            <!-- Desktop Horizontal Process Nodes -->
+            <div class="hidden lg:grid grid-cols-5 gap-3.5 relative">
+                <!-- Step 1 -->
+                <div class="p-5 rounded-2xl bg-surface-container-lowest border border-outline/10 relative flex flex-col justify-between hover:border-primary/30 transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</span>
+                            <span class="text-[11px] font-semibold text-primary uppercase tracking-wider">Input</span>
                         </div>
+                        <h3 class="font-semibold text-sm text-on-surface mb-1.5">Wearable &amp; Health Data</h3>
+                        <p class="text-xs text-on-surface-variant leading-relaxed">
+                            Key physiological indicators captured through the MomSafe wearable or manual entries (heart rate, SpO₂, skin temperature, HRV, sleep, and activity).
+                        </p>
                     </div>
-
-                    <div class="flex items-start gap-4 p-4 rounded-2xl bg-surface-container-low border border-outline/10">
-                        <div class="w-9 h-9 rounded-full bg-primary text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">2</div>
-                        <div>
-                            <div class="text-xs uppercase tracking-wider text-primary font-bold mb-0.5">Stage Two</div>
-                            <h3 class="font-semibold text-on-surface text-base mb-1">Structured Tracking</h3>
-                            <p class="text-sm text-on-surface-variant leading-relaxed">
-                                Readings are organized chronologically, grouping vitals, symptoms, hydration, nutrition, and medication adherence into coherent daily records.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-start gap-4 p-4 rounded-2xl bg-surface-container-low border border-outline/10">
-                        <div class="w-9 h-9 rounded-full bg-primary text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">3</div>
-                        <div>
-                            <div class="text-xs uppercase tracking-wider text-primary font-bold mb-0.5">Stage Three</div>
-                            <h3 class="font-semibold text-on-surface text-base mb-1">AI-Assisted Interpretation</h3>
-                            <p class="text-sm text-on-surface-variant leading-relaxed">
-                                Intelligent software algorithms analyze trends relative to gestational week, transforming raw telemetry numbers into plain-language summaries and context.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-start gap-4 p-4 rounded-2xl bg-surface-container-low border border-outline/10">
-                        <div class="w-9 h-9 rounded-full bg-primary text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">4</div>
-                        <div>
-                            <div class="text-xs uppercase tracking-wider text-primary font-bold mb-0.5">Stage Four</div>
-                            <h3 class="font-semibold text-on-surface text-base mb-1">Supportive Alerts &amp; Guidance</h3>
-                            <p class="text-sm text-on-surface-variant leading-relaxed">
-                                When logged data indicates out-of-range patterns or missed essential doses, the system delivers educational prompts and advises when to seek clinical guidance.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-start gap-4 p-4 rounded-2xl bg-surface-container-low border border-outline/10">
-                        <div class="w-9 h-9 rounded-full bg-primary text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">5</div>
-                        <div>
-                            <div class="text-xs uppercase tracking-wider text-primary font-bold mb-0.5">Stage Five</div>
-                            <h3 class="font-semibold text-on-surface text-base mb-1">Healthcare Connectivity</h3>
-                            <p class="text-sm text-on-surface-variant leading-relaxed">
-                                Longitudinal summaries can be shared with consulting obstetricians and clinics, or used with local hospital directory features to locate accredited care.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Section 4: Wearable Health Monitoring -->
-            <section class="reveal bg-surface-container-lowest rounded-3xl p-8 md:p-10 border border-outline/10 shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-2xl bg-primary-fixed/50 flex items-center justify-center text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface">Connected Maternal Health Wearable</h2>
-                </div>
-                <p class="text-base md:text-lg text-on-surface-variant leading-relaxed mb-6">
-                    MomSafe AI has developed a connected maternal health wearable that tracks key physiological indicators such as heart rate, SpO₂, skin temperature, HRV, sleep, and activity. The wearable integrates with the MomSafe platform to help mothers and healthcare teams understand health trends between routine clinical visits.
-                </p>
-
-                <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10 space-y-4">
-                    <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-on-surface text-base mb-1">Continuous Physiological Indicator Tracking</h3>
-                            <p class="text-sm text-on-surface-variant leading-relaxed">
-                                The wearable continuously records vital markers—including resting pulse trends, oxygen levels, skin temperature, heart rate variability (HRV), and nocturnal sleep patterns—providing uninterrupted awareness across trimesters.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="h-px bg-outline/10 my-2"></div>
-
-                    <div class="flex items-start gap-3">
-                        <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                        </div>
-                        <div>
-                            <h3 class="font-semibold text-on-surface text-base mb-1">MomSafe Platform Integration</h3>
-                            <p class="text-sm text-on-surface-variant leading-relaxed">
-                                Logged wearable metrics sync directly with the MomSafe app, organizing continuous records alongside daily symptom logs, hydration goals, and medication adherence to provide a unified health summary.
-                            </p>
-                        </div>
+                    <div class="mt-4 pt-3 border-t border-outline/10 text-[11px] text-on-surface-variant font-medium flex items-center justify-between">
+                        <span>Stage 1</span>
+                        <span>&rarr;</span>
                     </div>
                 </div>
 
-                <div class="mt-4 p-4 rounded-2xl bg-surface-container-low text-xs md:text-sm text-on-surface-variant border border-outline/10">
-                    <strong class="text-primary font-semibold">Non-Diagnostic Scope:</strong> The MomSafe wearable solution is engineered as an everyday maternal wellness and health-tracking companion. It does not claim medical-grade accuracy, clinical validation, or regulatory diagnostic certification, and is designed to complement—not replace—professional medical care.
-                </div>
-            </section>
-
-            <!-- Section 5: AI-Assisted Maternal Support -->
-            <section class="reveal bg-surface-container-lowest rounded-3xl p-8 md:p-10 border border-outline/10 shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-2xl bg-primary-fixed/50 flex items-center justify-center text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <!-- Step 2 -->
+                <div class="p-5 rounded-2xl bg-surface-container-lowest border border-outline/10 relative flex flex-col justify-between hover:border-primary/30 transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">2</span>
+                            <span class="text-[11px] font-semibold text-primary uppercase tracking-wider">Storage</span>
+                        </div>
+                        <h3 class="font-semibold text-sm text-on-surface mb-1.5">Structured Tracking</h3>
+                        <p class="text-xs text-on-surface-variant leading-relaxed">
+                            Readings organized chronologically, grouping vitals, symptoms, hydration, nutrition, and medication adherence into coherent daily records.
+                        </p>
                     </div>
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface">AI-Assisted Maternal Support</h2>
+                    <div class="mt-4 pt-3 border-t border-outline/10 text-[11px] text-on-surface-variant font-medium flex items-center justify-between">
+                        <span>Stage 2</span>
+                        <span>&rarr;</span>
+                    </div>
                 </div>
-                <p class="text-base md:text-lg text-on-surface-variant leading-relaxed mb-6">
-                    Artificial intelligence in maternal health serves to structure complexity and offer supportive educational context. By analyzing trends across vitals, symptoms, and gestational age, AI assists mothers in understanding their bodies without overwhelming them.
-                </p>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <h3 class="font-semibold text-primary text-base mb-2">Pattern Organization</h3>
-                        <p class="text-xs md:text-sm text-on-surface-variant leading-relaxed">
+                <!-- Step 3 -->
+                <div class="p-5 rounded-2xl bg-surface-container-lowest border border-outline/10 relative flex flex-col justify-between hover:border-primary/30 transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</span>
+                            <span class="text-[11px] font-semibold text-primary uppercase tracking-wider">Analysis</span>
+                        </div>
+                        <h3 class="font-semibold text-sm text-on-surface mb-1.5">AI-Assisted Insights</h3>
+                        <p class="text-xs text-on-surface-variant leading-relaxed">
+                            Intelligent algorithms analyze trends relative to gestational week, transforming raw telemetry numbers into plain-language summaries and context.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-outline/10 text-[11px] text-on-surface-variant font-medium flex items-center justify-between">
+                        <span>Stage 3</span>
+                        <span>&rarr;</span>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="p-5 rounded-2xl bg-surface-container-lowest border border-outline/10 relative flex flex-col justify-between hover:border-primary/30 transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">4</span>
+                            <span class="text-[11px] font-semibold text-primary uppercase tracking-wider">Support</span>
+                        </div>
+                        <h3 class="font-semibold text-sm text-on-surface mb-1.5">Support &amp; Alerts</h3>
+                        <p class="text-xs text-on-surface-variant leading-relaxed">
+                            When data indicates out-of-range patterns or missed essential doses, the system delivers educational prompts and advises when to seek clinical guidance.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-outline/10 text-[11px] text-on-surface-variant font-medium flex items-center justify-between">
+                        <span>Stage 4</span>
+                        <span>&rarr;</span>
+                    </div>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="p-5 rounded-2xl bg-surface-container-lowest border border-outline/10 relative flex flex-col justify-between hover:border-primary/30 transition-all">
+                    <div>
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="w-7 h-7 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">5</span>
+                            <span class="text-[11px] font-semibold text-primary uppercase tracking-wider">Care</span>
+                        </div>
+                        <h3 class="font-semibold text-sm text-on-surface mb-1.5">Connected Care</h3>
+                        <p class="text-xs text-on-surface-variant leading-relaxed">
+                            Longitudinal summaries shared with consulting obstetricians and clinics, or used with local hospital directory features to locate accredited care.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-outline/10 text-[11px] text-on-surface-variant font-medium flex items-center justify-between">
+                        <span>Stage 5</span>
+                        <span class="text-primary font-bold">&check;</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile & Tablet Vertical Timeline -->
+            <div class="lg:hidden space-y-4 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-outline/15 pl-8">
+                <div class="relative bg-surface-container-lowest p-4 rounded-2xl border border-outline/10">
+                    <span class="absolute -left-[27px] top-4 w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">1</span>
+                    <h3 class="font-semibold text-sm text-on-surface mb-1">Wearable &amp; Health Data</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">Key physiological indicators captured through the MomSafe wearable or manual entries (heart rate, SpO₂, skin temperature, HRV, sleep, and activity).</p>
+                </div>
+
+                <div class="relative bg-surface-container-lowest p-4 rounded-2xl border border-outline/10">
+                    <span class="absolute -left-[27px] top-4 w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">2</span>
+                    <h3 class="font-semibold text-sm text-on-surface mb-1">Structured Tracking</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">Readings organized chronologically, grouping vitals, symptoms, hydration, nutrition, and medication adherence into coherent daily records.</p>
+                </div>
+
+                <div class="relative bg-surface-container-lowest p-4 rounded-2xl border border-outline/10">
+                    <span class="absolute -left-[27px] top-4 w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">3</span>
+                    <h3 class="font-semibold text-sm text-on-surface mb-1">AI-Assisted Insights</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">Intelligent algorithms analyze trends relative to gestational week, transforming raw telemetry numbers into plain-language summaries.</p>
+                </div>
+
+                <div class="relative bg-surface-container-lowest p-4 rounded-2xl border border-outline/10">
+                    <span class="absolute -left-[27px] top-4 w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">4</span>
+                    <h3 class="font-semibold text-sm text-on-surface mb-1">Support &amp; Alerts</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">When data indicates out-of-range patterns or missed essential doses, the system delivers educational prompts and advises clinical contact.</p>
+                </div>
+
+                <div class="relative bg-surface-container-lowest p-4 rounded-2xl border border-outline/10">
+                    <span class="absolute -left-[27px] top-4 w-6 h-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center">5</span>
+                    <h3 class="font-semibold text-sm text-on-surface mb-1">Connected Care</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">Longitudinal summaries shared with consulting obstetricians and clinics, or used with hospital directory features to locate care.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. WEARABLE SECTION -->
+        <section id="wearable" class="max-w-6xl mx-auto px-6 py-14 md:py-20 border-b border-outline/10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                <!-- Left Wearable Information -->
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-fixed/60 text-primary text-xs font-semibold tracking-wider uppercase border border-primary/15">
+                        <span class="w-2 h-2 rounded-full bg-primary"></span>
+                        HARDWARE &amp; SENSOR INTEGRATION
+                    </div>
+
+                    <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-on-surface leading-tight">
+                        Connected Maternal Health Wearable
+                    </h2>
+
+                    <p class="text-base text-on-surface-variant leading-relaxed">
+                        MomSafe AI has developed a connected maternal health wearable that tracks key physiological indicators such as heart rate, SpO₂, skin temperature, HRV, sleep, and activity. The wearable integrates with the MomSafe platform to help mothers and healthcare teams understand health trends between routine clinical visits.
+                    </p>
+
+                    <div class="space-y-4 pt-1">
+                        <div class="flex items-start gap-3.5">
+                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-sm text-on-surface">Continuous Physiological Indicator Tracking</h3>
+                                <p class="text-xs text-on-surface-variant mt-0.5 leading-relaxed">The wearable continuously records vital markers—including resting pulse trends, oxygen levels, skin temperature, HRV, and sleep patterns—providing uninterrupted awareness across trimesters.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3.5">
+                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-sm text-on-surface">MomSafe Platform Integration</h3>
+                                <p class="text-xs text-on-surface-variant mt-0.5 leading-relaxed">Logged wearable metrics sync directly with the MomSafe app, organizing continuous records alongside daily symptom logs, hydration goals, and medication adherence to provide a unified health summary.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3.5">
+                            <div class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-sm text-on-surface">Maternal Comfort &amp; Passive Logging</h3>
+                                <p class="text-xs text-on-surface-variant mt-0.5 leading-relaxed">Designed for skin-friendly daily wear, comfortable during sleep, work, and light prenatal exercise without clinical encumbrance.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10 text-xs text-on-surface-variant leading-relaxed">
+                        <strong class="text-primary font-semibold">Non-Diagnostic Scope:</strong> The MomSafe wearable solution is engineered as an everyday maternal wellness and health-tracking companion. It does not claim medical-grade accuracy, clinical validation, or regulatory diagnostic certification, and is designed to complement—not replace—professional medical care.
+                    </div>
+                </div>
+
+                <!-- Right Premium Visual Card (Monitored Indicators Dashboard) -->
+                <div class="lg:col-span-6">
+                    <div class="bg-surface-container-lowest rounded-3xl p-6 sm:p-8 border border-outline/15 shadow-sm space-y-6">
+                        <div class="flex items-center justify-between border-b border-outline/10 pb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                                </div>
+                                <div>
+                                    <div class="text-xs uppercase tracking-wider font-bold text-primary">Connected Sensor Node</div>
+                                    <div class="text-base font-bold text-on-surface">Monitored Physiological Indicators</div>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary-fixed/50 text-primary border border-primary/15">
+                                Sample Interface Preview
+                            </span>
+                        </div>
+
+                        <!-- 6 Indicators Visual Detail -->
+                        <div class="space-y-3.5">
+                            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline/10 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">HR</div>
+                                    <div>
+                                        <div class="text-xs font-semibold text-on-surface">Heart Rate</div>
+                                        <div class="text-[11px] text-on-surface-variant">Resting maternal pulse</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-bold text-on-surface font-display">76 <span class="text-xs font-normal text-on-surface-variant">bpm</span></div>
+                                    <div class="text-[10px] text-on-surface-variant font-medium">Sample reading</div>
+                                </div>
+                            </div>
+
+                            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline/10 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">O₂</div>
+                                    <div>
+                                        <div class="text-xs font-semibold text-on-surface">SpO₂</div>
+                                        <div class="text-[11px] text-on-surface-variant">Blood oxygen saturation</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-bold text-on-surface font-display">98%</div>
+                                    <div class="text-[10px] text-on-surface-variant font-medium">Sample reading</div>
+                                </div>
+                            </div>
+
+                            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline/10 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">°C</div>
+                                    <div>
+                                        <div class="text-xs font-semibold text-on-surface">Skin Temperature</div>
+                                        <div class="text-[11px] text-on-surface-variant">Continuous thermal trends</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-bold text-on-surface font-display">36.6 <span class="text-xs font-normal text-on-surface-variant">°C</span></div>
+                                    <div class="text-[10px] text-on-surface-variant font-medium">Sample reading</div>
+                                </div>
+                            </div>
+
+                            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline/10 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">HRV</div>
+                                    <div>
+                                        <div class="text-xs font-semibold text-on-surface">HRV (Heart Rate Variability)</div>
+                                        <div class="text-[11px] text-on-surface-variant">Autonomic nervous response</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-bold text-on-surface font-display">58 <span class="text-xs font-normal text-on-surface-variant">ms</span></div>
+                                    <div class="text-[10px] text-on-surface-variant font-medium">Sample reading</div>
+                                </div>
+                            </div>
+
+                            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline/10 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">ZZ</div>
+                                    <div>
+                                        <div class="text-xs font-semibold text-on-surface">Sleep Staging</div>
+                                        <div class="text-[11px] text-on-surface-variant">Nocturnal rest intervals</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-bold text-on-surface font-display">7h 45m</div>
+                                    <div class="text-[10px] text-on-surface-variant font-medium">Trend preview</div>
+                                </div>
+                            </div>
+
+                            <div class="p-3.5 rounded-xl bg-surface-container-low border border-outline/10 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">ACT</div>
+                                    <div>
+                                        <div class="text-xs font-semibold text-on-surface">Daily Activity</div>
+                                        <div class="text-[11px] text-on-surface-variant">Gentle prenatal movement</div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-bold text-on-surface font-display">4,820 <span class="text-xs font-normal text-on-surface-variant">steps</span></div>
+                                    <div class="text-[10px] text-on-surface-variant font-medium">Trend preview</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-surface-container text-[11px] text-on-surface-variant text-center leading-relaxed">
+                            <span class="font-semibold text-primary">Sample Interface Preview:</span> Values shown are illustrative interface examples and do not represent live patient telemetry, clinical interpretations, or medically recommended thresholds.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. AI SUPPORT SECTION (Subtle Dark-Green Tinted Section) -->
+        <section id="ai-support" class="bg-[#003527] text-white py-16 md:py-24">
+            <div class="max-w-6xl mx-auto px-6">
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-primary-fixed text-xs font-semibold tracking-wider uppercase mb-3 border border-white/10">
+                        <span class="w-2 h-2 rounded-full bg-primary-fixed"></span>
+                        INTELLIGENT MATERNAL SUPPORT
+                    </div>
+                    <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-white">
+                        AI-Assisted Maternal Support
+                    </h2>
+                    <p class="text-sm sm:text-base text-white/80 mt-3 leading-relaxed">
+                        Artificial intelligence in maternal health serves to structure complexity and offer supportive educational context. By analyzing trends across vitals, symptoms, and gestational age, AI assists mothers in understanding their bodies without overwhelming them.
+                    </p>
+                </div>
+
+                <!-- 3 Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="p-6 rounded-3xl bg-white/[0.06] border border-white/10 hover:border-primary-fixed/40 transition-all duration-200">
+                        <div class="w-10 h-10 rounded-2xl bg-primary-fixed/20 text-primary-fixed flex items-center justify-center mb-4">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                        </div>
+                        <h3 class="font-semibold text-lg text-white mb-2">Understand Health Trends</h3>
+                        <p class="text-xs sm:text-sm text-white/70 leading-relaxed">
                             Synthesizes disparate daily inputs—hydration, sleep, pulse, and symptoms—into cohesive summaries that highlight baseline variations over time.
                         </p>
                     </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <h3 class="font-semibold text-primary text-base mb-2">Trimester-Adapted Context</h3>
-                        <p class="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                            Delivers educational answers customized to whether a mother is in week 8, week 24, or week 36, answering common questions with precision.
+                    <div class="p-6 rounded-3xl bg-white/[0.06] border border-white/10 hover:border-primary-fixed/40 transition-all duration-200">
+                        <div class="w-10 h-10 rounded-2xl bg-primary-fixed/20 text-primary-fixed flex items-center justify-center mb-4">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        </div>
+                        <h3 class="font-semibold text-lg text-white mb-2">Organize Pregnancy Information</h3>
+                        <p class="text-xs sm:text-sm text-white/70 leading-relaxed">
+                            Delivers educational answers customized to gestational milestones (whether week 8, 24, or 36), providing structure to complex maternal information.
                         </p>
                     </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <h3 class="font-semibold text-primary text-base mb-2">Care Prompting</h3>
-                        <p class="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                            Encourages timely communication with medical practitioners whenever trends suggest unusual patterns or persistent changes.
+                    <div class="p-6 rounded-3xl bg-white/[0.06] border border-white/10 hover:border-primary-fixed/40 transition-all duration-200">
+                        <div class="w-10 h-10 rounded-2xl bg-primary-fixed/20 text-primary-fixed flex items-center justify-center mb-4">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <h3 class="font-semibold text-lg text-white mb-2">Support Continuity Between Visits</h3>
+                        <p class="text-xs sm:text-sm text-white/70 leading-relaxed">
+                            Encourages timely communication with medical practitioners whenever trends suggest unusual patterns or persistent symptom changes.
                         </p>
                     </div>
                 </div>
 
-                <div class="p-4 rounded-2xl bg-primary-fixed/20 border border-primary/20 text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                    <strong class="text-primary font-semibold">Important Principle:</strong> AI is an assistive organizer and educational companion; it does not replace a doctor, midwife, or certified obstetrician. AI never makes clinical diagnoses or prescribes medical treatments.
+                <!-- Principle Callout -->
+                <div class="max-w-3xl mx-auto p-5 rounded-2xl bg-white/10 border border-white/15 text-xs sm:text-sm text-white/90 text-center leading-relaxed">
+                    <strong class="text-primary-fixed font-semibold">Important Principle:</strong> AI is an assistive organizer and educational companion; it does not replace a doctor, midwife, or certified obstetrician. AI never makes clinical diagnoses or prescribes medical treatments.
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Section 6: Connected Care -->
-            <section class="reveal bg-surface-container-lowest rounded-3xl p-8 md:p-10 border border-outline/10 shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-2xl bg-primary-fixed/50 flex items-center justify-center text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                    </div>
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface">Connected Maternal Care</h2>
-                </div>
-                <p class="text-base md:text-lg text-on-surface-variant leading-relaxed mb-6">
-                    Maternal care thrives when data flows smoothly between expectant families and medical teams. MomSafe AI focuses on connected care infrastructure that unifies self-tracking with institutional healthcare resources:
+        <!-- 7. CONNECTED CARE SECTION -->
+        <section id="connected-care" class="max-w-6xl mx-auto px-6 py-14 md:py-20 border-b border-outline/10">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <div class="text-xs uppercase tracking-wider font-bold text-primary mb-1">Ecosystem &amp; Collaboration</div>
+                <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-on-surface">Connected Maternal Care</h2>
+                <p class="text-sm sm:text-base text-on-surface-variant mt-3">
+                    Maternal care thrives when data flows smoothly between expectant families and medical teams. MomSafe helps improve continuity and organization of health information between clinical visits.
                 </p>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <h3 class="font-semibold text-on-surface text-base mb-1.5">Doctor &amp; Clinic Information Sharing</h3>
-                        <p class="text-sm text-on-surface-variant leading-relaxed">
-                            Mothers can review clear, exportable vital summaries during prenatal checkups, giving obstetricians a transparent timeline of everyday observations.
+            <!-- Visual Relationship Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Visual Relationship Diagram -->
+                <div class="lg:col-span-5 bg-surface-container-lowest p-6 sm:p-8 rounded-3xl border border-outline/15 shadow-sm text-center space-y-4">
+                    <div class="text-xs font-bold uppercase tracking-wider text-primary">Care Relationship Model</div>
+
+                    <!-- Mother Node -->
+                    <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10 flex items-center justify-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">1</div>
+                        <div class="text-sm font-bold text-on-surface">Expectant Mother &amp; Family</div>
+                    </div>
+
+                    <!-- Arrow 1 -->
+                    <div class="flex items-center justify-center text-primary">
+                        <svg class="w-5 h-5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                        <span class="text-[11px] text-on-surface-variant ml-2 font-medium">Daily Vitals &amp; Symptoms</span>
+                    </div>
+
+                    <!-- MomSafe AI Center Platform -->
+                    <div class="p-5 rounded-2xl bg-primary text-white shadow-sm space-y-1">
+                        <div class="font-display font-bold text-base">MomSafe AI Platform</div>
+                        <div class="text-xs text-white/80">Structured Longitudinal Records &amp; Timeline</div>
+                    </div>
+
+                    <!-- Arrow 2 -->
+                    <div class="flex items-center justify-center text-primary">
+                        <svg class="w-5 h-5 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                        <span class="text-[11px] text-on-surface-variant ml-2 font-medium">Exportable Summaries &amp; Consult Context</span>
+                    </div>
+
+                    <!-- Doctor / Clinic Node -->
+                    <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10 flex items-center justify-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">2</div>
+                        <div class="text-sm font-bold text-on-surface">Healthcare Provider &amp; Clinic</div>
+                    </div>
+                </div>
+
+                <!-- Explanation Cards -->
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="p-6 rounded-3xl bg-surface-container-lowest border border-outline/10">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-base text-on-surface mb-1">Doctor &amp; Clinic Information Sharing</h3>
+                                <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                                    Mothers can review clear, exportable vital summaries during prenatal checkups, giving obstetricians a transparent timeline of everyday observations rather than relying on brief recollections.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 rounded-3xl bg-surface-container-lowest border border-outline/10">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0 mt-0.5">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-base text-on-surface mb-1">Hospital &amp; Facility Directory</h3>
+                                <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                                    Integrated facility navigation tools assist mothers in identifying nearby maternity hospitals, certified delivery centers, and emergency maternal clinics.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-surface-container-low border border-outline/10 text-xs text-on-surface-variant leading-relaxed">
+                        <strong class="text-primary font-semibold">Important Clinical Boundary:</strong> MomSafe does not provide automatic clinical diagnosis or automated emergency dispatch services. All clinical decisions remain strictly between patients and certified healthcare teams.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. WHO IT IS FOR -->
+        <section id="who-its-for" class="max-w-6xl mx-auto px-6 py-14 md:py-20 border-b border-outline/10">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <div class="text-xs uppercase tracking-wider font-bold text-primary mb-1">Target Audience</div>
+                <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-on-surface">Who MomSafe Is For</h2>
+                <p class="text-sm sm:text-base text-on-surface-variant mt-3">MomSafe AI is thoughtfully engineered for the complete maternal care circle:</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="p-7 rounded-3xl bg-surface-container-lowest border border-outline/10 flex flex-col justify-between hover:border-primary/30 transition-all duration-200">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                        </div>
+                        <h3 class="font-semibold text-lg text-on-surface mb-2">Pregnant Women</h3>
+                        <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                            Expectant mothers seeking reassurance, daily tracking clarity, stage-specific answers, and confidence throughout every week of pregnancy.
                         </p>
                     </div>
+                    <div class="mt-6 pt-4 border-t border-outline/10">
+                        <span class="text-xs font-semibold text-primary">Daily Confidence &amp; Clarity</span>
+                    </div>
+                </div>
 
-                    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline/10">
-                        <h3 class="font-semibold text-on-surface text-base mb-1.5">Hospital &amp; Facility Directory</h3>
-                        <p class="text-sm text-on-surface-variant leading-relaxed">
-                            Integrated facility location tools assist mothers in identifying nearby maternity hospitals, certified delivery centers, and emergency maternal clinics.
+                <!-- Card 2 -->
+                <div class="p-7 rounded-3xl bg-surface-container-lowest border border-outline/10 flex flex-col justify-between hover:border-primary/30 transition-all duration-200">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        </div>
+                        <h3 class="font-semibold text-lg text-on-surface mb-2">Families &amp; Caregivers</h3>
+                        <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                            Partners and family members who want to stay informed, support prenatal medication and hydration routines, and share peace of mind.
                         </p>
                     </div>
-                </div>
-            </section>
-
-            <!-- Section 7: Who MomSafe Is For -->
-            <section class="reveal bg-surface-container-lowest rounded-3xl p-8 md:p-10 border border-outline/10 shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-2xl bg-primary-fixed/50 flex items-center justify-center text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    <div class="mt-6 pt-4 border-t border-outline/10">
+                        <span class="text-xs font-semibold text-primary">Shared Care &amp; Awareness</span>
                     </div>
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface">Who MomSafe Is For</h2>
                 </div>
-                <p class="text-base md:text-lg text-on-surface-variant leading-relaxed mb-6">
-                    MomSafe AI is thoughtfully engineered for the complete maternal care circle:
-                </p>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10 flex flex-col justify-between">
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                            </div>
-                            <h3 class="font-semibold text-on-surface text-lg mb-2">Pregnant Women</h3>
-                            <p class="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                                Expectant mothers seeking reassurance, daily tracking clarity, stage-specific answers, and confidence throughout every week of pregnancy.
-                            </p>
+                <!-- Card 3 -->
+                <div class="p-7 rounded-3xl bg-surface-container-lowest border border-outline/10 flex flex-col justify-between hover:border-primary/30 transition-all duration-200">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                         </div>
+                        <h3 class="font-semibold text-lg text-on-surface mb-2">Healthcare Providers</h3>
+                        <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                            Obstetricians, midwives, and clinics that benefit when patients present structured, chronological health logs rather than scattered recollections.
+                        </p>
                     </div>
-
-                    <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10 flex flex-col justify-between">
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                            </div>
-                            <h3 class="font-semibold text-on-surface text-lg mb-2">Families &amp; Caregivers</h3>
-                            <p class="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                                Partners and family members who want to stay informed, support prenatal medication and hydration routines, and share peace of mind.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="bg-surface-container-low rounded-2xl p-6 border border-outline/10 flex flex-col justify-between">
-                        <div>
-                            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                            </div>
-                            <h3 class="font-semibold text-on-surface text-lg mb-2">Healthcare Providers</h3>
-                            <p class="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                                Obstetricians, midwives, and clinics that benefit when patients present structured, chronological health logs rather than scattered recollections.
-                            </p>
-                        </div>
+                    <div class="mt-6 pt-4 border-t border-outline/10">
+                        <span class="text-xs font-semibold text-primary">Structured Patient Context</span>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Section 8: Responsible Use -->
-            <section class="reveal bg-gradient-to-br from-primary-fixed/20 to-surface-container-low rounded-3xl p-8 md:p-10 border border-primary/20 shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        <!-- 9. RESPONSIBLE USE & MEDICAL DISCLAIMER (Clean Trust/Safety Panel) -->
+        <section id="responsible-use" class="max-w-6xl mx-auto px-6 py-14 md:py-20 border-b border-outline/10">
+            <div class="p-8 sm:p-10 rounded-3xl bg-surface-container-lowest border border-primary/20 shadow-sm space-y-6">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-2xl bg-primary flex items-center justify-center text-white shrink-0 shadow-sm">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface">Responsible Use &amp; Medical Disclaimer</h2>
+                    <div>
+                        <div class="text-xs uppercase tracking-wider font-bold text-primary">Trust &amp; Clinical Safety</div>
+                        <h2 class="font-display text-xl sm:text-2xl font-bold text-on-surface">Responsible Use &amp; Medical Disclaimer</h2>
+                    </div>
                 </div>
-                <div class="bg-surface-container-lowest/90 rounded-2xl p-6 border border-primary/10 space-y-4">
-                    <p class="text-base md:text-lg text-on-surface font-semibold leading-relaxed text-primary">
+
+                <div class="space-y-4 text-on-surface-variant text-sm leading-relaxed">
+                    <p class="text-base sm:text-lg font-semibold text-primary">
                         MomSafe AI is not a substitute for professional medical advice, diagnosis, treatment, or emergency services.
                     </p>
-                    <p class="text-sm text-on-surface-variant leading-relaxed">
+                    <p>
                         MomSafe AI is a digital supportive platform engineered to help mothers track and understand self-recorded vitals, symptoms, and healthy habits. It is not an emergency response dispatch system and cannot detect acute obstetric emergencies automatically.
                     </p>
-                    <div class="p-4 rounded-xl bg-error/10 border border-error/20 text-xs md:text-sm text-error leading-relaxed">
-                        <strong>When to Seek Emergency Medical Attention:</strong> If you experience severe continuous headaches, sudden visual disturbances or swelling of the face/hands, vaginal bleeding, acute abdominal or pelvic pain, leaking amniotic fluid, or a marked decrease in fetal movement, immediately contact your obstetrician, call emergency medical services (such as 112/108), or go directly to the nearest hospital emergency room.
+
+                    <div class="p-4 sm:p-5 rounded-2xl bg-error/10 border border-error/20 text-xs sm:text-sm text-error leading-relaxed space-y-1">
+                        <div class="font-bold">When to Seek Emergency Medical Attention:</div>
+                        <p>
+                            If you experience severe continuous headaches, sudden visual disturbances or swelling of the face/hands, vaginal bleeding, acute abdominal or pelvic pain, leaking amniotic fluid, or a marked decrease in fetal movement, immediately contact your obstetrician, call emergency medical services (such as 112/108), or go directly to the nearest hospital emergency room.
+                        </p>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Section 9: FAQ -->
-            <section class="reveal bg-surface-container-lowest rounded-3xl p-8 md:p-10 border border-outline/10 shadow-sm">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 rounded-2xl bg-primary-fixed/50 flex items-center justify-center text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <h2 class="font-display text-2xl md:text-3xl font-bold text-on-surface">Frequently Asked Questions</h2>
-                </div>
-                <p class="text-base text-on-surface-variant leading-relaxed mb-6">
-                    Common inquiries regarding maternal health monitoring, wearable data, and MomSafe AI’s supportive role.
-                </p>
+        <!-- 10. FAQ SECTION -->
+        <section id="faq" class="max-w-4xl mx-auto px-6 py-14 md:py-20 border-b border-outline/10">
+            <div class="text-center max-w-xl mx-auto mb-10">
+                <div class="text-xs uppercase tracking-wider font-bold text-primary mb-1">Questions &amp; Answers</div>
+                <h2 class="font-display text-2xl sm:text-3xl font-bold text-on-surface">Frequently Asked Questions</h2>
+                <p class="text-sm text-on-surface-variant mt-2">Common inquiries regarding maternal health monitoring, wearable data, and MomSafe AI’s supportive role.</p>
+            </div>
 
-                <div class="space-y-4">
-                    <!-- FAQ 1 -->
-                    <details class="group bg-surface-container-low rounded-2xl border border-outline/10 p-5 transition-all">
-                        <summary class="flex items-center justify-between cursor-pointer list-none">
-                            <h3 class="font-semibold text-on-surface text-base pr-4">What is maternal health monitoring, and why does it matter during pregnancy?</h3>
-                            <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
-                            Maternal health monitoring involves observing, recording, and tracking everyday maternal physiological indicators and wellness patterns—such as resting heart rate, blood oxygen levels, daily symptoms, temperature, and nutrition—throughout pregnancy. It helps mothers stay attuned to their bodies and maintains continuity of information between periodic prenatal appointments.
-                        </p>
-                    </details>
+            <!-- Accessible, Elegant Accordion List -->
+            <div class="space-y-3">
+                <!-- FAQ 1 -->
+                <details class="group bg-surface-container-lowest rounded-2xl border border-outline/10 p-5 hover:border-primary/20 transition-all">
+                    <summary class="flex items-center justify-between cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded-lg">
+                        <h3 class="font-semibold text-on-surface text-sm sm:text-base pr-4">What is maternal health monitoring, and why does it matter during pregnancy?</h3>
+                        <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </summary>
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
+                        Maternal health monitoring involves observing, recording, and tracking everyday maternal physiological indicators and wellness patterns—such as resting heart rate, blood oxygen levels, daily symptoms, temperature, and nutrition—throughout pregnancy. It helps mothers stay attuned to their bodies and maintains continuity of information between periodic prenatal appointments.
+                    </p>
+                </details>
 
-                    <!-- FAQ 2 -->
-                    <details class="group bg-surface-container-low rounded-2xl border border-outline/10 p-5 transition-all">
-                        <summary class="flex items-center justify-between cursor-pointer list-none">
-                            <h3 class="font-semibold text-on-surface text-base pr-4">Can MomSafe AI diagnose pregnancy conditions such as preeclampsia or gestational diabetes?</h3>
-                            <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
-                            No. MomSafe AI is an informational and health-tracking platform, not a medical diagnostic device or clinical diagnostic service. It does not diagnose, treat, or prevent medical conditions. Any out-of-range trends or concerns flagged in the app are meant to prompt structured discussion with your qualified healthcare provider.
-                        </p>
-                    </details>
+                <!-- FAQ 2 -->
+                <details class="group bg-surface-container-lowest rounded-2xl border border-outline/10 p-5 hover:border-primary/20 transition-all">
+                    <summary class="flex items-center justify-between cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded-lg">
+                        <h3 class="font-semibold text-on-surface text-sm sm:text-base pr-4">Can MomSafe AI diagnose pregnancy conditions such as preeclampsia or gestational diabetes?</h3>
+                        <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </summary>
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
+                        No. MomSafe AI is an informational and health-tracking platform, not a medical diagnostic device or clinical diagnostic service. It does not diagnose, treat, or prevent medical conditions. Any out-of-range trends or concerns flagged in the app are meant to prompt structured discussion with your qualified healthcare provider.
+                    </p>
+                </details>
 
-                    <!-- FAQ 3 -->
-                    <details class="group bg-surface-container-low rounded-2xl border border-outline/10 p-5 transition-all">
-                        <summary class="flex items-center justify-between cursor-pointer list-none">
-                            <h3 class="font-semibold text-on-surface text-base pr-4">How does MomSafe AI differ from a conventional pregnancy tracker?</h3>
-                            <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
-                            Standard pregnancy trackers typically focus on static week-by-week calendar milestones. MomSafe AI combines active daily symptom logging, non-invasive wearable biometric data, AI-assisted pattern organization, and connected care tools to give expectant mothers a continuous, holistic view of their health journey.
-                        </p>
-                    </details>
+                <!-- FAQ 3 -->
+                <details class="group bg-surface-container-lowest rounded-2xl border border-outline/10 p-5 hover:border-primary/20 transition-all">
+                    <summary class="flex items-center justify-between cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded-lg">
+                        <h3 class="font-semibold text-on-surface text-sm sm:text-base pr-4">How does MomSafe AI differ from a conventional pregnancy tracker?</h3>
+                        <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </summary>
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
+                        Standard pregnancy trackers typically focus on static week-by-week calendar milestones. MomSafe AI combines active daily symptom logging, non-invasive wearable biometric data, AI-assisted pattern organization, and connected care tools to give expectant mothers a continuous, holistic view of their health journey.
+                    </p>
+                </details>
 
-                    <!-- FAQ 4 -->
-                    <details class="group bg-surface-container-low rounded-2xl border border-outline/10 p-5 transition-all">
-                        <summary class="flex items-center justify-between cursor-pointer list-none">
-                            <h3 class="font-semibold text-on-surface text-base pr-4">What wearable health monitoring does MomSafe AI offer?</h3>
-                            <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
-                            MomSafe AI has developed a connected maternal health wearable that tracks key physiological indicators such as heart rate, SpO₂, skin temperature, HRV, sleep, and activity. The wearable integrates with the MomSafe platform to help mothers and healthcare teams understand health trends between routine clinical visits. In addition to wearable tracking, expectant mothers can also log non-invasive readings and daily symptoms directly in the MomSafe application.
-                        </p>
-                    </details>
+                <!-- FAQ 4 -->
+                <details class="group bg-surface-container-lowest rounded-2xl border border-outline/10 p-5 hover:border-primary/20 transition-all">
+                    <summary class="flex items-center justify-between cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded-lg">
+                        <h3 class="font-semibold text-on-surface text-sm sm:text-base pr-4">What wearable health monitoring does MomSafe AI offer?</h3>
+                        <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </summary>
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
+                        MomSafe AI has developed a connected maternal health wearable that tracks key physiological indicators such as heart rate, SpO₂, skin temperature, HRV, sleep, and activity. The wearable integrates with the MomSafe platform to help mothers and healthcare teams understand health trends between routine clinical visits. In addition to wearable tracking, expectant mothers can also log non-invasive readings and daily symptoms directly in the MomSafe application.
+                    </p>
+                </details>
 
-                    <!-- FAQ 5 -->
-                    <details class="group bg-surface-container-low rounded-2xl border border-outline/10 p-5 transition-all">
-                        <summary class="flex items-center justify-between cursor-pointer list-none">
-                            <h3 class="font-semibold text-on-surface text-base pr-4">How is my personal and pregnancy health data protected?</h3>
-                            <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
-                            MomSafe AI adheres to strict data privacy principles with encrypted data transmission, secure cloud infrastructure, and user-controlled data permissions. Your personal health logs and vital trends remain confidential and under your control. Learn more in our <a href="/privacy.html" class="text-primary font-medium hover:underline">Privacy Policy</a>.
-                        </p>
-                    </details>
+                <!-- FAQ 5 -->
+                <details class="group bg-surface-container-lowest rounded-2xl border border-outline/10 p-5 hover:border-primary/20 transition-all">
+                    <summary class="flex items-center justify-between cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded-lg">
+                        <h3 class="font-semibold text-on-surface text-sm sm:text-base pr-4">How is my personal and pregnancy health data protected?</h3>
+                        <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </summary>
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
+                        MomSafe AI adheres to strict data privacy principles with encrypted data transmission, secure cloud infrastructure, and user-controlled data permissions. Your personal health logs and vital trends remain confidential and under your control. Learn more in our <a href="/privacy.html" class="text-primary font-medium hover:underline">Privacy Policy</a>.
+                    </p>
+                </details>
 
-                    <!-- FAQ 6 -->
-                    <details class="group bg-surface-container-low rounded-2xl border border-outline/10 p-5 transition-all">
-                        <summary class="flex items-center justify-between cursor-pointer list-none">
-                            <h3 class="font-semibold text-on-surface text-base pr-4">Can I share my MomSafe health records with my doctor or OB-GYN?</h3>
-                            <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
-                            Yes. MomSafe AI allows mothers to organize their historical vital records, symptom logs, and medication adherence notes into clear, readable summaries that can be reviewed together with obstetricians, midwives, or clinics during routine prenatal checkups.
-                        </p>
-                    </details>
+                <!-- FAQ 6 -->
+                <details class="group bg-surface-container-lowest rounded-2xl border border-outline/10 p-5 hover:border-primary/20 transition-all">
+                    <summary class="flex items-center justify-between cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded-lg">
+                        <h3 class="font-semibold text-on-surface text-sm sm:text-base pr-4">Can I share my MomSafe health records with my doctor or OB-GYN?</h3>
+                        <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </summary>
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
+                        Yes. MomSafe AI allows mothers to organize their historical vital records, symptom logs, and medication adherence notes into clear, readable summaries that can be reviewed together with obstetricians, midwives, or clinics during routine prenatal checkups.
+                    </p>
+                </details>
 
-                    <!-- FAQ 7 -->
-                    <details class="group bg-surface-container-low rounded-2xl border border-outline/10 p-5 transition-all">
-                        <summary class="flex items-center justify-between cursor-pointer list-none">
-                            <h3 class="font-semibold text-on-surface text-base pr-4">What should I do if MomSafe AI highlights an unusual reading or I feel unwell?</h3>
-                            <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </summary>
-                        <p class="text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
-                            If you feel unwell or notice unusual readings, contact your physician or maternal care clinic promptly. If you experience severe symptoms like sudden severe headache, blurred vision, vaginal bleeding, acute abdominal pain, or diminished fetal movements, seek immediate in-person emergency medical care.
-                        </p>
-                    </details>
-                </div>
-            </section>
+                <!-- FAQ 7 -->
+                <details class="group bg-surface-container-lowest rounded-2xl border border-outline/10 p-5 hover:border-primary/20 transition-all">
+                    <summary class="flex items-center justify-between cursor-pointer list-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary rounded-lg">
+                        <h3 class="font-semibold text-on-surface text-sm sm:text-base pr-4">What should I do if MomSafe AI highlights an unusual reading or I feel unwell?</h3>
+                        <svg class="chevron w-5 h-5 text-primary shrink-0 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </summary>
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed mt-3 pt-3 border-t border-outline/10">
+                        If you feel unwell or notice unusual readings, contact your physician or maternal care clinic promptly. If you experience severe symptoms like sudden severe headache, blurred vision, vaginal bleeding, acute abdominal pain, or diminished fetal movements, seek immediate in-person emergency medical care.
+                    </p>
+                </details>
+            </div>
+        </section>
 
-            <!-- Internal Links Navigation Callout -->
-            <section class="reveal bg-surface-container-low rounded-3xl p-8 border border-outline/10 text-center">
-                <h2 class="font-display text-2xl font-bold text-on-surface mb-2">Explore MomSafe AI</h2>
-                <p class="text-sm text-on-surface-variant max-w-xl mx-auto mb-6">
+        <!-- 11. CALLOUT SECTION -->
+        <section class="max-w-6xl mx-auto px-6 py-14 md:py-20 text-center">
+            <div class="bg-surface-container-lowest p-8 sm:p-12 rounded-3xl border border-outline/15 shadow-sm max-w-3xl mx-auto space-y-4">
+                <h2 class="font-display text-2xl sm:text-3xl font-bold text-on-surface">Explore MomSafe AI</h2>
+                <p class="text-sm text-on-surface-variant max-w-lg mx-auto leading-relaxed">
                     Discover our story, mission, and platform features, or explore how connected maternal care supports families throughout pregnancy.
                 </p>
-                <div class="flex flex-wrap items-center justify-center gap-3">
-                    <a href="/landing.html" class="px-5 py-2.5 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary-container transition-colors shadow-sm">
+                <div class="flex flex-wrap items-center justify-center gap-3 pt-3">
+                    <a href="/landing.html" class="px-6 py-3 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary-container transition-all shadow-sm hover:-translate-y-0.5 active:translate-y-0">
                         Explore Platform
                     </a>
-                    <a href="/about" class="px-5 py-2.5 rounded-full bg-surface-container-lowest text-primary text-sm font-semibold border border-primary/20 hover:bg-primary-fixed/20 transition-colors">
+                    <a href="/about" class="px-6 py-3 rounded-full bg-surface-container-low text-primary text-sm font-semibold border border-primary/20 hover:bg-primary-fixed/20 transition-all hover:-translate-y-0.5 active:translate-y-0">
                         About MomSafe AI
                     </a>
-                    <a href="/login" class="px-5 py-2.5 rounded-full bg-surface-container-lowest text-on-surface-variant text-sm font-semibold border border-outline/20 hover:text-primary transition-colors">
+                    <a href="/login" class="px-6 py-3 rounded-full bg-surface-container-low text-on-surface-variant text-sm font-semibold border border-outline/20 hover:text-primary transition-all hover:-translate-y-0.5 active:translate-y-0">
                         Log In
                     </a>
                 </div>
-            </section>
-        </div>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-outline/10 bg-surface/50 mt-16 reveal">
-        <div class="max-w-5xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
+    <footer class="border-t border-outline/10 bg-surface/50 mt-10">
+        <div class="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="text-sm text-on-surface-variant text-center md:text-left">
                 <p>&copy; 2026 MomSafe AI. A product of MateraCare Technologies Private Limited.</p>
                 <p class="text-xs text-on-surface-variant/70 mt-0.5">All rights reserved.</p>
@@ -727,26 +1172,39 @@
         </div>
     </footer>
 
-    <!-- Reveal on scroll script matching MomSafe theme -->
+    <!-- Mobile Menu Script & Subtle Scroll Animation -->
     <script>
-        document.querySelectorAll('main section').forEach(function (el) { el.classList.add('reveal'); });
+        // Mobile Navigation Toggle
+        var menuBtn = document.getElementById('mobile-menu-btn');
+        var mobileMenu = document.getElementById('mobile-menu');
+        var iconBars = document.getElementById('menu-icon-bars');
+        var iconClose = document.getElementById('menu-icon-close');
+
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', function () {
+                var isExpanded = menuBtn.getAttribute('aria-expanded') === 'true';
+                menuBtn.setAttribute('aria-expanded', String(!isExpanded));
+                mobileMenu.classList.toggle('hidden');
+                iconBars.classList.toggle('hidden');
+                iconClose.classList.toggle('hidden');
+            });
+        }
+
+        // Lightweight reveal on scroll
         (function () {
-            if (!('IntersectionObserver' in window)) {
-                document.querySelectorAll('.reveal').forEach(function (e) { e.classList.add('visible'); });
-                return;
-            }
-            var io = new IntersectionObserver(function (entries) {
+            if (!('IntersectionObserver' in window)) return;
+            var observer = new IntersectionObserver(function (entries) {
                 entries.forEach(function (entry) {
                     if (entry.isIntersecting) {
-                        var delay = parseInt(entry.target.getAttribute('data-delay')) || 0;
-                        setTimeout(function () { entry.target.classList.add('visible'); }, delay);
-                        io.unobserve(entry.target);
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
                     }
                 });
-            }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-            document.querySelectorAll('.reveal').forEach(function (el, i) {
-                el.setAttribute('data-delay', String((i % 3) * 60));
-                io.observe(el);
+            }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+
+            document.querySelectorAll('main > section').forEach(function (el) {
+                el.classList.add('reveal');
+                observer.observe(el);
             });
         })();
     </script>
