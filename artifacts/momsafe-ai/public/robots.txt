@@ -8,6 +8,8 @@ Allow: /terms
 Allow: /terms.html
 Allow: /about
 Allow: /about.html
+Allow: /maternal-health-monitoring
+Allow: /maternal-health-monitoring.html
 
 # Disallow authenticated, dashboard, and private application routes
 Disallow: /dashboard
