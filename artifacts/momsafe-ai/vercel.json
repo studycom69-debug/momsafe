@@ -5,6 +5,7 @@
   "rewrites": [
     { "source": "/about", "destination": "/about.html" },
     { "source": "/maternal-health-monitoring", "destination": "/maternal-health-monitoring.html" },
+    { "source": "/pregnancy-monitoring", "destination": "/pregnancy-monitoring.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/(.*)", "destination": "/index.html" }

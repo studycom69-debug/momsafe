@@ -10,6 +10,8 @@ Allow: /about
 Allow: /about.html
 Allow: /maternal-health-monitoring
 Allow: /maternal-health-monitoring.html
+Allow: /pregnancy-monitoring
+Allow: /pregnancy-monitoring.html
 
 # Disallow authenticated, dashboard, and private application routes
 Disallow: /dashboard
