@@ -93,11 +93,46 @@ function Router() {
   if (needsOnboarding) {
     return (
       <Switch>
+        <Route path="/landing">
+          {() => {
+            window.location.replace("/landing.html");
+            return null;
+          }}
+        </Route>
+        <Route path="/terms">
+          {() => {
+            window.location.replace("/terms.html");
+            return null;
+          }}
+        </Route>
+        <Route path="/privacy">
+          {() => {
+            window.location.replace("/privacy.html");
+            return null;
+          }}
+        </Route>
         <Route path="/onboarding">
           {() => <Onboarding onComplete={() => setNeedsOnboarding(false)} />}
         </Route>
+        <Route path="/">
+          {() => {
+            const skip = sessionStorage.getItem("momsafe_skip_onboarding");
+            if (skip === "true") {
+              window.location.replace("/landing.html");
+              return null;
+            }
+            return <Redirect to="/onboarding" />;
+          }}
+        </Route>
         <Route>
-          <Redirect to="/onboarding" />
+          {() => {
+            const skip = sessionStorage.getItem("momsafe_skip_onboarding");
+            if (skip === "true") {
+              window.location.replace("/landing.html");
+              return null;
+            }
+            return <Redirect to="/onboarding" />;
+          }}
         </Route>
       </Switch>
     );

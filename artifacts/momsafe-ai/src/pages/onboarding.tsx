@@ -197,15 +197,80 @@ const PREGNANCY_TYPES = [
   { id: "Multiple", label: "Multiple (Triplets+)" },
 ];
 
-const INDIAN_CONDITIONS = [
-  { id: "Gestational Diabetes (GDM)", label: "Gestational Diabetes (GDM)", key: "gdm" },
-  { id: "Pre-eclampsia / High BP", label: "Pre-eclampsia / High BP", key: "preeclampsia" },
-  { id: "Pregnancy Anemia (Low Hb)", label: "Pregnancy Anemia (Low Hb)", key: "anemia" },
-  { id: "Thyroid (TSH Imbalance)", label: "Thyroid (TSH Imbalance)", key: "thyroid" },
-  { id: "Gestational Hypertension", label: "Gestational Hypertension", key: "preeclampsia" },
-  { id: "PCOS / PCOD History", label: "PCOS / PCOD History", key: "gdm" },
-  { id: "Asthma / Respiratory", label: "Asthma / Respiratory", key: "anemia" },
-  { id: "None of the above", label: "None of the above", key: "none" },
+interface IndianCondition {
+  id: string;
+  label: string;
+  shortTag: string;
+  simpleMeaning: string;
+  inPregnancy: string;
+  howToRelate: string;
+}
+
+const INDIAN_CONDITIONS: IndianCondition[] = [
+  {
+    id: "High BP / Hypertension",
+    label: "High BP / Gestational Hypertension",
+    shortTag: "Stress & Blood Pressure",
+    simpleMeaning: "Blood pressure readings higher than normal (usually above 130/85 mmHg) or frequent high tension/stress.",
+    inPregnancy: "Your blood flows with higher force; monitored closely to ensure smooth placental nourishment for baby.",
+    howToRelate: "Choose this if: You have high work/home stress, doctor noted high BP at clinic, or you take BP tablets.",
+  },
+  {
+    id: "Gestational Diabetes (GDM)",
+    label: "Gestational Diabetes (GDM)",
+    shortTag: "Sugar / Glucose Levels",
+    simpleMeaning: "Blood sugar levels higher than usual during pregnancy (detected via glucose tolerance test).",
+    inPregnancy: "Baby gets extra sugar if glucose is high; managed easily with millets, small meals, and gentle daily walking.",
+    howToRelate: "Choose this if: Your blood sugar test was borderline/high, family history of sugar, or advised diet control.",
+  },
+  {
+    id: "PCOS / PCOD History",
+    label: "PCOS / PCOD History",
+    shortTag: "Hormones & Periods",
+    simpleMeaning: "Past history of irregular menstrual cycles, hormonal imbalance, or small cysts in ovaries before pregnancy.",
+    inPregnancy: "You already achieved pregnancy! We monitor your insulin levels and weight gain to keep you energetic and healthy.",
+    howToRelate: "Choose this if: You had irregular periods before conceiving, took hormonal medicine, or had ultrasound showing PCOS.",
+  },
+  {
+    id: "Pregnancy Anemia (Low Hb)",
+    label: "Pregnancy Anemia (Low Iron / Hemoglobin)",
+    shortTag: "Low Hemoglobin & Iron",
+    simpleMeaning: "Low red blood cells or hemoglobin (Hb below 11 g/dL), meaning less oxygen carries through your body.",
+    inPregnancy: "Baby draws iron from you to grow; needs daily iron-folic acid tablets and foods like spinach, beetroot, and jaggery.",
+    howToRelate: "Choose this if: You feel easily exhausted, get dizzy when standing up, have pale nails, or doctor prescribed extra iron.",
+  },
+  {
+    id: "Thyroid (TSH Imbalance)",
+    label: "Thyroid Imbalance (Hypo / Hyperthyroid)",
+    shortTag: "Thyroid Medicine / TSH",
+    simpleMeaning: "Thyroid gland in your neck is sluggish (Hypothyroidism) or overactive, showing high or low TSH.",
+    inPregnancy: "Thyroid hormone is essential for baby's brain development; managed simply with a daily morning tablet (Thyronorm/Eltroxin).",
+    howToRelate: "Choose this if: You take a thyroid tablet every morning on an empty stomach, or doctor found TSH above 2.5–3.0.",
+  },
+  {
+    id: "Pre-eclampsia / Sudden Swelling",
+    label: "Pre-eclampsia (High BP + Swelling)",
+    shortTag: "High BP + Fluid Swelling",
+    simpleMeaning: "Elevated blood pressure combined with noticeable sudden swelling (water retention) in face, fingers, or feet.",
+    inPregnancy: "Requires routine urine protein tests and calm rest; prevents sudden strain on mother's liver and kidneys.",
+    howToRelate: "Choose this if: Your shoes or rings suddenly feel very tight, you have persistent swelling, or doctor noted protein in urine.",
+  },
+  {
+    id: "Asthma / Respiratory",
+    label: "Asthma / Breathing Sensitivity",
+    shortTag: "Wheezing & Inhaler Use",
+    simpleMeaning: "Sensitive airways that react to dust, cold air, or seasonal changes with coughing or wheezing.",
+    inPregnancy: "Safe pregnancy inhalers ensure ample oxygen reaches your baby. It is completely safe to continue doctor-approved inhalers.",
+    howToRelate: "Choose this if: You get chest tightness, seasonal wheezing, or keep an inhaler (e.g. Asthalin/Budecort) at home.",
+  },
+  {
+    id: "None of the above",
+    label: "None of the above (Routine Healthy Journey)",
+    shortTag: "Healthy Routine Pregnancy",
+    simpleMeaning: "No chronic illness, no daily prescription pills (other than routine prenatal vitamins and folic acid).",
+    inPregnancy: "Standard routine care with regular ultrasound scans, blood tests, and nutritious balanced Indian diet.",
+    howToRelate: "Choose this if: You have no ongoing medical issues and your health checkups have been completely normal.",
+  },
 ];
 
 const INDIAN_ALLERGIES = [
@@ -841,13 +906,14 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             <button
               type="button"
               onClick={() => {
-                toast.info("Draft progress saved.");
-                window.location.href = "/dashboard";
+                sessionStorage.setItem("momsafe_skip_onboarding", "true");
+                toast.info("Returning to landing page...");
+                window.location.href = "/landing.html";
               }}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <LogOut className="w-3.5 h-3.5 text-slate-400" />
-              Save & Exit
+              <span>Exit to Home</span>
             </button>
           </div>
         </header>
@@ -1416,29 +1482,56 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                       </button>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {INDIAN_CONDITIONS.map((cond) => {
                         const active = selectedConditions.includes(cond.id);
                         return (
-                          <button
+                          <div
                             key={cond.id}
-                            type="button"
                             onClick={() => toggleCondition(cond.id)}
-                            className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
+                            className={`p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
                               active
-                                ? "bg-emerald-50 border border-[#044735] text-[#044735] font-bold shadow-sm"
-                                : "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700"
+                                ? "bg-emerald-50/70 border-[#044735] shadow-sm"
+                                : "bg-white hover:bg-slate-50/80 border-slate-200/90 hover:border-slate-300"
                             }`}
                           >
-                            <span
-                              className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[10px] ${
-                                active ? "bg-[#044735] text-white" : "border border-slate-300"
-                              }`}
-                            >
-                              {active ? "✓" : ""}
-                            </span>
-                            {cond.label}
-                          </button>
+                            <div>
+                              <div className="flex items-start justify-between gap-2 mb-1.5">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors ${
+                                      active
+                                        ? "bg-[#044735] text-white"
+                                        : "border border-slate-300 bg-white"
+                                    }`}
+                                  >
+                                    {active ? "✓" : ""}
+                                  </span>
+                                  <span
+                                    className={`text-xs font-bold leading-tight ${
+                                      active ? "text-[#044735]" : "text-slate-800"
+                                    }`}
+                                  >
+                                    {cond.label}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">
+                                  {cond.shortTag}
+                                </span>
+                              </div>
+
+                              <p className="text-[11px] text-slate-600 leading-snug pl-6">
+                                {cond.simpleMeaning}
+                              </p>
+                            </div>
+
+                            <div className="mt-2.5 pt-2 border-t border-slate-100/90 pl-6">
+                              <p className="text-[10px] text-slate-500 leading-tight">
+                                <strong className="text-slate-700 font-semibold">How to relate: </strong>
+                                {cond.howToRelate}
+                              </p>
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
