@@ -141,6 +141,15 @@ function validateIndianPhone(phone: string): string | null {
   return null;
 }
 
+function validateWeight(val: string): string | null {
+  if (!val || !val.trim()) return null;
+  const num = Number(val);
+  if (isNaN(num)) return "Please enter a valid numeric weight in kg";
+  if (num < 30) return "Pre-pregnancy weight must be at least 30 kg";
+  if (num > 180) return "Pre-pregnancy weight must not exceed 180 kg";
+  return null;
+}
+
 function calculateDueDateFromWeek(currentWeek: number): {
   dueDateStr: string;
   formattedDate: string;
@@ -257,7 +266,12 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
   const [activeModal, setActiveModal] = useState<"dpdp" | "fogsi" | "emergency108" | "help" | null>(null);
 
   // AI Explainer State
-  const [aiExplainResult, setAiExplainResult] = useState<{ topic: string; text: string } | null>(null);
+  const [aiExplainResult, setAiExplainResult] = useState<{
+    topic: string;
+    text: string;
+    tips?: string[];
+    doctorNote?: string;
+  } | null>(null);
 
   // Form State: Starts completely clean and EMPTY (no hardcoded prefill)
   const [form, setForm] = useState({
@@ -294,6 +308,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
   const errors = {
     full_name: validateFullName(form.full_name, "Mother's Full Name"),
     age: validateAge(form.age),
+    weight: validateWeight(form.pre_preg_weight),
     guardian_name: validateFullName(form.guardian_name, "Guardian Name"),
     guardian_phone: validateIndianPhone(form.guardian_phone),
     doctor_name: validateOptionalDoctor(form.doctor_name),
@@ -354,7 +369,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     }
   };
 
-  // Call Supabase Edge Function 'care-assist' for AI explanation
+  // Call Supabase Edge Function 'care-assist' powered by OpenAI gpt-4o-mini
   const handleAskAI = async (topicKey: string, customQuery?: string) => {
     setIsExplaining(true);
     try {
@@ -369,7 +384,9 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
           body: JSON.stringify({
             action: "explain",
             topic: topicKey,
-            query: customQuery || topicKey,
+            raw_text: customQuery || topicKey,
+            context: "maternal_onboarding",
+            gestational_week: form.gestational_week,
           }),
         }
       );
@@ -377,8 +394,10 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
       const data = await res.json();
       if (data?.explanation) {
         setAiExplainResult({
-          topic: topicKey.replace(/_/g, " ").toUpperCase(),
+          topic: data.topic || topicKey.replace(/_/g, " ").toUpperCase(),
           text: data.explanation,
+          tips: data.practical_tips || [],
+          doctorNote: data.doctor_note || "",
         });
       } else {
         toast.info("AI Care Explainer: Aligned with FOGSI maternal safety guidelines.");
@@ -390,7 +409,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     }
   };
 
-  // Call Supabase Edge Function 'care-assist' to format clinical notes
+  // Call Supabase Edge Function 'care-assist' to format clinical notes via OpenAI
   const handleFormatNotes = async () => {
     if (!form.notes.trim()) {
       toast.error("Please enter a short doctor instruction or prescription note first.");
@@ -408,14 +427,16 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
           },
           body: JSON.stringify({
             action: "format_note",
-            text: form.notes,
+            raw_text: form.notes,
+            gestational_week: form.gestational_week,
           }),
         }
       );
 
       const data = await res.json();
-      if (data?.formatted) {
-        setForm((f) => ({ ...f, notes: data.formatted }));
+      const formatted = data?.formatted_note || data?.formatted;
+      if (formatted) {
+        setForm((f) => ({ ...f, notes: formatted }));
         toast.success("Standardized via MomSafe AI Care Engine");
       } else {
         // Fallback local formatter
@@ -440,6 +461,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
       setTouched({
         full_name: true,
         age: true,
+        weight: true,
         guardian_name: true,
         guardian_phone: true,
         doctor_name: true,
@@ -452,6 +474,10 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
       }
       if (errors.age) {
         toast.error(errors.age);
+        return;
+      }
+      if (errors.weight) {
+        toast.error(errors.weight);
         return;
       }
       if (errors.guardian_name) {
@@ -523,34 +549,36 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
       // 2. Insert/update into emergency_contacts table for emergency SOS/SMS loop
       if (form.guardian_name && form.guardian_phone) {
-        await supabase
-          .from("emergency_contacts")
-          .upsert(
-            {
-              user_id: user.id,
-              name: form.guardian_name.trim(),
-              relationship: form.guardian_relationship,
-              phone: form.guardian_phone.trim(),
-              is_primary: true,
-            },
-            { onConflict: "user_id, phone" }
-          )
-          .catch(() => {});
+        try {
+          await supabase
+            .from("emergency_contacts")
+            .upsert(
+              {
+                user_id: user.id,
+                name: form.guardian_name.trim(),
+                relationship: form.guardian_relationship,
+                phone: form.guardian_phone.trim(),
+                is_primary: true,
+              },
+              { onConflict: "user_id, phone" }
+            );
+        } catch (_) {}
       }
 
       // 3. Initialize privacy_settings
-      await supabase
-        .from("privacy_settings")
-        .upsert(
-          {
-            user_id: user.id,
-            share_with_doctor: true,
-            location_enabled: true,
-            ai_training: false,
-          },
-          { onConflict: "user_id" }
-        )
-        .catch(() => {});
+      try {
+        await supabase
+          .from("privacy_settings")
+          .upsert(
+            {
+              user_id: user.id,
+              share_with_doctor: true,
+              location_enabled: true,
+              ai_training: false,
+            },
+            { onConflict: "user_id" }
+          );
+      } catch (_) {}
 
       toast.success("Maternal profile set up successfully! Welcome to MomSafe.");
       if (onComplete) onComplete();
@@ -1024,44 +1052,90 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     </p>
                   </div>
 
-                  {/* Additional Clinical Rows: Blood Group, Weight & Pregnancy Type */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                  {/* Blood Group Quick-Selection Grid */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
                         <Droplet className="w-3.5 h-3.5 text-rose-500" />
-                        Blood Group
+                        Blood Group & Rh Type <span className="text-slate-400 font-normal text-[11px]">(Tap to choose)</span>
                       </label>
-                      <select
-                        value={form.blood_type}
-                        onChange={(e) => setForm({ ...form, blood_type: e.target.value })}
-                        className="w-full h-11 px-3 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735]"
-                      >
-                        <option value="">Select Blood Group</option>
-                        {BLOOD_GROUPS.map((bg) => (
-                          <option key={bg} value={bg}>
-                            {bg}
-                          </option>
-                        ))}
-                      </select>
+                      {form.blood_type && (
+                        <span className="text-[11px] font-bold text-[#044735] bg-emerald-100/70 border border-emerald-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          Selected: {form.blood_type}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                      {BLOOD_GROUPS.map((bg) => {
+                        const isSelected = form.blood_type === bg;
+                        const isRhNeg = bg.includes("-");
+                        return (
+                          <button
+                            key={bg}
+                            type="button"
+                            onClick={() => setForm({ ...form, blood_type: bg })}
+                            className={`h-11 rounded-xl text-xs font-bold transition-all flex flex-col items-center justify-center border ${
+                              isSelected
+                                ? "bg-[#044735] text-white border-[#044735] shadow-sm ring-2 ring-emerald-300/40"
+                                : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-100/60"
+                            }`}
+                          >
+                            <span className="text-sm leading-none">{bg}</span>
+                            <span className={`text-[9px] font-medium mt-0.5 ${isSelected ? "text-emerald-200" : "text-slate-400"}`}>
+                              {isRhNeg ? "Rh -" : "Rh +"}
+                            </span>
+                          </button>
+                        );
+                      })}
                     </div>
 
+                    {form.blood_type && form.blood_type.includes("-") && (
+                      <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/70 text-amber-900 text-[11px] flex items-start gap-2">
+                        <Info className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                        <span>
+                          <strong>Rh-Negative Factor Noted:</strong> FOGSI guidelines recommend scheduling an indirect Coombs test and Anti-D immunoglobulin counseling at Week 28.
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Pre-Pregnancy Weight & Pregnancy Type Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
-                        <Scale className="w-3.5 h-3.5 text-slate-400" />
-                        Pre-Pregnancy Weight
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide flex items-center gap-1">
+                          <Scale className="w-3.5 h-3.5 text-slate-400" />
+                          Pre-Pregnancy Weight <span className="text-slate-400 font-normal">(30 – 180 kg)</span>
+                        </label>
+                        {form.pre_preg_weight && Number(form.pre_preg_weight) >= 30 && Number(form.pre_preg_weight) <= 180 && (
+                          <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                            Valid metric
+                          </span>
+                        )}
+                      </div>
                       <div className="relative">
                         <input
                           type="number"
                           min="30"
                           max="180"
+                          step="0.5"
                           value={form.pre_preg_weight}
                           onChange={(e) => setForm({ ...form, pre_preg_weight: e.target.value })}
+                          onBlur={() => setTouched((t) => ({ ...t, weight: true }))}
                           placeholder="e.g. 58"
-                          className="w-full h-11 px-3.5 pr-8 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735]"
+                          className={`w-full h-11 px-3.5 pr-10 rounded-xl border text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all ${
+                            touched.weight && errors.weight
+                              ? "border-rose-300 bg-rose-50/20"
+                              : "border-slate-200"
+                          }`}
                         />
-                        <span className="absolute right-3 top-3.5 text-xs text-slate-400">kg</span>
+                        <span className="absolute right-3.5 top-3.5 text-xs font-semibold text-slate-400">kg</span>
                       </div>
+                      {touched.weight && errors.weight && (
+                        <p className="text-xs text-rose-500 mt-1">{errors.weight}</p>
+                      )}
                     </div>
 
                     <div>
@@ -1787,6 +1861,83 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                 className="px-5 py-2.5 rounded-xl bg-[#044735] text-white text-xs font-bold hover:bg-[#013c2c] transition-colors"
               >
                 Close Document
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* AI Guidance Explainer Modal (OpenAI gpt-4o-mini powered) */}
+      {aiExplainResult && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-50/60 to-teal-50/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#044735] flex items-center justify-center text-white shadow-sm">
+                  <Sparkles className="w-5 h-5 text-emerald-300" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">
+                    {aiExplainResult.topic}
+                  </h3>
+                  <span className="text-[11px] text-emerald-700 font-semibold block">
+                    MomSafe AI Guidance • FOGSI / ICMR Aligned
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAiExplainResult(null)}
+                className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-slate-800 flex items-center justify-center transition-colors shadow-sm"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 overflow-y-auto space-y-4 text-xs text-slate-700 leading-relaxed">
+              <p className="text-sm font-medium text-slate-800 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200/70">
+                {aiExplainResult.text}
+              </p>
+
+              {aiExplainResult.tips && aiExplainResult.tips.length > 0 && (
+                <div className="space-y-2 pt-1">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Practical Care Tips for Mother
+                  </h4>
+                  <div className="space-y-1.5">
+                    {aiExplainResult.tips.map((tip, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-2 p-2.5 rounded-xl bg-emerald-50/50 border border-emerald-100/80 text-slate-800"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-[#044735] shrink-0 mt-0.5" />
+                        <span className="text-xs">{tip}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {aiExplainResult.doctorNote && (
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200/60 text-amber-900 text-xs flex items-start gap-2">
+                  <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <span>{aiExplainResult.doctorNote}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400">
+                Powered by MomSafe Clinical Engine
+              </span>
+              <button
+                type="button"
+                onClick={() => setAiExplainResult(null)}
+                className="px-5 py-2.5 rounded-xl bg-[#044735] text-white text-xs font-bold hover:bg-[#013c2c] transition-colors"
+              >
+                Understood, Close
               </button>
             </div>
           </div>
