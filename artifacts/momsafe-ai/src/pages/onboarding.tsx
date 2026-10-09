@@ -9,7 +9,6 @@ import {
   ChevronLeft,
   Loader2,
   Sparkles,
-  RotateCcw,
   ShieldCheck,
   Check,
   Lock,
@@ -28,20 +27,55 @@ import {
   Phone,
   Minus,
   Plus,
+  Mail,
+  BookOpen,
 } from "lucide-react";
 
 function validateName(name: string): string | null {
   const v = name.trim();
-  if (!v) return "Please enter your full name";
-  if (v.length < 2) return "Name must be at least 2 characters";
+  if (!v) return "Please enter your full legal name";
+  if (v.length < 4) return "Name must be at least 4 characters";
   if (v.length > 80) return "Name must be under 80 characters";
-  if (/\d/.test(v)) return "Name should not contain numbers";
-  const bad = /(.)\1{3,}/;
-  if (bad.test(v)) return "Name looks invalid (too many repeated characters)";
-  const re = /^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ'’\-\s.]{1,79}$/;
-  if (!re.test(v)) return "Please enter letters only";
+  if (/\d/.test(v)) return "Name cannot contain numbers";
+  if (/[!@#$%^&*()_=+{}[\]:;"'<>,?/~`]/.test(v)) return "Name cannot contain special characters";
+
   const words = v.split(/\s+/).filter(Boolean);
-  if (words.length < 2) return "Please enter first and last name";
+  if (words.length < 2) return "Please enter both First Name and Last Name";
+
+  for (const word of words) {
+    if (word.length < 2) return "Each name must be at least 2 characters long";
+
+    // Repeated identical character check (e.g. "ww", "zzz", "aaaa")
+    if (/^(.)\1+$/i.test(word)) {
+      return `"${word}" is not a valid real name`;
+    }
+
+    // Must contain at least one vowel
+    if (!/[aeiouy]/i.test(word)) {
+      return `"${word}" is missing vowels and appears to be random keyboard letters`;
+    }
+
+    // Streak of 3+ identical letters
+    if (/(.)\1{2,}/i.test(word)) {
+      return "Name contains too many repeated consecutive letters";
+    }
+
+    // Known spam/keyboard-mash tokens
+    const lower = word.toLowerCase();
+    const banned = [
+      "xxx", "asdf", "qwer", "zxcv", "hjkl", "test", "demo", "dummy",
+      "null", "none", "fake", "user", "admin", "temp", "aswhu", "ww", "sw"
+    ];
+    if (banned.some((b) => lower === b || (b.length >= 4 && lower.includes(b)))) {
+      return "Please enter an authentic legal name";
+    }
+  }
+
+  const validPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['’\-][A-Za-zÀ-ÖØ-öø-ÿ]+)*(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['’\-][A-Za-zÀ-ÖØ-öø-ÿ]+)*)+$/;
+  if (!validPattern.test(v)) {
+    return "Please enter a valid full name (letters only)";
+  }
+
   return null;
 }
 
@@ -51,6 +85,23 @@ function validateAge(age: string): string | null {
   if (!Number.isFinite(n) || !Number.isInteger(n)) return "Age must be a whole number";
   if (n < 16) return "Age must be at least 16";
   if (n > 55) return "Age must be 55 or under";
+  return null;
+}
+
+function validateGuardianName(name: string): string | null {
+  const v = name.trim();
+  if (!v) return "Please enter guardian's name";
+  if (v.length < 2) return "Guardian name must be at least 2 characters";
+  if (/\d/.test(v)) return "Guardian name cannot contain numbers";
+  if (/^(.)\1+$/i.test(v) || !/[aeiouy]/i.test(v)) return "Please enter a valid guardian name";
+  return null;
+}
+
+function validateIndianPhone(phone: string): string | null {
+  const cleaned = phone.replace(/[\s\-\(\)]/g, "");
+  if (!cleaned) return "Please enter guardian's mobile number";
+  const re = /^(?:\+91|91|0)?[6-9]\d{9}$/;
+  if (!re.test(cleaned)) return "Please enter a valid 10-digit Indian mobile number (e.g. +91 98765 43210)";
   return null;
 }
 
@@ -82,9 +133,9 @@ function calculateDueDateFromWeek(currentWeek: number): {
 }
 
 function getWeekMilestone(week: number): string {
-  if (week <= 8) return "Early embryonic stage: Vital organs and neural tube forming.";
-  if (week <= 12) return "End of 1st Trimester: Baby's heartbeat is clearly detectable.";
-  if (week <= 16) return "Week 16: Rapid growth, baby's facial expressions developing.";
+  if (week <= 8) return "Early embryonic stage: Vital neural tube and heart chambers forming.";
+  if (week <= 12) return "End of 1st Trimester: Baby's heartbeat is clearly detectable; organs formed.";
+  if (week <= 16) return "Week 16: Rapid growth, baby's facial expressions and movement developing.";
   if (week <= 20) return "Week 20: Mid-pregnancy anatomy scan milestone; first kicks felt.";
   if (week <= 24) return "Week 24: Baby's hearing formed; lungs producing surfactant.";
   if (week <= 28) return "Week 28: Third trimester begins; baby opens eyes and recognizes maternal voice.";
@@ -152,7 +203,6 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [saving, setSaving] = useState(false);
   const [isFormatting, setIsFormatting] = useState(false);
-  const [originalNotes, setOriginalNotes] = useState<string | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [lastSavedTime, setLastSavedTime] = useState<string>("Just now");
   const [activeModal, setActiveModal] = useState<"dpdp" | "fogsi" | "emergency108" | "help" | null>(null);
@@ -189,14 +239,11 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     return "First Trimester";
   }, [form.gestational_week]);
 
-  const progressPercent = useMemo(
-    () => Math.min(100, Math.max(5, Math.round((form.gestational_week / 40) * 100))),
-    [form.gestational_week]
-  );
-
   const errors = {
     full_name: validateName(form.full_name),
     age: validateAge(form.age),
+    guardian_name: validateGuardianName(form.guardian_name),
+    guardian_phone: validateIndianPhone(form.guardian_phone),
   };
 
   // If user already has a completed profile, redirect to dashboard
@@ -257,13 +304,21 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
   const handleNext = () => {
     if (step === 1) {
-      setTouched({ full_name: true, age: true });
+      setTouched({ full_name: true, age: true, guardian_name: true, guardian_phone: true });
       if (errors.full_name) {
         toast.error(errors.full_name);
         return;
       }
       if (errors.age) {
-        toast.error("Please enter a valid age.");
+        toast.error(errors.age);
+        return;
+      }
+      if (errors.guardian_name) {
+        toast.error(errors.guardian_name);
+        return;
+      }
+      if (errors.guardian_phone) {
+        toast.error(errors.guardian_phone);
         return;
       }
       setStep(2);
@@ -282,11 +337,10 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
   const handleFormatNotes = async () => {
     if (!form.notes.trim()) {
-      toast.error("Please write a short doctor instruction first.");
+      toast.error("Please write a doctor directive or advice note first.");
       return;
     }
     setIsFormatting(true);
-    setOriginalNotes(form.notes);
     try {
       await new Promise((r) => setTimeout(r, 350));
       let text = form.notes.trim();
@@ -296,7 +350,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
       text = text.replace(/(^\s*|[.!?]\s+)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
       if (!/[.!?]$/.test(text)) text += ".";
       setForm((f) => ({ ...f, notes: `Doctor's instructions: ${text}` }));
-      toast.success("Standardized clinical notation");
+      toast.success("Standardized clinical triage notation");
     } catch {
       toast.error("Unable to format notes.");
     } finally {
@@ -316,7 +370,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
       const allergiesStr = selectedAllergies.length > 0 ? selectedAllergies.join(", ") : null;
       const emergencyContactStr = `${form.guardian_name.trim()} (${form.guardian_relationship}) • ${form.guardian_phone.trim()}`;
 
-      // 1. Update public.users
+      // 1. Update public.users table (The single source of truth for the AI Guidance & Risk Engines)
       const { error: userError } = await supabase.from("users").upsert(
         {
           id: user.id,
@@ -338,7 +392,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
       if (userError) throw userError;
 
-      // 2. Insert/update into emergency_contacts table
+      // 2. Insert into emergency_contacts table for granular emergency SMS/SOS lookups
       if (form.guardian_name && form.guardian_phone) {
         await supabase.from("emergency_contacts").upsert(
           {
@@ -352,7 +406,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
         ).catch(() => {});
       }
 
-      // 3. Initialize privacy_settings
+      // 3. Initialize privacy settings
       await supabase.from("privacy_settings").upsert(
         {
           user_id: user.id,
@@ -363,7 +417,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
         { onConflict: "user_id" }
       ).catch(() => {});
 
-      toast.success("Maternal profile set up successfully! Welcome to MomSafe.");
+      toast.success("Maternal profile set up successfully! AI companion is now calibrated.");
       if (onComplete) onComplete();
       setTimeout(() => {
         window.location.href = "/dashboard";
@@ -381,7 +435,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
       <div className="max-w-6xl w-full bg-white rounded-3xl shadow-[0_20px_50px_-15px_rgba(1,60,44,0.08)] border border-slate-200/70 overflow-hidden flex flex-col my-auto transition-all">
         {/* Top Navbar: Clean, Spacious, Official Favicon Logo */}
         <header className="px-6 sm:px-10 py-5 border-b border-slate-100 bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Official MomSafe Logo (Exact Favicon from /favicon.svg) */}
+          {/* Official Favicon Logo with clean text */}
           <div className="flex items-center gap-3 shrink-0">
             <img
               src="/favicon.svg"
@@ -671,7 +725,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                   DPDP Act 2023 & ABDM Compliant
                 </p>
                 <p className="text-slate-500 text-[11px] mt-0.5">
-                  End-to-end encrypted health data stored on Indian servers.
+                  End-to-end encrypted health data stored securely on Indian servers.
                 </p>
               </div>
             </div>
@@ -746,9 +800,13 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                         max="55"
                         value={form.age}
                         onChange={(e) => setForm({ ...form, age: e.target.value })}
+                        onBlur={() => setTouched((t) => ({ ...t, age: true }))}
                         placeholder="28"
                         className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all"
                       />
+                      {touched.age && errors.age && (
+                        <p className="text-xs text-rose-500 mt-1">{errors.age}</p>
+                      )}
                     </div>
                   </div>
 
@@ -867,7 +925,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                   {/* Emergency Guardian Contact */}
                   <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
                     <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                      Emergency Guardian / Partner Loop
+                      Emergency Guardian / Partner Loop <span className="text-rose-500">*</span>
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <div>
@@ -875,29 +933,50 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                           type="text"
                           value={form.guardian_name}
                           onChange={(e) => setForm({ ...form, guardian_name: e.target.value })}
+                          onBlur={() => setTouched((t) => ({ ...t, guardian_name: true }))}
                           placeholder="Guardian Name"
-                          className="w-full h-10 px-3 rounded-lg border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:border-[#044735]"
+                          className={`w-full h-10 px-3 rounded-lg border text-xs text-slate-900 bg-white focus:outline-none focus:border-[#044735] ${
+                            touched.guardian_name && errors.guardian_name
+                              ? "border-rose-300"
+                              : "border-slate-200"
+                          }`}
                         />
+                        {touched.guardian_name && errors.guardian_name && (
+                          <p className="text-[10px] text-rose-500 mt-1">{errors.guardian_name}</p>
+                        )}
                       </div>
                       <div>
-                        <input
-                          type="text"
+                        <select
                           value={form.guardian_relationship}
                           onChange={(e) =>
                             setForm({ ...form, guardian_relationship: e.target.value })
                           }
-                          placeholder="Relationship (e.g. Husband)"
                           className="w-full h-10 px-3 rounded-lg border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:border-[#044735]"
-                        />
+                        >
+                          <option value="Husband">Husband / Partner</option>
+                          <option value="Mother">Mother</option>
+                          <option value="Father">Father</option>
+                          <option value="Sister">Sister</option>
+                          <option value="Brother">Brother</option>
+                          <option value="Relative / Friend">Relative / Friend</option>
+                        </select>
                       </div>
                       <div>
                         <input
                           type="text"
                           value={form.guardian_phone}
                           onChange={(e) => setForm({ ...form, guardian_phone: e.target.value })}
+                          onBlur={() => setTouched((t) => ({ ...t, guardian_phone: true }))}
                           placeholder="+91 98765 43210"
-                          className="w-full h-10 px-3 rounded-lg border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:border-[#044735]"
+                          className={`w-full h-10 px-3 rounded-lg border text-xs text-slate-900 bg-white focus:outline-none focus:border-[#044735] ${
+                            touched.guardian_phone && errors.guardian_phone
+                              ? "border-rose-300"
+                              : "border-slate-200"
+                          }`}
                         />
+                        {touched.guardian_phone && errors.guardian_phone && (
+                          <p className="text-[10px] text-rose-500 mt-1">{errors.guardian_phone}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1096,13 +1175,13 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div className="p-3 rounded-xl bg-white border border-slate-200/80">
-                        <span className="text-slate-400 text-[11px] block">Calculated Due Date</span>
+                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Calculated Due Date</span>
                         <span className="font-bold text-slate-800 mt-0.5 block">
                           {formattedDate} ({daysRemaining} days remaining)
                         </span>
                       </div>
                       <div className="p-3 rounded-xl bg-white border border-slate-200/80">
-                        <span className="text-slate-400 text-[11px] block">Doctor & Hospital</span>
+                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Doctor & Hospital</span>
                         <span className="font-bold text-slate-800 mt-0.5 block truncate">
                           {form.doctor_name} • {form.hospital}
                         </span>
@@ -1250,89 +1329,180 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
           >
             Emergency 108 Loop
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveModal("help")}
+            className="hover:text-slate-800 underline transition-colors"
+          >
+            Support
+          </button>
         </div>
       </footer>
 
-      {/* Info Modals */}
+      {/* Comprehensive Document Reader Modals */}
       {activeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 relative">
-            <button
-              type="button"
-              onClick={() => setActiveModal(null)}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100"
-            >
-              <X className="w-4 h-4" />
-            </button>
-
-            {activeModal === "dpdp" && (
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#044735] flex items-center justify-center mb-3">
-                  <Lock className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden relative">
+            {/* Modal Header */}
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#044735] flex items-center justify-center font-bold">
+                  {activeModal === "dpdp" && <Lock className="w-5 h-5" />}
+                  {activeModal === "fogsi" && <ShieldCheck className="w-5 h-5" />}
+                  {activeModal === "emergency108" && <Zap className="w-5 h-5 text-amber-500" />}
+                  {activeModal === "help" && <Mail className="w-5 h-5" />}
                 </div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Digital Personal Data Protection (DPDP) Act 2023 & ABDM
-                </h3>
-                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  MomSafe AI adheres strictly to India's DPDP Act 2023 and Ayushman Bharat Digital Mission (ABDM) standards. All electronic health records and vitals are encrypted with AES-256 and hosted on secure Indian cloud infrastructure. Data is never shared with third-party advertisers.
-                </p>
-              </div>
-            )}
-
-            {activeModal === "fogsi" && (
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#044735] flex items-center justify-center mb-3">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900">
-                  FOGSI & ICMR Clinical Guidelines
-                </h3>
-                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  Our clinical triage alerts follow clinical recommendations formulated by the Federation of Obstetric and Gynaecological Societies of India (FOGSI) and the Indian Council of Medical Research (ICMR). Thresholds for gestational hypertension (&gt;140/90 mmHg), anemia (Hb &lt;11 g/dL), and gestational diabetes are calibrated to Indian maternal cohorts.
-                </p>
-              </div>
-            )}
-
-            {activeModal === "emergency108" && (
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900">
-                  National 108 Emergency Ambulance & Guardian SOS Loop
-                </h3>
-                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  During an acute maternal crisis (e.g., eclampsia warning, critical BP spike, or absent fetal movements), MomSafe AI triggers an automated emergency loop. It transmits real-time high-priority SMS notifications with GPS coordinates to your registered family guardian and provides one-touch integration with local 108 Emergency Medical Services.
-                </p>
-              </div>
-            )}
-
-            {activeModal === "help" && (
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#044735] flex items-center justify-center mb-3">
-                  <HelpCircle className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900">
-                  MomSafe Care Assistance
-                </h3>
-                <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  Have questions about your intake setup or sensor pairing? Our maternal care team is available to assist you.
-                </p>
-                <div className="mt-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                  <p className="font-bold text-slate-800">Support Availability: 24/7 Priority Emergency Care</p>
-                  <p className="text-slate-600 mt-1">Helpline: 1800-MOMSAFE (Toll-Free, India)</p>
-                  <p className="text-slate-500 mt-0.5">Email: care@momsafe.health</p>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">
+                    {activeModal === "dpdp" && "DPDP Act 2023 & ABDM Health Privacy"}
+                    {activeModal === "fogsi" && "FOGSI & ICMR Clinical Obstetric Standards"}
+                    {activeModal === "emergency108" && "National 108 Emergency & SOS Protocol"}
+                    {activeModal === "help" && "MomSafe AI Care Support"}
+                  </h3>
+                  <span className="text-[11px] text-slate-500">
+                    {activeModal === "dpdp" && "Official Data Protection Policy • Version 2026.1"}
+                    {activeModal === "fogsi" && "Clinical Practice Guidelines • Evidence-Based Care"}
+                    {activeModal === "emergency108" && "Emergency Medical Escalation Specification"}
+                    {activeModal === "help" && "Maternal Navigation Team"}
+                  </span>
                 </div>
               </div>
-            )}
 
-            <button
-              type="button"
-              onClick={() => setActiveModal(null)}
-              className="mt-5 w-full py-2.5 rounded-xl bg-[#044735] text-white text-xs font-semibold hover:bg-[#013c2c] transition-colors"
-            >
-              Understood
-            </button>
+              <button
+                type="button"
+                onClick={() => setActiveModal(null)}
+                className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-slate-800 flex items-center justify-center transition-colors shadow-sm"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="p-6 sm:p-8 overflow-y-auto space-y-6 text-xs text-slate-600 leading-relaxed">
+              {activeModal === "dpdp" && (
+                <>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">1. Legislative Compliance & Sovereign Hosting</h4>
+                    <p>
+                      MomSafe AI complies fully with India's <strong>Digital Personal Data Protection (DPDP) Act, 2023</strong> and the <strong>Ayushman Bharat Digital Mission (ABDM)</strong> health data registry frameworks. All sensitive personal data (SPD) and maternal electronic health records (EHR) are hosted in Tier-4 sovereign cloud data centers located within the Republic of India.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">2. Encryption at Rest & In Transit</h4>
+                    <p>
+                      Biometric vitals (systolic/diastolic blood pressure, continuous glucose levels, heart rate variability, fetal movement logs) are encrypted using <strong>AES-256</strong> cipher specifications at rest and <strong>TLS 1.3</strong> during network transmission.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">3. Non-Commercial Data Commitment</h4>
+                    <p>
+                      Your clinical intake notes, medical allergies, and pregnancy timeline are strictly confidential. MomSafe AI does not sell, license, or monetize maternal health data to third-party ad networks or pharmaceutical brokers.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">4. Patient Rights & Data Erasure</h4>
+                    <p>
+                      In accordance with Section 12 of the DPDP Act 2023, you hold the unreserved right to request data portability, access logs, and complete account erasure. You may trigger account deletion directly from the Settings tab or by contacting our Data Protection Officer (DPO) at <strong>support@momsafe.in</strong>.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {activeModal === "fogsi" && (
+                <>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">1. Obstetric Reference Parameters</h4>
+                    <p>
+                      All predictive risk algorithms in MomSafe AI conform to clinical guidelines issued by the <strong>Federation of Obstetric and Gynaecological Societies of India (FOGSI)</strong> and the <strong>Indian Council of Medical Research (ICMR)</strong>.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">2. Blood Pressure & Preeclampsia Thresholds</h4>
+                    <p>
+                      - Normal Baseline: &lt;120/80 mmHg.<br />
+                      - Pre-hypertension Observation: 130–139/80–89 mmHg.<br />
+                      - Severe Gestational Alert: Systolic &ge;140 mmHg or Diastolic &ge;90 mmHg recorded on two occasions at least 4 hours apart.<br />
+                      - Critical Emergency Escalation: Systolic &gt;160 mmHg triggers immediate red-alert notification.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">3. Gestational Diabetes Mellitus (GDM) Targets</h4>
+                    <p>
+                      Calibrated in accordance with the Diabetes in Pregnancy Study Group India (DIPSI) and ICMR standards: Fasting blood glucose &lt;90 mg/dL, 1-hour post-meal &lt;140 mg/dL, and 2-hour post-meal &lt;120 mg/dL.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">4. Maternal Anemia Stratification</h4>
+                    <p>
+                      Hemoglobin thresholds adjusted for Indian maternal demographics: Normal: &ge;11.0 g/dL; Mild Anemia: 10.0–10.9 g/dL; Moderate Anemia: 7.0–9.9 g/dL; Severe Anemia: &lt;7.0 g/dL requiring urgent clinical intervention.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {activeModal === "emergency108" && (
+                <>
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">1. Automated SOS Escalation Protocol</h4>
+                    <p>
+                      MomSafe AI continuously evaluates telemetry streams against critical risk factors. In the event of severe hemodynamic anomalies or SOS button activation, the platform initiates a priority emergency loop.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">2. Guardian SMS & Location Dispatch</h4>
+                    <p>
+                      An automated high-priority SMS containing current vitals summary, GPS location link, and patient identification is transmitted to your registered family guardian ({form.guardian_name || "Primary Contact"}).
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-bold text-slate-900">3. Integration with National 108 EMS</h4>
+                    <p>
+                      Provides one-touch emergency connectivity to the <strong>National 108 Ambulance Network</strong> across Indian states with automated routing to the nearest empanelled maternal care emergency department.
+                    </p>
+                  </div>
+                </>
+              )}
+
+              {activeModal === "help" && (
+                <div className="space-y-4">
+                  <p>
+                    Have questions about your intake setup, gestational age calibration, or sensor pairing? Our maternal care team is dedicated to assisting you throughout your pregnancy.
+                  </p>
+                  <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100 space-y-2">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold">
+                      <Mail className="w-4 h-4 text-[#044735]" />
+                      <span>Email Support</span>
+                    </div>
+                    <p className="text-slate-600 font-semibold text-sm">support@momsafe.in</p>
+                    <p className="text-[11px] text-slate-500">
+                      Our care navigators respond to all maternal inquiries within 24 hours.
+                    </p>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    *For medical emergencies, please use the 108 Emergency Loop or contact your consulting hospital ({form.hospital}) immediately.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end shrink-0">
+              <button
+                type="button"
+                onClick={() => setActiveModal(null)}
+                className="px-5 py-2.5 rounded-xl bg-[#044735] text-white text-xs font-bold hover:bg-[#013c2c] transition-colors"
+              >
+                Close Document
+              </button>
+            </div>
           </div>
         </div>
       )}
