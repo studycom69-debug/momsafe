@@ -114,6 +114,8 @@ export default function Login() {
   const [, setLocation] = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ id: string; email?: string } | null>(null);
+  const [hasCompletedProfile, setHasCompletedProfile] = useState<boolean>(false);
 
   // Read ?redirect= from query string
   const redirect =
@@ -127,18 +129,18 @@ export default function Login() {
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        if (mounted && session) {
-          // Check if onboarding is needed
+        if (mounted && session?.user) {
+          setCurrentUser({
+            id: session.user.id,
+            email: session.user.email,
+          });
           const { data: profile } = await supabase
             .from("users")
             .select("full_name")
             .eq("id", session.user.id)
             .maybeSingle();
-
-          if (!profile?.full_name) {
-            window.location.href = "/onboarding";
-          } else {
-            setLocation(redirect || "/dashboard");
+          if (mounted) {
+            setHasCompletedProfile(Boolean(profile?.full_name));
           }
         }
       } catch (_) {
@@ -148,16 +150,25 @@ export default function Login() {
     return () => {
       mounted = false;
     };
-  }, [redirect, setLocation]);
+  }, []);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
     try {
+      // Clear local session first so the user can switch or re-authenticate cleanly
+      await supabase.auth.signOut({ scope: "local" });
+    } catch (_) {}
+
+    try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}${redirect}`,
+          redirectTo: `${window.location.origin}${redirect || "/dashboard"}`,
+          queryParams: {
+            prompt: "select_account",
+            access_type: "offline",
+          },
         },
       });
       if (error) {
@@ -166,6 +177,27 @@ export default function Login() {
       }
     } catch (e: any) {
       setError(e?.message || "Sign-in failed. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const handleContinueCurrent = () => {
+    if (hasCompletedProfile) {
+      setLocation(redirect || "/dashboard");
+    } else {
+      window.location.href = "/onboarding";
+    }
+  };
+
+  const handleSignOut = async () => {
+    setLoading(true);
+    try {
+      await supabase.auth.signOut();
+      setCurrentUser(null);
+      setHasCompletedProfile(false);
+    } catch (e: any) {
+      setError(e?.message || "Failed to sign out");
+    } finally {
       setLoading(false);
     }
   };
@@ -664,14 +696,54 @@ export default function Login() {
                   Sign In
                 </h2>
                 <p className="text-body-md text-md3-on-surface-variant">
-                  Welcome to MomSafe AI. Enter your credentials to continue
-                  monitoring your health safely.
+                  Welcome to MomSafe AI. Choose an account to continue monitoring your health safely.
                 </p>
               </div>
             </div>
 
             <div className="space-y-6 mt-8">
-              <div className="pt-4">
+              {currentUser?.email ? (
+                <div className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200/80 text-slate-800 space-y-3 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold text-emerald-800 tracking-wider uppercase">
+                      Current Session
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      disabled={loading}
+                      className="text-xs font-semibold text-rose-600 hover:text-rose-800 transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm uppercase shadow-sm">
+                      {currentUser.email.charAt(0)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-slate-900 truncate">
+                        {currentUser.email}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {hasCompletedProfile
+                          ? "Onboarding completed"
+                          : "Setup not finished yet"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleContinueCurrent}
+                    disabled={loading}
+                    className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-all"
+                  >
+                    Continue as {currentUser.email.split("@")[0]}
+                  </button>
+                </div>
+              ) : null}
+
+              <div className="pt-2">
                 <button
                   type="button"
                   onClick={handleGoogleSignIn}
@@ -697,7 +769,11 @@ export default function Login() {
                     />
                   </svg>
                   <span className="font-semibold text-black text-body-md">
-                    {loading ? "Signing you in..." : "Sign in with Google"}
+                    {loading
+                      ? "Connecting..."
+                      : currentUser
+                      ? "Sign in with a different Google account"
+                      : "Sign in with Google"}
                   </span>
                 </button>
               </div>

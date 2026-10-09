@@ -35,6 +35,12 @@ function Router() {
   const { user, loading } = useAuth();
   const [profileChecked, setProfileChecked] = useState(false);
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
+  const [location] = useLocation();
+
+  // If user navigates to /login, render Login page directly without delay or redirection
+  if (location === "/login") {
+    return <Login />;
+  }
 
   useEffect(() => {
     if (!user) {
