@@ -38,6 +38,15 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-charts": ["recharts"],
+          "vendor-map": ["leaflet", "react-leaflet"],
+          "vendor-supabase": ["@supabase/supabase-js"],
+        },
+      },
+    },
   },
   server: {
     port: Number(process.env.PORT ?? "3000"),

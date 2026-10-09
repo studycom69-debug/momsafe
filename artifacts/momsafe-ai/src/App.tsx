@@ -7,25 +7,35 @@ import {
   Redirect,
 } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import AppLayout from "@/components/layout/AppLayout";
-import Dashboard from "@/pages/dashboard";
-import Vitals from "@/pages/vitals";
-import Alerts from "@/pages/alerts";
-import Analytics from "@/pages/analytics";
-import AIGuidance from "@/pages/ai-guidance";
-import Nutrition from "@/pages/nutrition";
-import Medication from "@/pages/medication";
-import DailyLogs from "@/pages/daily-logs";
-import LocationPage from "@/pages/LocationPage";
-import Settings from "@/pages/settings";
-import Help from "@/pages/help";
-import Login from "@/pages/login";
-import Onboarding from "@/pages/onboarding";
+
+// Code-split pages so authenticated/heavy bundles (Recharts, Leaflet, etc.) are only loaded on demand
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const Vitals = lazy(() => import("@/pages/vitals"));
+const Alerts = lazy(() => import("@/pages/alerts"));
+const Analytics = lazy(() => import("@/pages/analytics"));
+const AIGuidance = lazy(() => import("@/pages/ai-guidance"));
+const Nutrition = lazy(() => import("@/pages/nutrition"));
+const Medication = lazy(() => import("@/pages/medication"));
+const DailyLogs = lazy(() => import("@/pages/daily-logs"));
+const LocationPage = lazy(() => import("@/pages/LocationPage"));
+const Settings = lazy(() => import("@/pages/settings"));
+const Help = lazy(() => import("@/pages/help"));
+const Login = lazy(() => import("@/pages/login"));
+const Onboarding = lazy(() => import("@/pages/onboarding"));
+
+function PageLoader() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+    </div>
+  );
+}
 
 import { Toaster } from "@/components/ui/sonner";
 
@@ -39,7 +49,11 @@ function Router() {
 
   // If user navigates to /login, render Login page directly without delay or redirection
   if (location === "/login") {
-    return <Login />;
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Login />
+      </Suspense>
+    );
   }
 
   useEffect(() => {
@@ -69,98 +83,104 @@ function Router() {
 
   if (!user) {
     return (
-      <Switch>
-        <Route path="/login" component={Login} />
-        <Route path="/terms">
-          {() => {
-            window.location.replace("/terms.html");
-            return null;
-          }}
-        </Route>
-        <Route path="/privacy">
-          {() => {
-            window.location.replace("/privacy.html");
-            return null;
-          }}
-        </Route>
-        <Route path="/">
-          {() => {
-            window.location.replace("/landing.html");
-            return null;
-          }}
-        </Route>
-        <Route>
-          <Redirect to="/" />
-        </Route>
-      </Switch>
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route path="/login" component={Login} />
+          <Route path="/terms">
+            {() => {
+              window.location.replace("/terms.html");
+              return null;
+            }}
+          </Route>
+          <Route path="/privacy">
+            {() => {
+              window.location.replace("/privacy.html");
+              return null;
+            }}
+          </Route>
+          <Route path="/">
+            {() => {
+              window.location.replace("/landing.html");
+              return null;
+            }}
+          </Route>
+          <Route>
+            <Redirect to="/" />
+          </Route>
+        </Switch>
+      </Suspense>
     );
   }
 
   if (needsOnboarding) {
     return (
-      <Switch>
-        <Route path="/landing">
-          {() => {
-            window.location.replace("/landing.html");
-            return null;
-          }}
-        </Route>
-        <Route path="/terms">
-          {() => {
-            window.location.replace("/terms.html");
-            return null;
-          }}
-        </Route>
-        <Route path="/privacy">
-          {() => {
-            window.location.replace("/privacy.html");
-            return null;
-          }}
-        </Route>
-        <Route path="/login" component={Login} />
-        <Route path="/onboarding">
-          {() => <Onboarding onComplete={() => setNeedsOnboarding(false)} />}
-        </Route>
-        <Route>
-          <Redirect to="/onboarding" />
-        </Route>
-      </Switch>
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route path="/landing">
+            {() => {
+              window.location.replace("/landing.html");
+              return null;
+            }}
+          </Route>
+          <Route path="/terms">
+            {() => {
+              window.location.replace("/terms.html");
+              return null;
+            }}
+          </Route>
+          <Route path="/privacy">
+            {() => {
+              window.location.replace("/privacy.html");
+              return null;
+            }}
+          </Route>
+          <Route path="/login" component={Login} />
+          <Route path="/onboarding">
+            {() => <Onboarding onComplete={() => setNeedsOnboarding(false)} />}
+          </Route>
+          <Route>
+            <Redirect to="/onboarding" />
+          </Route>
+        </Switch>
+      </Suspense>
     );
   }
 
   return (
     <AppLayout>
-      <Switch>
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/vitals" component={Vitals} />
-        <Route path="/alerts" component={Alerts} />
-        <Route path="/analytics" component={Analytics} />
-        <Route path="/ai-guidance" component={AIGuidance} />
-        <Route path="/nutrition" component={Nutrition} />
-        <Route path="/medication" component={Medication} />
-        <Route path="/daily-logs" component={DailyLogs} />
-        <Route path="/hospitals" component={LocationPage} />
-        <Route path="/settings" component={Settings} />
-        <Route path="/help" component={Help} />
-        <Route path="/onboarding">
-          <Redirect to="/dashboard" />
-        </Route>
-        <Route path="/terms">
-          {() => {
-            window.location.href = "/terms.html";
-            return null;
-          }}
-        </Route>
-        <Route path="/privacy">
-          {() => {
-            window.location.href = "/privacy.html";
-            return null;
-          }}
-        </Route>
-        <Route path="/">
-          <Redirect to="/dashboard" />
-        </Route>
-      </Switch>
+      <Suspense fallback={<PageLoader />}>
+        <Switch>
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/vitals" component={Vitals} />
+          <Route path="/alerts" component={Alerts} />
+          <Route path="/analytics" component={Analytics} />
+          <Route path="/ai-guidance" component={AIGuidance} />
+          <Route path="/nutrition" component={Nutrition} />
+          <Route path="/medication" component={Medication} />
+          <Route path="/daily-logs" component={DailyLogs} />
+          <Route path="/hospitals" component={LocationPage} />
+          <Route path="/settings" component={Settings} />
+          <Route path="/help" component={Help} />
+          <Route path="/onboarding">
+            <Redirect to="/dashboard" />
+          </Route>
+          <Route path="/terms">
+            {() => {
+              window.location.href = "/terms.html";
+              return null;
+            }}
+          </Route>
+          <Route path="/privacy">
+            {() => {
+              window.location.href = "/privacy.html";
+              return null;
+            }}
+          </Route>
+          <Route path="/">
+            <Redirect to="/dashboard" />
+          </Route>
+        </Switch>
+      </Suspense>
     </AppLayout>
   );
 }

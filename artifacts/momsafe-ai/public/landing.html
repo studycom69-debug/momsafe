@@ -63,7 +63,14 @@
         }
         </script>
 
-        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <!-- Preconnect to Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+        <!-- Production Compiled Tailwind Stylesheet -->
+        <link rel="stylesheet" href="/landing.css" />
+
+        <!-- Typography -->
         <link
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap"
             rel="stylesheet"
@@ -72,151 +79,6 @@
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
             rel="stylesheet"
         />
-        <script id="tailwind-config">
-            tailwind.config = {
-                darkMode: "class",
-                theme: {
-                    extend: {
-                        colors: {
-                            "on-secondary-fixed": "#0d1c2d",
-                            "outline-variant": "#bfc9c3",
-                            "surface-tint": "#2b6954",
-                            "secondary-fixed": "#d4e4fa",
-                            "primary-fixed-dim": "#95d3ba",
-                            "on-primary": "#ffffff",
-                            "on-surface-variant": "#404944",
-                            "on-primary-fixed": "#002117",
-                            "inverse-primary": "#95d3ba",
-                            "error-container": "#ffdad6",
-                            "on-error": "#ffffff",
-                            "tertiary-fixed-dim": "#ffb4a2",
-                            "on-error-container": "#93000a",
-                            "on-primary-container": "#80bea6",
-                            "surface-container": "#eceef0",
-                            "surface-container-high": "#e6e8ea",
-                            "surface-container-low": "#f2f4f6",
-                            "primary-fixed": "#b0f0d6",
-                            "primary-container": "#064e3b",
-                            "surface-container-lowest": "#ffffff",
-                            "tertiary-fixed": "#ffdad2",
-                            "on-tertiary-fixed-variant": "#862208",
-                            "on-primary-fixed-variant": "#0b513d",
-                            background: "#f7f9fb",
-                            "on-tertiary-fixed": "#3c0700",
-                            outline: "#707974",
-                            "on-secondary": "#ffffff",
-                            "secondary-fixed-dim": "#b9c8de",
-                            secondary: "#516072",
-                            "on-secondary-fixed-variant": "#39485a",
-                            "tertiary-container": "#831f06",
-                            "surface-variant": "#e0e3e5",
-                            "secondary-container": "#d2e1f7",
-                            error: "#ba1a1a",
-                            "inverse-on-surface": "#eff1f3",
-                            "on-tertiary-container": "#ff957b",
-                            "inverse-surface": "#2d3133",
-                            "surface-container-highest": "#e0e3e5",
-                            surface: "#f7f9fb",
-                            "on-tertiary": "#ffffff",
-                            "surface-dim": "#d8dadc",
-                            "on-secondary-container": "#556477",
-                            "on-background": "#191c1e",
-                            primary: "#003527",
-                            "on-surface": "#191c1e",
-                            "surface-bright": "#f7f9fb",
-                            tertiary: "#5e1000",
-                        },
-                        borderRadius: {
-                            DEFAULT: "0.25rem",
-                            lg: "0.5rem",
-                            xl: "0.75rem",
-                            full: "9999px",
-                        },
-                        spacing: {
-                            "margin-mobile": "20px",
-                            "stack-sm": "12px",
-                            "margin-desktop": "64px",
-                            unit: "8px",
-                            gutter: "24px",
-                            "stack-lg": "48px",
-                            "stack-md": "24px",
-                            "container-max": "1280px",
-                        },
-                        fontFamily: {
-                            "headline-lg": ["Plus Jakarta Sans"],
-                            "body-lg": ["Inter"],
-                            "headline-lg-mobile": ["Plus Jakarta Sans"],
-                            "headline-sm": ["Plus Jakarta Sans"],
-                            "label-caps": ["Inter"],
-                            "body-sm": ["Inter"],
-                            "headline-md": ["Plus Jakarta Sans"],
-                            "body-md": ["Inter"],
-                        },
-                        fontSize: {
-                            "headline-lg": [
-                                "40px",
-                                {
-                                    lineHeight: "48px",
-                                    letterSpacing: "-0.02em",
-                                    fontWeight: "700",
-                                },
-                            ],
-                            "body-lg": [
-                                "18px",
-                                {
-                                    lineHeight: "28px",
-                                    fontWeight: "400",
-                                },
-                            ],
-                            "headline-lg-mobile": [
-                                "30px",
-                                {
-                                    lineHeight: "36px",
-                                    letterSpacing: "-0.02em",
-                                    fontWeight: "700",
-                                },
-                            ],
-                            "headline-sm": [
-                                "20px",
-                                {
-                                    lineHeight: "28px",
-                                    fontWeight: "600",
-                                },
-                            ],
-                            "label-caps": [
-                                "12px",
-                                {
-                                    lineHeight: "16px",
-                                    letterSpacing: "0.05em",
-                                    fontWeight: "600",
-                                },
-                            ],
-                            "body-sm": [
-                                "14px",
-                                {
-                                    lineHeight: "20px",
-                                    fontWeight: "400",
-                                },
-                            ],
-                            "headline-md": [
-                                "24px",
-                                {
-                                    lineHeight: "32px",
-                                    fontWeight: "600",
-                                },
-                            ],
-                            "body-md": [
-                                "16px",
-                                {
-                                    lineHeight: "24px",
-                                    fontWeight: "400",
-                                },
-                            ],
-                        },
-                    },
-                },
-            };
-        </script>
         <style>
             html {
                 scroll-behavior: smooth;
@@ -2453,6 +2315,10 @@
                             >
                                 <img
                                     alt="Secure Lock"
+                                    width="288"
+                                    height="288"
+                                    loading="lazy"
+                                    decoding="async"
                                     class="w-full h-full object-contain drop-shadow-xl animate-float"
                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMEI4b0PtIeXD9s3EC5ogPLiRCpkTP1sES48wZIbdj8Us2FibL9gpiQJuvI8MInQFfU8AVupFetUzyBq6iyguU34fRvxQ375nRt9ApfBp7g1SjVRkcbgi9TgktcLZfa2YRtgKCTj_AJ612LfLsEK6fxj2xaFy-YiE7kLUUWxlryWkzbB9-ZVL9dlrKERKdvrzjoSPV9KmKiQa-cLYfO3BDdLXdY1Ul0PmHFrgLJYjBjCih343gi286h-A3DxG9NfcyBTI"
                                     style="
