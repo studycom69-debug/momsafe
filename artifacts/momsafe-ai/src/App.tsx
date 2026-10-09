@@ -111,28 +111,12 @@ function Router() {
             return null;
           }}
         </Route>
+        <Route path="/login" component={Login} />
         <Route path="/onboarding">
           {() => <Onboarding onComplete={() => setNeedsOnboarding(false)} />}
         </Route>
-        <Route path="/">
-          {() => {
-            const skip = sessionStorage.getItem("momsafe_skip_onboarding");
-            if (skip === "true") {
-              window.location.replace("/landing.html");
-              return null;
-            }
-            return <Redirect to="/onboarding" />;
-          }}
-        </Route>
         <Route>
-          {() => {
-            const skip = sessionStorage.getItem("momsafe_skip_onboarding");
-            if (skip === "true") {
-              window.location.replace("/landing.html");
-              return null;
-            }
-            return <Redirect to="/onboarding" />;
-          }}
+          <Redirect to="/onboarding" />
         </Route>
       </Switch>
     );

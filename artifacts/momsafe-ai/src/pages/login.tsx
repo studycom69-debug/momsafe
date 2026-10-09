@@ -123,11 +123,23 @@ export default function Login() {
     let mounted = true;
     (async () => {
       try {
+        sessionStorage.removeItem("momsafe_skip_onboarding");
         const {
           data: { session },
         } = await supabase.auth.getSession();
         if (mounted && session) {
-          setLocation(redirect);
+          // Check if onboarding is needed
+          const { data: profile } = await supabase
+            .from("users")
+            .select("full_name")
+            .eq("id", session.user.id)
+            .maybeSingle();
+
+          if (!profile?.full_name) {
+            window.location.href = "/onboarding";
+          } else {
+            setLocation(redirect || "/dashboard");
+          }
         }
       } catch (_) {
         // ignore

@@ -906,7 +906,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             <button
               type="button"
               onClick={() => {
-                sessionStorage.setItem("momsafe_skip_onboarding", "true");
+                sessionStorage.removeItem("momsafe_skip_onboarding");
                 toast.info("Returning to landing page...");
                 window.location.href = "/landing.html";
               }}
