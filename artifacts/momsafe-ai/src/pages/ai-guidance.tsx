@@ -729,7 +729,7 @@ export default function AIGuidance() {
         supabase
           .from("users")
           .select(
-            "full_name, gestational_week, due_date, conditions, doctor_name",
+            "full_name, gestational_week, due_date, conditions, doctor_name, allergies, notes, dietary_preference",
           )
           .eq("id", user.id)
           .maybeSingle(),
@@ -777,6 +777,9 @@ export default function AIGuidance() {
       const pregnancy = {
         gestational_week: prof?.gestational_week,
         conditions: prof?.conditions || "None",
+        allergies: prof?.allergies || "None",
+        dietary_preference: prof?.dietary_preference || "Standard",
+        notes: prof?.notes || "",
       };
 
       const res = await fetch(
@@ -919,6 +922,9 @@ export default function AIGuidance() {
       const pregnancy = {
         gestational_week: profile?.gestational_week,
         conditions: profile?.conditions || "None",
+        allergies: profile?.allergies || "None",
+        dietary_preference: profile?.dietary_preference || "Standard",
+        notes: profile?.notes || "",
       };
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-guidance`,

@@ -93,7 +93,9 @@ function Router() {
   if (needsOnboarding) {
     return (
       <Switch>
-        <Route path="/onboarding" component={Onboarding} />
+        <Route path="/onboarding">
+          {() => <Onboarding onComplete={() => setNeedsOnboarding(false)} />}
+        </Route>
         <Route>
           <Redirect to="/onboarding" />
         </Route>
@@ -115,6 +117,9 @@ function Router() {
         <Route path="/hospitals" component={LocationPage} />
         <Route path="/settings" component={Settings} />
         <Route path="/help" component={Help} />
+        <Route path="/onboarding">
+          <Redirect to="/dashboard" />
+        </Route>
         <Route path="/terms">
           {() => {
             window.location.href = "/terms.html";

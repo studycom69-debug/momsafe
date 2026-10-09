@@ -231,6 +231,12 @@ export default function Nutrition() {
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/nutrition-`;
 
       try {
+        const { data: userProf } = await supabase
+          .from("users")
+          .select("allergies, conditions, dietary_preference")
+          .eq("id", user.id)
+          .maybeSingle();
+
         const res = await fetch(AI_URL, {
           method: "POST",
           headers: {
@@ -240,6 +246,9 @@ export default function Nutrition() {
           },
           body: JSON.stringify({
             nutrition_insights: true,
+            allergies: userProf?.allergies || "None",
+            conditions: userProf?.conditions || "None",
+            dietary_preference: userProf?.dietary_preference || "Standard",
             totals: {
               calories: totalCalories,
               protein: totalProtein,

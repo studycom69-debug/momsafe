@@ -379,6 +379,9 @@ export default function Settings() {
           bmi: Number(userData.bmi) || null,
           conditions: userData.conditions,
           conception_method: userData.conception_method,
+          allergies: userData.allergies,
+          dietary_preference: userData.dietary_preference,
+          notes: userData.notes,
         },
         { onConflict: "id" },
       );
@@ -795,6 +798,30 @@ export default function Settings() {
                     value={userData?.conception_method || "Natural"}
                     onChange={(v) =>
                       setUserData({ ...userData, conception_method: v })
+                    }
+                  />
+                  <Field
+                    label="Allergies & Sensitivities"
+                    value={userData?.allergies || "None"}
+                    placeholder="e.g. Peanuts, Penicillin, Lactose"
+                    onChange={(v) =>
+                      setUserData({ ...userData, allergies: v })
+                    }
+                  />
+                  <Field
+                    label="Dietary Preference"
+                    value={userData?.dietary_preference || "Standard"}
+                    placeholder="e.g. Vegetarian, Halal, Vegan"
+                    onChange={(v) =>
+                      setUserData({ ...userData, dietary_preference: v })
+                    }
+                  />
+                  <Field
+                    label="Notes for AI Care Companion"
+                    value={userData?.notes || ""}
+                    placeholder="e.g. Prone to low blood pressure, sensitive to smells"
+                    onChange={(v) =>
+                      setUserData({ ...userData, notes: v })
                     }
                   />
                 </div>
