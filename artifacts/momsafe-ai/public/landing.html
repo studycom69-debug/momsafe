@@ -10,6 +10,28 @@
         <meta name="theme-color" content="#003527" />
         <meta name="color-scheme" content="light" />
 
+        <!-- Lightweight Authenticated Session Bridge (Client-side convenience redirect) -->
+        <script>
+            (function () {
+                try {
+                    var raw = localStorage.getItem('sb-frupdhslwhwyxclhcqve-auth-token');
+                    if (!raw) return;
+                    var session = JSON.parse(raw);
+                    if (
+                        session &&
+                        typeof session.access_token === 'string' &&
+                        session.access_token.length > 20 &&
+                        typeof session.expires_at === 'number' &&
+                        session.expires_at > (Date.now() / 1000) &&
+                        session.user &&
+                        typeof session.user.id === 'string'
+                    ) {
+                        window.location.replace('/dashboard');
+                    }
+                } catch (_) {}
+            })();
+        </script>
+
         <!-- Favicons -->
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />

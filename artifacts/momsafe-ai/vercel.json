@@ -8,6 +8,7 @@
     { "source": "/pregnancy-monitoring", "destination": "/pregnancy-monitoring.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/", "destination": "/landing.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
