@@ -100,7 +100,7 @@ function Router() {
           </Route>
           <Route path="/">
             {() => {
-              window.location.replace("/landing.html");
+              window.location.replace(import.meta.env.PROD ? "/" : "/landing.html");
               return null;
             }}
           </Route>
