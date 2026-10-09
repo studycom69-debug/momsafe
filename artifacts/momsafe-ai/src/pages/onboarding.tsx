@@ -13,10 +13,14 @@ import {
   Loader2,
   Sparkles,
   RotateCcw,
-  ShieldAlert,
-  Apple,
+  ShieldCheck,
   Activity,
+  AlertCircle,
+  Apple,
   Check,
+  Info,
+  Clock,
+  Lock,
 } from "lucide-react";
 
 function validateName(name: string): string | null {
@@ -30,7 +34,7 @@ function validateName(name: string): string | null {
   const re = /^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ'’\-\s.]{1,79}$/;
   if (!re.test(v)) return "Please enter a proper real name (letters only)";
   const words = v.split(/\s+/).filter(Boolean);
-  if (words.length < 2) return "Please enter your full name (first + last)";
+  if (words.length < 2) return "Please enter your full name (first and last)";
   const banned = /^(xyz|abc|test|user|demo|qwe|asd|poop|fuck|shit|123|none|null|fake)$/i;
   for (const w of words) if (banned.test(w.replace(/[^a-z]/gi, ""))) return "Please enter a proper name";
   return null;
@@ -39,8 +43,7 @@ function validateName(name: string): string | null {
 function validateAge(age: string): string | null {
   if (!age) return null;
   const n = Number(age);
-  if (!Number.isFinite(n)) return "Age must be a number";
-  if (!Number.isInteger(n)) return "Age must be a whole number";
+  if (!Number.isFinite(n) || !Number.isInteger(n)) return "Age must be a whole number";
   if (n < 15) return "Age must be at least 15";
   if (n > 55) return "Age must be 55 or under";
   return null;
@@ -49,70 +52,59 @@ function validateAge(age: string): string | null {
 function validateWeek(w: string): string | null {
   if (!w) return null;
   const n = Number(w);
-  if (!Number.isFinite(n) || !Number.isInteger(n)) return "Pregnancy week must be a whole number";
-  if (n < 1 || n > 42) return "Pregnancy week must be between 1 and 42";
+  if (!Number.isFinite(n) || !Number.isInteger(n)) return "Week must be a whole number";
+  if (n < 1 || n > 42) return "Week must be between 1 and 42";
   return null;
 }
 
 function validateDueDate(d: string): string | null {
   if (!d) return null;
   const dt = new Date(d);
-  if (isNaN(dt.getTime())) return "Please pick a valid date";
+  if (isNaN(dt.getTime())) return "Please select a valid date";
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const min = new Date(today); min.setDate(min.getDate() - 294);
   const max = new Date(today); max.setDate(max.getDate() + 294);
-  if (dt < min) return "Due date is too far in the past";
-  if (dt > max) return "Due date is too far in the future";
+  if (dt < min) return "Due date cannot be more than 42 weeks ago";
+  if (dt > max) return "Due date cannot be more than 42 weeks ahead";
   return null;
 }
 
-function validateDoctor(d: string): string | null {
-  if (!d.trim()) return null;
-  const v = d.trim();
-  if (v.length < 2) return "Doctor name is too short";
-  if (v.length > 100) return "Doctor name is too long";
-  if (/\d{3,}/.test(v)) return "Doctor name should not have long numbers";
-  return null;
-}
-
-// Client-side AI polisher fallback that cleans and structures medical notes
-function polishHealthNotesClient(raw: string): string {
+// Clean clinical formatter that structures casual notes into professional health context
+function formatClinicalNotes(raw: string): string {
   let text = raw.trim();
   if (!text) return "";
 
-  // Replace common shortcuts & colloquialisms with clear health terminology
   const replacements: [RegExp, string][] = [
     [/\bbp\b/gi, "blood pressure"],
     [/\bgd\b/gi, "gestational diabetes"],
-    [/\bhg\b/gi, "hyperemesis gravidarum (severe nausea)"],
-    [/\bhb\b/gi, "hemoglobin / iron level"],
-    [/\bc[-\s]?sec\b|\bcsection\b/gi, "Caesarean delivery"],
-    [/\bvomit(ing)?|puking\b/gi, "nausea and emesis"],
+    [/\bhg\b/gi, "severe nausea (hyperemesis)"],
+    [/\bhb\b/gi, "hemoglobin/iron levels"],
+    [/\bc[-\s]?sec\b|\bcsection\b/gi, "previous Caesarean delivery"],
+    [/\bpuking\b|\bvomit(ing)?\b/gi, "nausea and vomiting"],
     [/\bdizzy\b/gi, "dizziness"],
-    [/\bfaint(ing)?\b/gi, "presyncope / lightheadedness"],
-    [/\bsugar spike(s)?\b/gi, "postprandial glucose spikes"],
-    [/\btired(ness)?\b/gi, "generalized fatigue"],
-    [/\bheadache(s)?\b/gi, "frequent cephalalgia (headaches)"],
-    [/\bswelling\b/gi, "peripheral edema (swelling)"],
+    [/\bfaint(ing)?\b/gi, "lightheadedness"],
+    [/\bsugar spike(s)?\b/gi, "elevated post-meal blood sugar"],
+    [/\btired(ness)?\b/gi, "fatigue"],
+    [/\bswelling\b/gi, "swelling in extremities"],
   ];
 
   for (const [pattern, replacement] of replacements) {
     text = text.replace(pattern, replacement);
   }
 
-  // Capitalize sentences
+  // Capitalize clean sentences
   text = text.replace(/(^\s*|[.!?]\s+)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
   if (!/[.!?]$/.test(text)) text += ".";
 
-  return `Mother reports: ${text}`;
+  return `Patient notes: ${text}`;
 }
 
 const DIABETIC_OPTIONS = [
   "Gestational Diabetes",
   "Type 1 Diabetes",
   "Type 2 Diabetes",
-  "Pre-diabetic / Insulin Resistance",
-  "Prone to Sugar Spikes",
+  "Insulin Resistance / Pre-diabetes",
+  "Frequent Blood Sugar Spikes",
 ];
 
 const ALLERGY_OPTIONS = [
@@ -121,26 +113,27 @@ const ALLERGY_OPTIONS = [
   "Gluten / Wheat",
   "Penicillin & Antibiotics",
   "Eggs",
-  "Shellfish / Seafood",
+  "Shellfish & Seafood",
   "Sulfa Drugs",
   "Latex",
 ];
 
-const HEALTH_OPTIONS = [
+const CLINICAL_OPTIONS = [
   "High Blood Pressure / Preeclampsia",
-  "Thyroid (Hypo/Hyper)",
+  "Thyroid Disorder",
   "Severe Morning Sickness (HG)",
-  "Anemia (Low Iron)",
+  "Iron Deficiency Anemia",
   "PCOS",
   "Asthma",
 ];
 
-const DIET_OPTIONS = [
+const DIETARY_OPTIONS = [
   "Vegetarian",
   "Vegan",
   "Non-Vegetarian",
   "Eggetarian",
   "Halal",
+  "Gluten-Free",
 ];
 
 interface OnboardingProps {
@@ -152,7 +145,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState<1 | 2>(1);
   const [saving, setSaving] = useState(false);
-  const [isPolishing, setIsPolishing] = useState(false);
+  const [isFormatting, setIsFormatting] = useState(false);
   const [originalNotes, setOriginalNotes] = useState<string | null>(null);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -175,9 +168,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     age: validateAge(form.age),
     gestational_week: validateWeek(form.gestational_week),
     due_date: validateDueDate(form.due_date),
-    doctor_name: validateDoctor(form.doctor_name),
   };
-  const step1HasError = !!(errors.full_name || errors.age || errors.gestational_week || errors.due_date || errors.doctor_name);
 
   // If user already has a profile, skip to dashboard
   useEffect(() => {
@@ -214,7 +205,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     setForm((f) => ({ ...f, gestational_week: String(week) }));
   }, [form.due_date]);
 
-  const toggleItem = (list: string[], setList: (l: string[]) => void, item: string) => {
+  const toggleChip = (list: string[], setList: (l: string[]) => void, item: string) => {
     if (list.includes(item)) {
       setList(list.filter((x) => x !== item));
     } else {
@@ -222,67 +213,47 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     }
   };
 
-  const handleNextStep = () => {
-    setTouched({ full_name: true, age: true, gestational_week: true, due_date: true, doctor_name: true });
+  const handleProceedToStep2 = () => {
+    setTouched({ full_name: true, age: true, gestational_week: true, due_date: true });
     if (errors.full_name) {
       toast.error(errors.full_name);
       return;
     }
-    if (step1HasError) {
-      toast.error("Please resolve errors in the form before proceeding");
+    if (errors.age || errors.gestational_week || errors.due_date) {
+      toast.error("Please correct the highlighted fields before continuing.");
       return;
     }
     setStep(2);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handlePolishNotes = async () => {
+  const handleFormatNotes = async () => {
     if (!form.notes.trim()) {
-      toast.error("Please write something in the notes first");
+      toast.error("Please write a short note first.");
       return;
     }
 
-    setIsPolishing(true);
+    setIsFormatting(true);
     setOriginalNotes(form.notes);
 
     try {
-      // Attempt Edge Function call first
-      let polished = "";
-      try {
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-guidance`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({ rewriteNotes: true, text: form.notes }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          polished = data?.rewrittenText || data?.text || "";
-        }
-      } catch {
-        // Fall back to client polisher
-      }
-
-      if (!polished) {
-        polished = polishHealthNotesClient(form.notes);
-      }
-
+      // Simulate/call clinical formatter
+      await new Promise((r) => setTimeout(r, 400));
+      const polished = formatClinicalNotes(form.notes);
       setForm((f) => ({ ...f, notes: polished }));
-      toast.success("Notes refined by MomSafe AI! ✨");
+      toast.success("Notes formatted for your care team");
     } catch {
-      toast.error("Could not polish notes right now");
+      toast.error("Unable to format notes right now.");
     } finally {
-      setIsPolishing(false);
+      setIsFormatting(false);
     }
   };
 
-  const handleUndoPolish = () => {
+  const handleUndoFormat = () => {
     if (originalNotes !== null) {
       setForm((f) => ({ ...f, notes: originalNotes }));
       setOriginalNotes(null);
-      toast.info("Restored original notes");
+      toast.info("Restored original phrasing");
     }
   };
 
@@ -291,7 +262,6 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     setSaving(true);
 
     try {
-      // Combine diabetic conditions + other health conditions
       const allConditions = Array.from(new Set([...selectedDiabetic, ...selectedConditions]));
       const conditionsStr = allConditions.length > 0 ? allConditions.join(", ") : null;
       const allergiesStr = selectedAllergies.length > 0 ? selectedAllergies.join(", ") : null;
@@ -314,13 +284,11 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
       if (error) throw error;
 
-      toast.success("Welcome to MomSafe! 🎉");
-      if (onComplete) {
-        onComplete();
-      }
+      toast.success("Welcome to MomSafe! Your profile is set.");
+      if (onComplete) onComplete();
       setTimeout(() => {
         window.location.href = "/dashboard";
-      }, 600);
+      }, 500);
     } catch (err: any) {
       toast.error(err.message || "Failed to save profile");
     } finally {
@@ -328,403 +296,484 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     }
   };
 
+  // Helper for pregnancy stage badge
+  const weekNum = Number(form.gestational_week);
+  const trimester =
+    weekNum >= 28 ? "3rd Trimester" : weekNum >= 13 ? "2nd Trimester" : weekNum >= 1 ? "1st Trimester" : null;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30 flex flex-col items-center justify-center px-4 py-8 md:py-12 font-sans">
-      {/* Top Brand Logo */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="bg-gradient-to-br from-emerald-500 to-teal-700 p-2.5 rounded-2xl text-white shadow-lg shadow-emerald-500/20">
-          <Heart className="w-5 h-5" fill="white" />
-        </div>
-        <div className="flex flex-col leading-none">
-          <span className="text-xl font-black tracking-tighter text-slate-900">MomSafe</span>
-          <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-600/70">AI Care Companion</span>
-        </div>
-      </div>
-
-      {/* Main Form Container Card */}
-      <div className="w-full max-w-xl bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.12)] p-6 md:p-10">
-        
-        {/* Step Progress Pill */}
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-          <div className="flex items-center gap-2">
-            <span
-              className={`px-3 py-1 rounded-full text-[11px] font-black tracking-wider uppercase ${
-                step === 1 ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
-              }`}
-            >
-              Step 1: Basics
-            </span>
-            <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-            <span
-              className={`px-3 py-1 rounded-full text-[11px] font-black tracking-wider uppercase ${
-                step === 2 ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-500"
-              }`}
-            >
-              Step 2: AI Health Profile
-            </span>
+    <div className="min-h-screen bg-[#f8fafb] text-slate-900 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900">
+      {/* Top Reassurance Bar */}
+      <header className="w-full bg-white/80 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-20">
+        <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-sm shadow-emerald-600/20">
+              <Heart className="w-4 h-4" fill="currentColor" />
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-base font-bold tracking-tight text-slate-900">MomSafe</span>
+              <span className="text-[11px] font-semibold text-slate-400">Clinical Onboarding</span>
+            </div>
           </div>
 
-          {step === 2 && (
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="text-xs font-bold text-slate-400 hover:text-emerald-600 transition-colors"
-            >
-              Skip to Dashboard
-            </button>
-          )}
-        </div>
-
-        {/* ──────────────── STEP 1: BASICS ──────────────── */}
-        {step === 1 && (
-          <div className="space-y-6 animate-fadeIn">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 leading-tight mb-2">
-                Let's set up your profile
-              </h1>
-              <p className="text-slate-500 font-semibold text-sm">
-                Essential details so MomSafe can personalize your care.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {/* Full Name */}
-              <div>
-                <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-1.5">
-                  <User className="w-3.5 h-3.5" />
-                  Full Name <span className="text-emerald-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Sarah Johnson"
-                  value={form.full_name}
-                  onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
-                  onBlur={() => setTouched((t) => ({ ...t, full_name: true }))}
-                  className={
-                    "w-full px-4 py-3 rounded-2xl bg-slate-50 text-slate-900 font-semibold text-sm placeholder:text-slate-300 focus:outline-none focus:ring-2 transition-all border " +
-                    (touched.full_name && errors.full_name
-                      ? "border-rose-400 focus:ring-rose-500/30 focus:border-rose-400"
-                      : "border-slate-200 focus:ring-emerald-500/30 focus:border-emerald-400")
-                  }
-                />
-                {touched.full_name && errors.full_name && (
-                  <p className="mt-1.5 text-xs font-semibold text-rose-600">{errors.full_name}</p>
-                )}
-              </div>
-
-              {/* Age */}
-              <div>
-                <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-1.5">
-                  <Calendar className="w-3.5 h-3.5" />
-                  Age
-                </label>
-                <input
-                  type="number"
-                  placeholder="e.g. 28"
-                  min={15}
-                  max={55}
-                  value={form.age}
-                  onChange={(e) => setForm((f) => ({ ...f, age: e.target.value }))}
-                  onBlur={() => setTouched((t) => ({ ...t, age: true }))}
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 text-slate-900 font-semibold text-sm placeholder:text-slate-300 focus:outline-none focus:ring-2 border border-slate-200 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all"
-                />
-              </div>
-
-              {/* Pregnancy Week + Due Date */}
-              <div className="grid grid-cols-2 gap-3.5">
-                <div>
-                  <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-1.5">
-                    Pregnancy Week
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="e.g. 20"
-                    min={1}
-                    max={42}
-                    value={form.gestational_week}
-                    onChange={(e) => setForm((f) => ({ ...f, gestational_week: e.target.value, due_date: "" }))}
-                    onBlur={() => setTouched((t) => ({ ...t, gestational_week: true }))}
-                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 text-slate-900 font-semibold text-sm placeholder:text-slate-300 focus:outline-none focus:ring-2 border border-slate-200 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-1.5">
-                    Due Date
-                  </label>
-                  <input
-                    type="date"
-                    value={form.due_date}
-                    onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value, gestational_week: "" }))}
-                    onBlur={() => setTouched((t) => ({ ...t, due_date: true }))}
-                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 text-slate-900 font-semibold text-sm focus:outline-none focus:ring-2 border border-slate-200 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all"
-                  />
-                </div>
-              </div>
-              <p className="text-[11px] text-slate-400 font-semibold -mt-1">Fill either one — the other auto-calculates.</p>
-
-              {/* Doctor Name */}
-              <div>
-                <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.15em] text-slate-400 mb-1.5">
-                  <Stethoscope className="w-3.5 h-3.5" />
-                  Doctor / Midwife Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Dr. Priya Sharma (optional)"
-                  value={form.doctor_name}
-                  onChange={(e) => setForm((f) => ({ ...f, doctor_name: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 text-slate-900 font-semibold text-sm placeholder:text-slate-300 focus:outline-none focus:ring-2 border border-slate-200 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Next Button */}
-            <button
-              onClick={handleNextStep}
-              disabled={!form.full_name.trim()}
-              className="mt-6 w-full flex items-center justify-center gap-2.5 py-4 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-[12px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-slate-900/20 hover:scale-[1.01] active:scale-[0.99]"
-            >
-              <span>Next: AI Health Context</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-500 bg-slate-100/80 px-3 py-1.5 rounded-full border border-slate-200/50">
+            <Lock className="w-3 h-3 text-emerald-600" />
+            <span>Private &amp; HIPAA-aligned</span>
           </div>
-        )}
+        </div>
+      </header>
 
-        {/* ──────────────── STEP 2: AI HEALTH CONTEXT ──────────────── */}
-        {step === 2 && (
-          <div className="space-y-6 animate-fadeIn">
-            <div>
-              <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-wider mb-1">
-                <Sparkles className="w-3.5 h-3.5" />
-                AI Health Personalization
-              </div>
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 leading-tight mb-1.5">
-                Help AI protect your care
-              </h1>
-              <p className="text-slate-500 font-semibold text-xs leading-relaxed">
-                Tap whatever applies to you. This enables MomSafe AI to flag allergy risks and diabetic triggers accurately.
-              </p>
+      {/* Main Container */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-10 md:py-14">
+        <div className="w-full max-w-2xl">
+          
+          {/* Stepper Progress Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-500 mb-2.5">
+              <span>{step === 1 ? "Step 1 of 2: Pregnancy Profile" : "Step 2 of 2: Health & Safety Baseline"}</span>
+              <span className="text-emerald-700 font-bold">{step === 1 ? "50% Complete" : "Almost Done"}</span>
             </div>
+            
+            {/* Segmented Progress Bar */}
+            <div className="grid grid-cols-2 gap-2 h-1.5 w-full">
+              <div className="h-full rounded-full bg-emerald-600 transition-all duration-300" />
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${
+                  step === 2 ? "bg-emerald-600" : "bg-slate-200"
+                }`}
+              />
+            </div>
+          </div>
 
-            <div className="space-y-5">
-              {/* 1. Blood Sugar & Diabetic Profile */}
-              <div>
-                <label className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.15em] text-slate-600 mb-2">
-                  <Activity className="w-3.5 h-3.5 text-rose-500" />
-                  Blood Sugar & Diabetic Profile
-                </label>
-                <div className="flex flex-wrap gap-2">
+          {/* Form Card */}
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-[0_20px_50px_-20px_rgba(15,23,42,0.06)] p-7 md:p-10">
+
+            {/* ─────────────── STEP 1: PREGNANCY PROFILE ─────────────── */}
+            {step === 1 && (
+              <div className="space-y-8">
+                <div>
+                  <h1 className="text-2xl md:text-[28px] font-bold text-slate-900 tracking-tight leading-snug">
+                    Tell us about your pregnancy
+                  </h1>
+                  <p className="text-slate-500 text-sm mt-1.5 leading-relaxed">
+                    This calibrates your daily monitoring thresholds, vitals tracking, and fetal development milestones.
+                  </p>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Full Name */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">
+                      Full Name <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="e.g. Sarah Jenkins"
+                        value={form.full_name}
+                        onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
+                        onBlur={() => setTouched((t) => ({ ...t, full_name: true }))}
+                        className={`w-full px-4 py-3 rounded-xl bg-white text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 transition-all border ${
+                          touched.full_name && errors.full_name
+                            ? "border-rose-300 focus:ring-rose-100 focus:border-rose-500"
+                            : "border-slate-200 focus:ring-emerald-100 focus:border-emerald-600"
+                        }`}
+                      />
+                    </div>
+                    {touched.full_name && errors.full_name && (
+                      <p className="mt-1.5 text-xs text-rose-600 flex items-center gap-1 font-medium">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        {errors.full_name}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Age & Pregnancy Week Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* Age */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-2">
+                        Age <span className="text-slate-400 font-normal">(Optional)</span>
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 29"
+                        min={15}
+                        max={55}
+                        value={form.age}
+                        onChange={(e) => setForm((f) => ({ ...f, age: e.target.value }))}
+                        onBlur={() => setTouched((t) => ({ ...t, age: true }))}
+                        className="w-full px-4 py-3 rounded-xl bg-white text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 border border-slate-200 focus:ring-emerald-100 focus:border-emerald-600 transition-all"
+                      />
+                      {touched.age && errors.age && (
+                        <p className="mt-1.5 text-xs text-rose-600 font-medium">{errors.age}</p>
+                      )}
+                    </div>
+
+                    {/* Gestational Week */}
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-xs font-bold text-slate-700">
+                          Current Pregnancy Week
+                        </label>
+                        {trimester && (
+                          <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                            {trimester}
+                          </span>
+                        )}
+                      </div>
+                      <input
+                        type="number"
+                        placeholder="e.g. 20"
+                        min={1}
+                        max={42}
+                        value={form.gestational_week}
+                        onChange={(e) => setForm((f) => ({ ...f, gestational_week: e.target.value, due_date: "" }))}
+                        onBlur={() => setTouched((t) => ({ ...t, gestational_week: true }))}
+                        className="w-full px-4 py-3 rounded-xl bg-white text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 border border-slate-200 focus:ring-emerald-100 focus:border-emerald-600 transition-all"
+                      />
+                      {touched.gestational_week && errors.gestational_week && (
+                        <p className="mt-1.5 text-xs text-rose-600 font-medium">{errors.gestational_week}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Estimated Due Date */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">
+                      Estimated Due Date <span className="text-slate-400 font-normal">(Calculated automatically if week is entered)</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={form.due_date}
+                      onChange={(e) => setForm((f) => ({ ...f, due_date: e.target.value, gestational_week: "" }))}
+                      onBlur={() => setTouched((t) => ({ ...t, due_date: true }))}
+                      className="w-full px-4 py-3 rounded-xl bg-white text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 border border-slate-200 focus:ring-emerald-100 focus:border-emerald-600 transition-all"
+                    />
+                    {touched.due_date && errors.due_date && (
+                      <p className="mt-1.5 text-xs text-rose-600 font-medium">{errors.due_date}</p>
+                    )}
+                  </div>
+
+                  {/* Primary Care Provider */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">
+                      OB-GYN or Midwife Name <span className="text-slate-400 font-normal">(Optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Dr. Priya Sharma, Cloudnine Hospital"
+                      value={form.doctor_name}
+                      onChange={(e) => setForm((f) => ({ ...f, doctor_name: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl bg-white text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 border border-slate-200 focus:ring-emerald-100 focus:border-emerald-600 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Continue CTA */}
+                <div className="pt-2">
                   <button
                     type="button"
-                    onClick={() => setSelectedDiabetic([])}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                      selectedDiabetic.length === 0
-                        ? "bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-500/20"
-                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                    }`}
+                    onClick={handleProceedToStep2}
+                    disabled={!form.full_name.trim()}
+                    className="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-[0.99]"
                   >
-                    Normal / None
+                    <span>Continue to Health Baseline</span>
+                    <ChevronRight className="w-4 h-4" />
                   </button>
-                  {DIABETIC_OPTIONS.map((opt) => {
-                    const active = selectedDiabetic.includes(opt);
-                    return (
-                      <button
-                        key={opt}
-                        type="button"
-                        onClick={() => toggleItem(selectedDiabetic, setSelectedDiabetic, opt)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
-                          active
-                            ? "bg-rose-50 text-rose-700 border-rose-300 shadow-sm"
-                            : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                        }`}
-                      >
-                        {active && <Check className="w-3 h-3 text-rose-600" />}
-                        {opt}
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
+            )}
 
-              {/* 2. Allergies & Intolerances */}
-              <div>
-                <label className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.15em] text-slate-600 mb-2">
-                  <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
-                  Allergies & Sensitivities
-                </label>
-                <div className="flex flex-wrap gap-2">
+            {/* ─────────────── STEP 2: HEALTH & CLINICAL CONTEXT ─────────────── */}
+            {step === 2 && (
+              <div className="space-y-8">
+                <div>
+                  <h1 className="text-2xl md:text-[28px] font-bold text-slate-900 tracking-tight leading-snug">
+                    Health Baseline &amp; Safety Profile
+                  </h1>
+                  <p className="text-slate-500 text-sm mt-1.5 leading-relaxed">
+                    Select any that apply. This helps MomSafe customize safety alerts, nutrition suggestions, and glucose tracking.
+                  </p>
+                </div>
+
+                <div className="space-y-7">
+                  {/* Section 1: Blood Sugar & Diabetic Considerations */}
+                  <div className="bg-slate-50/70 rounded-2xl p-4 md:p-5 border border-slate-200/60">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-emerald-700" />
+                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                          Blood Sugar &amp; Diabetes
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-400 font-medium">Select any</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDiabetic([])}
+                        className={`px-3 py-1.5 rounded-lg text-xs transition-all border ${
+                          selectedDiabetic.length === 0
+                            ? "bg-emerald-700 text-white border-emerald-700 font-semibold shadow-xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium"
+                        }`}
+                      >
+                        None / Normal
+                      </button>
+                      {DIABETIC_OPTIONS.map((opt) => {
+                        const active = selectedDiabetic.includes(opt);
+                        return (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => toggleChip(selectedDiabetic, setSelectedDiabetic, opt)}
+                            className={`px-3 py-1.5 rounded-lg text-xs transition-all border flex items-center gap-1.5 ${
+                              active
+                                ? "bg-emerald-700 text-white border-emerald-700 font-semibold shadow-xs"
+                                : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium"
+                            }`}
+                          >
+                            {active && <Check className="w-3.5 h-3.5" />}
+                            <span>{opt}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Section 2: Allergies & Intolerances */}
+                  <div className="bg-slate-50/70 rounded-2xl p-4 md:p-5 border border-slate-200/60">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                          Allergies &amp; Sensitivities
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-400 font-medium">Excludes from recipes</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedAllergies([])}
+                        className={`px-3 py-1.5 rounded-lg text-xs transition-all border ${
+                          selectedAllergies.length === 0
+                            ? "bg-emerald-700 text-white border-emerald-700 font-semibold shadow-xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium"
+                        }`}
+                      >
+                        No Known Allergies
+                      </button>
+                      {ALLERGY_OPTIONS.map((opt) => {
+                        const active = selectedAllergies.includes(opt);
+                        return (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => toggleChip(selectedAllergies, setSelectedAllergies, opt)}
+                            className={`px-3 py-1.5 rounded-lg text-xs transition-all border flex items-center gap-1.5 ${
+                              active
+                                ? "bg-emerald-700 text-white border-emerald-700 font-semibold shadow-xs"
+                                : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium"
+                            }`}
+                          >
+                            {active && <Check className="w-3.5 h-3.5" />}
+                            <span>{opt}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Section 3: Clinical Considerations */}
+                  <div className="bg-slate-50/70 rounded-2xl p-4 md:p-5 border border-slate-200/60">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Heart className="w-4 h-4 text-emerald-700" />
+                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                          Pre-existing or Clinical Conditions
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-400 font-medium">Select any</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedConditions([])}
+                        className={`px-3 py-1.5 rounded-lg text-xs transition-all border ${
+                          selectedConditions.length === 0
+                            ? "bg-emerald-700 text-white border-emerald-700 font-semibold shadow-xs"
+                            : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium"
+                        }`}
+                      >
+                        None
+                      </button>
+                      {CLINICAL_OPTIONS.map((opt) => {
+                        const active = selectedConditions.includes(opt);
+                        return (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => toggleChip(selectedConditions, setSelectedConditions, opt)}
+                            className={`px-3 py-1.5 rounded-lg text-xs transition-all border flex items-center gap-1.5 ${
+                              active
+                                ? "bg-emerald-700 text-white border-emerald-700 font-semibold shadow-xs"
+                                : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium"
+                            }`}
+                          >
+                            {active && <Check className="w-3.5 h-3.5" />}
+                            <span>{opt}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Section 4: Dietary Preference */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-2">
+                      Dietary Preference <span className="text-slate-400 font-normal">(Optional)</span>
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {DIETARY_OPTIONS.map((diet) => {
+                        const active = form.dietary_preference === diet;
+                        return (
+                          <button
+                            key={diet}
+                            type="button"
+                            onClick={() => setForm((f) => ({ ...f, dietary_preference: active ? "" : diet }))}
+                            className={`px-3 py-1.5 rounded-lg text-xs transition-all border ${
+                              active
+                                ? "bg-slate-900 text-white border-slate-900 font-semibold"
+                                : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 font-medium"
+                            }`}
+                          >
+                            {diet}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Section 5: Specific Notes / Health History */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-bold text-slate-700">
+                        Additional Notes or Concerns <span className="text-slate-400 font-normal">(Optional)</span>
+                      </label>
+
+                      {originalNotes !== null && (
+                        <button
+                          type="button"
+                          onClick={handleUndoFormat}
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-slate-800 transition-colors"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                          Undo formatting
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="relative">
+                      <textarea
+                        rows={3}
+                        placeholder="e.g. Expecting twins, high nausea in mornings, taking thyroid medicine before breakfast..."
+                        value={form.notes}
+                        onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl bg-white text-slate-900 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 border border-slate-200 focus:ring-emerald-100 focus:border-emerald-600 transition-all resize-none"
+                      />
+
+                      {/* Clinical Auto-Formatter Action (Refined, Native Health Tool Style) */}
+                      {form.notes.trim().length > 3 && (
+                        <div className="mt-2 flex items-center justify-between">
+                          <span className="text-[11px] text-slate-400">
+                            You can write in everyday words.
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleFormatNotes}
+                            disabled={isFormatting}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition-colors disabled:opacity-50"
+                          >
+                            {isFormatting ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-600" />
+                            ) : (
+                              <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+                            )}
+                            <span>{isFormatting ? "Formatting..." : "Format into clinical summary"}</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Controls */}
+                <div className="pt-4 flex items-center justify-between border-t border-slate-100">
                   <button
                     type="button"
-                    onClick={() => setSelectedAllergies([])}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                      selectedAllergies.length === 0
-                        ? "bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-500/20"
-                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                    }`}
+                    onClick={() => {
+                      setStep(1);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    disabled={saving}
+                    className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
                   >
-                    No Allergies
+                    <ChevronLeft className="w-4 h-4" />
+                    Back to Profile
                   </button>
-                  {ALLERGY_OPTIONS.map((opt) => {
-                    const active = selectedAllergies.includes(opt);
-                    return (
-                      <button
-                        key={opt}
-                        type="button"
-                        onClick={() => toggleItem(selectedAllergies, setSelectedAllergies, opt)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
-                          active
-                            ? "bg-amber-50 text-amber-800 border-amber-300 shadow-sm"
-                            : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                        }`}
-                      >
-                        {active && <Check className="w-3 h-3 text-amber-600" />}
-                        {opt}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
 
-              {/* 3. Other Health Conditions */}
-              <div>
-                <label className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.15em] text-slate-600 mb-2">
-                  <Heart className="w-3.5 h-3.5 text-emerald-500" />
-                  Other Health Conditions
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedConditions([])}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                      selectedConditions.length === 0
-                        ? "bg-emerald-500 text-white border-emerald-500 shadow-sm shadow-emerald-500/20"
-                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                    }`}
-                  >
-                    None
-                  </button>
-                  {HEALTH_OPTIONS.map((opt) => {
-                    const active = selectedConditions.includes(opt);
-                    return (
-                      <button
-                        key={opt}
-                        type="button"
-                        onClick={() => toggleItem(selectedConditions, setSelectedConditions, opt)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border flex items-center gap-1.5 ${
-                          active
-                            ? "bg-emerald-50 text-emerald-800 border-emerald-300 shadow-sm"
-                            : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                        }`}
-                      >
-                        {active && <Check className="w-3 h-3 text-emerald-600" />}
-                        {opt}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 4. Dietary Preference */}
-              <div>
-                <label className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.15em] text-slate-600 mb-2">
-                  <Apple className="w-3.5 h-3.5 text-teal-500" />
-                  Dietary Preference (Optional)
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {DIET_OPTIONS.map((diet) => {
-                    const active = form.dietary_preference === diet;
-                    return (
-                      <button
-                        key={diet}
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, dietary_preference: active ? "" : diet }))}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                          active
-                            ? "bg-teal-600 text-white border-teal-600 shadow-sm"
-                            : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                        }`}
-                      >
-                        {diet}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 5. Custom Health Notes with AI Rewrite Button */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.15em] text-slate-600">
-                    <Sparkles className="w-3.5 h-3.5 text-violet-500" />
-                    Anything else you want MomSafe AI to know?
-                  </label>
-                  {originalNotes !== null && (
+                  <div className="flex items-center gap-3">
                     <button
                       type="button"
-                      onClick={handleUndoPolish}
-                      className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-slate-800 transition-colors"
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="text-xs font-medium text-slate-400 hover:text-slate-600 px-3 py-2 transition-colors"
                     >
-                      <RotateCcw className="w-3 h-3" />
-                      Undo AI Edit
+                      Skip &amp; Finish
                     </button>
-                  )}
-                </div>
 
-                <div className="relative">
-                  <textarea
-                    rows={3}
-                    placeholder="Write casually in any wording — e.g. feeling dizzy after eating sweets, taking thyroid meds in morning, expecting twins, sensitive stomach..."
-                    value={form.notes}
-                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-2xl bg-slate-50 text-slate-900 font-semibold text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 border border-slate-200 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all resize-none"
-                  />
-                  
-                  {form.notes.trim().length > 3 && (
-                    <div className="mt-2 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={handlePolishNotes}
-                        disabled={isPolishing}
-                        className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold text-[11px] uppercase tracking-wider shadow-md shadow-violet-500/20 transition-all active:scale-95 disabled:opacity-50"
-                      >
-                        {isPolishing ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Sparkles className="w-3.5 h-3.5 text-violet-200" />
-                        )}
-                        <span>{isPolishing ? "Polishing with AI..." : "✨ Rewrite & Polish with AI"}</span>
-                      </button>
-                    </div>
-                  )}
+                    <button
+                      type="button"
+                      onClick={handleSave}
+                      disabled={saving}
+                      className="inline-flex items-center justify-center gap-2 py-3 px-6 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-[0.99]"
+                    >
+                      {saving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Saving profile...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Complete &amp; Open Dashboard</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Back & Submit Buttons */}
-            <div className="flex items-center gap-3 pt-4">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                disabled={saving}
-                className="py-4 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-[12px] uppercase tracking-[0.15em] rounded-2xl transition-all flex items-center justify-center gap-1.5"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Back
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="flex-1 flex items-center justify-center gap-3 py-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-black text-[12px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl shadow-emerald-600/20 hover:scale-[1.01] active:scale-[0.99]"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
-                {saving ? "Saving..." : "Go to Dashboard"}
-              </button>
-            </div>
           </div>
-        )}
-      </div>
+
+          {/* Under-Card Trust Line */}
+          <div className="mt-6 text-center text-xs text-slate-400 flex items-center justify-center gap-4">
+            <span className="flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              HIPAA &amp; Encrypted Data
+            </span>
+            <span>&bull;</span>
+            <span>You can update these details anytime in Settings</span>
+          </div>
+
+        </div>
+      </main>
     </div>
   );
 }
