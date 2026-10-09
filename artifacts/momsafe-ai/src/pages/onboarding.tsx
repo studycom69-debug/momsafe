@@ -1784,37 +1784,6 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
         </div>
       </footer>
 
-      {/* Interactive AI Explainer Modal */}
-      {aiExplainResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative">
-            <button
-              type="button"
-              onClick={() => setAiExplainResult(null)}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100"
-            >
-              <X className="w-4 h-4" />
-            </button>
-            <div className="flex items-center gap-2.5 mb-3 text-[#044735]">
-              <Sparkles className="w-5 h-5" />
-              <h4 className="font-bold text-sm text-slate-900">
-                MomSafe AI Care Assistant
-              </h4>
-            </div>
-            <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              {aiExplainResult.text}
-            </p>
-            <button
-              type="button"
-              onClick={() => setAiExplainResult(null)}
-              className="mt-4 w-full py-2.5 rounded-xl bg-[#044735] text-white text-xs font-bold hover:bg-[#013c2c] transition-colors"
-            >
-              Got It
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Comprehensive Document Reader Modals */}
       {activeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
