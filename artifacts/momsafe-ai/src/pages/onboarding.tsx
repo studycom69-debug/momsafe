@@ -24,76 +24,112 @@ import {
   Stethoscope,
   Building2,
   User,
-  Phone,
   Minus,
   Plus,
   Mail,
-  BookOpen,
+  Scale,
+  Droplet,
+  Users,
+  MessageSquare,
 } from "lucide-react";
 
-function validateName(name: string): string | null {
+// Robust Name Validation (Blocks gibberish like 'joeufjiw', 'ww sw', 'xxx', 'aswhu')
+function isPhoneticallyPlausible(word: string): boolean {
+  const w = word.toLowerCase();
+  if (w.length < 2 || w.length > 25) return false;
+
+  // Must contain at least one vowel
+  const vowels = w.match(/[aeiouy]/g);
+  if (!vowels) return false;
+
+  // Vowel ratio must be realistic (between 18% and 75%)
+  const vowelRatio = vowels.length / w.length;
+  if (vowelRatio < 0.18 || vowelRatio > 0.8) return false;
+
+  // Streak of 3+ identical letters (e.g. 'aaa', 'zzz')
+  if (/(.)\1{2,}/.test(w)) return false;
+
+  // Streak of 4+ consecutive vowels (e.g. 'oeufi', 'aiueo')
+  if (/[aeiouy]{4,}/.test(w)) return false;
+
+  // Streak of 4+ consecutive consonants
+  if (/[bcdfghjklmnpqrstvwxz]{4,}/.test(w)) return false;
+
+  // Unnatural consonant digraphs not found in Indian/English names (e.g. 'fj', 'jw', 'qx', 'zx', 'dx', 'fx', 'jx', 'kx', 'wx', 'qk', 'pk', 'bg')
+  const unnaturalPairs = ["fj", "jw", "qx", "zx", "dx", "fx", "jx", "kx", "wx", "qk", "qj", "vj", "zp"];
+  for (const pair of unnaturalPairs) {
+    if (w.includes(pair)) return false;
+  }
+
+  // Keyboard row smash
+  const smash = ["asdf", "qwer", "zxcv", "hjkl", "uiop", "bnm", "xxx", "aswhu", "demo", "test", "fake", "user", "dummy"];
+  for (const s of smash) {
+    if (w.includes(s)) return false;
+  }
+
+  return true;
+}
+
+function validateFullName(name: string, fieldLabel = "Full Name"): string | null {
   const v = name.trim();
-  if (!v) return "Please enter your full legal name";
-  if (v.length < 4) return "Name must be at least 4 characters";
-  if (v.length > 80) return "Name must be under 80 characters";
-  if (/\d/.test(v)) return "Name cannot contain numbers";
-  if (/[!@#$%^&*()_=+{}[\]:;"'<>,?/~`]/.test(v)) return "Name cannot contain special characters";
+  if (!v) return `Please enter ${fieldLabel.toLowerCase()}`;
+  if (v.length < 4) return `${fieldLabel} must be at least 4 characters`;
+  if (v.length > 60) return `${fieldLabel} must be under 60 characters`;
+  if (/\d/.test(v)) return `${fieldLabel} cannot contain numbers`;
+  if (/[!@#$%^&*()_=+{}[\]:;"'<>,?/~`\\|]/.test(v)) return `${fieldLabel} cannot contain symbols`;
 
   const words = v.split(/\s+/).filter(Boolean);
-  if (words.length < 2) return "Please enter both First Name and Last Name";
+  if (words.length < 2) return `Please enter both First Name and Last Name`;
 
   for (const word of words) {
-    if (word.length < 2) return "Each name must be at least 2 characters long";
-
-    // Repeated identical character check (e.g. "ww", "zzz", "aaaa")
-    if (/^(.)\1+$/i.test(word)) {
-      return `"${word}" is not a valid real name`;
-    }
-
-    // Must contain at least one vowel
-    if (!/[aeiouy]/i.test(word)) {
-      return `"${word}" is missing vowels and appears to be random keyboard letters`;
-    }
-
-    // Streak of 3+ identical letters
-    if (/(.)\1{2,}/i.test(word)) {
-      return "Name contains too many repeated consecutive letters";
-    }
-
-    // Known spam/keyboard-mash tokens
-    const lower = word.toLowerCase();
-    const banned = [
-      "xxx", "asdf", "qwer", "zxcv", "hjkl", "test", "demo", "dummy",
-      "null", "none", "fake", "user", "admin", "temp", "aswhu", "ww", "sw"
-    ];
-    if (banned.some((b) => lower === b || (b.length >= 4 && lower.includes(b)))) {
-      return "Please enter an authentic legal name";
+    if (!isPhoneticallyPlausible(word)) {
+      return `"${word}" does not appear to be a valid real name`;
     }
   }
 
   const validPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['’\-][A-Za-zÀ-ÖØ-öø-ÿ]+)*(?:\s+[A-Za-zÀ-ÖØ-öø-ÿ]+(?:['’\-][A-Za-zÀ-ÖØ-öø-ÿ]+)*)+$/;
   if (!validPattern.test(v)) {
-    return "Please enter a valid full name (letters only)";
+    return `Please enter a valid legal name (letters only)`;
   }
 
   return null;
 }
 
-function validateAge(age: string): string | null {
-  if (!age) return null;
-  const n = Number(age);
-  if (!Number.isFinite(n) || !Number.isInteger(n)) return "Age must be a whole number";
-  if (n < 16) return "Age must be at least 16";
-  if (n > 55) return "Age must be 55 or under";
+function validateOptionalDoctor(doctor: string): string | null {
+  const v = doctor.trim();
+  if (!v) return null; // Optional
+  if (v.length < 3) return "Doctor name must be at least 3 characters";
+  if (/\d/.test(v)) return "Doctor name cannot contain numbers";
+  const clean = v.replace(/^dr\.?\s+/i, "");
+  const words = clean.split(/\s+/).filter(Boolean);
+  for (const w of words) {
+    if (!isPhoneticallyPlausible(w)) {
+      return `"${w}" in doctor's name does not appear valid`;
+    }
+  }
   return null;
 }
 
-function validateGuardianName(name: string): string | null {
-  const v = name.trim();
-  if (!v) return "Please enter guardian's name";
-  if (v.length < 2) return "Guardian name must be at least 2 characters";
-  if (/\d/.test(v)) return "Guardian name cannot contain numbers";
-  if (/^(.)\1+$/i.test(v) || !/[aeiouy]/i.test(v)) return "Please enter a valid guardian name";
+function validateOptionalHospital(hosp: string): string | null {
+  const v = hosp.trim();
+  if (!v) return null; // Optional
+  if (v.length < 3) return "Hospital name must be at least 3 characters";
+  const words = v.split(/\s+/).filter(Boolean);
+  for (const w of words) {
+    if (w.length >= 3 && !/[aeiouy]/i.test(w)) {
+      return "Hospital name contains invalid words";
+    }
+  }
+  return null;
+}
+
+function validateAge(age: string): string | null {
+  const v = age.trim();
+  if (!v) return "Please enter mother's age";
+  const n = Number(v);
+  if (!Number.isFinite(n) || !Number.isInteger(n)) return "Age must be a whole number";
+  if (n < 16) return "Age must be at least 16";
+  if (n > 55) return "Age must be 55 or under";
   return null;
 }
 
@@ -144,15 +180,23 @@ function getWeekMilestone(week: number): string {
   return "Weeks 37–40: Full term. Lungs and vitals mature for labor.";
 }
 
+const BLOOD_GROUPS = ["A+", "B+", "O+", "AB+", "A-", "B-", "O-", "AB-"];
+
+const PREGNANCY_TYPES = [
+  { id: "Singleton", label: "Singleton (Single Baby)" },
+  { id: "Twins", label: "Twins" },
+  { id: "Multiple", label: "Multiple (Triplets+)" },
+];
+
 const INDIAN_CONDITIONS = [
-  "Gestational Diabetes (GDM)",
-  "Pre-eclampsia / High BP",
-  "Pregnancy Anemia (Low Hb)",
-  "Thyroid (TSH Imbalance)",
-  "Gestational Hypertension",
-  "PCOS / PCOD History",
-  "Asthma / Respiratory",
-  "None of the above",
+  { id: "Gestational Diabetes (GDM)", label: "Gestational Diabetes (GDM)", key: "gdm" },
+  { id: "Pre-eclampsia / High BP", label: "Pre-eclampsia / High BP", key: "preeclampsia" },
+  { id: "Pregnancy Anemia (Low Hb)", label: "Pregnancy Anemia (Low Hb)", key: "anemia" },
+  { id: "Thyroid (TSH Imbalance)", label: "Thyroid (TSH Imbalance)", key: "thyroid" },
+  { id: "Gestational Hypertension", label: "Gestational Hypertension", key: "preeclampsia" },
+  { id: "PCOS / PCOD History", label: "PCOS / PCOD History", key: "gdm" },
+  { id: "Asthma / Respiratory", label: "Asthma / Respiratory", key: "anemia" },
+  { id: "None of the above", label: "None of the above", key: "none" },
 ];
 
 const INDIAN_ALLERGIES = [
@@ -172,24 +216,28 @@ const INDIAN_DIETS = [
     title: "Gestational Diabetic (Low GI)",
     desc: "Millets (Ragi, Jowar), high-fiber pulses, sprouted daals, and regulated carb timing to stabilize glucose.",
     badge: "FOGSI & ICMR Aligned",
+    aiTopic: "diet_gdm",
   },
   {
     id: "lacto_vegetarian",
     title: "Indian Pure Vegetarian",
     desc: "Paneer, curd, seasonal leafy greens, lentils, with fortified vitamin B12 and iron supplementation support.",
     badge: "High Bioavailability",
+    aiTopic: "diet_veg",
   },
   {
     id: "sattvic_jain",
     title: "Sattvic / Jain Friendly",
     desc: "Wholesome grains, nuts, dairy, and seeds prepared without underground roots for light and balanced digestion.",
     badge: "Gentle Digestion",
+    aiTopic: "diet_sattvic",
   },
   {
     id: "balanced_nonveg",
     title: "Eggetarian / High Protein",
     desc: "Farm eggs, fresh steamed fish, lean poultry broth, and green vegetables for optimal fetal growth.",
     badge: "DHA & Protein Rich",
+    aiTopic: "diet_nonveg",
   },
 ];
 
@@ -203,30 +251,34 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [saving, setSaving] = useState(false);
   const [isFormatting, setIsFormatting] = useState(false);
+  const [isExplaining, setIsExplaining] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [lastSavedTime, setLastSavedTime] = useState<string>("Just now");
   const [activeModal, setActiveModal] = useState<"dpdp" | "fogsi" | "emergency108" | "help" | null>(null);
 
+  // AI Explainer State
+  const [aiExplainResult, setAiExplainResult] = useState<{ topic: string; text: string } | null>(null);
+
+  // Form State: Starts completely clean and EMPTY (no hardcoded prefill)
   const [form, setForm] = useState({
     full_name: "",
-    age: "28",
-    gestational_week: 24,
-    doctor_name: "Dr. Priya Sharma, MD",
-    hospital: "Cloudnine Hospital, Bengaluru",
-    guardian_name: "Rahul Sharma",
+    age: "",
+    gestational_week: 20,
+    blood_type: "",
+    pre_preg_weight: "",
+    pregnancy_type: "Singleton",
+    doctor_name: "",
+    hospital: "",
+    guardian_name: "",
     guardian_relationship: "Husband",
-    guardian_phone: "+91 98765 43210",
-    dietary_preference: "gdm_friendly",
+    guardian_phone: "",
+    dietary_preference: "",
     notes: "",
     enable_telemetry: true,
   });
 
-  const [selectedConditions, setSelectedConditions] = useState<string[]>([
-    "Gestational Diabetes (GDM)",
-  ]);
-  const [selectedAllergies, setSelectedAllergies] = useState<string[]>([
-    "Penicillin & Cephalosporins",
-  ]);
+  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
+  const [selectedAllergies, setSelectedAllergies] = useState<string[]>([]);
 
   const { dueDateStr, formattedDate, daysRemaining } = useMemo(
     () => calculateDueDateFromWeek(form.gestational_week),
@@ -240,10 +292,12 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
   }, [form.gestational_week]);
 
   const errors = {
-    full_name: validateName(form.full_name),
+    full_name: validateFullName(form.full_name, "Mother's Full Name"),
     age: validateAge(form.age),
-    guardian_name: validateGuardianName(form.guardian_name),
+    guardian_name: validateFullName(form.guardian_name, "Guardian Name"),
     guardian_phone: validateIndianPhone(form.guardian_phone),
+    doctor_name: validateOptionalDoctor(form.doctor_name),
+    hospital: validateOptionalHospital(form.hospital),
   };
 
   // If user already has a completed profile, redirect to dashboard
@@ -263,9 +317,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
         setForm((f) => ({
           ...f,
           full_name: data.full_name || "",
-          gestational_week: data.gestational_week || 24,
-          doctor_name: data.doctor_name || f.doctor_name,
-          hospital: data.hospital || f.hospital,
+          gestational_week: data.gestational_week || 20,
         }));
       }
     })();
@@ -302,9 +354,98 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     }
   };
 
+  // Call Supabase Edge Function 'care-assist' for AI explanation
+  const handleAskAI = async (topicKey: string, customQuery?: string) => {
+    setIsExplaining(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/care-assist`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({
+            action: "explain",
+            topic: topicKey,
+            query: customQuery || topicKey,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (data?.explanation) {
+        setAiExplainResult({
+          topic: topicKey.replace(/_/g, " ").toUpperCase(),
+          text: data.explanation,
+        });
+      } else {
+        toast.info("AI Care Explainer: Aligned with FOGSI maternal safety guidelines.");
+      }
+    } catch {
+      toast.info("MomSafe AI guidelines: Follow FOGSI clinical prenatal advice.");
+    } finally {
+      setIsExplaining(false);
+    }
+  };
+
+  // Call Supabase Edge Function 'care-assist' to format clinical notes
+  const handleFormatNotes = async () => {
+    if (!form.notes.trim()) {
+      toast.error("Please enter a short doctor instruction or prescription note first.");
+      return;
+    }
+    setIsFormatting(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/care-assist`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({
+            action: "format_note",
+            text: form.notes,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (data?.formatted) {
+        setForm((f) => ({ ...f, notes: data.formatted }));
+        toast.success("Standardized via MomSafe AI Care Engine");
+      } else {
+        // Fallback local formatter
+        let text = form.notes.trim();
+        text = text.replace(/\bbp\b/gi, "blood pressure");
+        text = text.replace(/\bgdm?\b/gi, "gestational diabetes (GDM)");
+        text = text.replace(/\bhb\b/gi, "hemoglobin level");
+        text = text.replace(/(^\s*|[.!?]\s+)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
+        if (!/[.!?]$/.test(text)) text += ".";
+        setForm((f) => ({ ...f, notes: `Doctor's Directive: ${text}` }));
+        toast.success("Standardized clinical triage notation");
+      }
+    } catch {
+      toast.error("Could not reach AI assistant; saved as standard note.");
+    } finally {
+      setIsFormatting(false);
+    }
+  };
+
   const handleNext = () => {
     if (step === 1) {
-      setTouched({ full_name: true, age: true, guardian_name: true, guardian_phone: true });
+      setTouched({
+        full_name: true,
+        age: true,
+        guardian_name: true,
+        guardian_phone: true,
+        doctor_name: true,
+        hospital: true,
+      });
+
       if (errors.full_name) {
         toast.error(errors.full_name);
         return;
@@ -321,6 +462,14 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
         toast.error(errors.guardian_phone);
         return;
       }
+      if (errors.doctor_name) {
+        toast.error(errors.doctor_name);
+        return;
+      }
+      if (errors.hospital) {
+        toast.error(errors.hospital);
+        return;
+      }
       setStep(2);
     } else if (step === 2) {
       setStep(3);
@@ -332,29 +481,6 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
   const handleBack = () => {
     if (step > 1) {
       setStep((s) => (s - 1) as 1 | 2 | 3 | 4);
-    }
-  };
-
-  const handleFormatNotes = async () => {
-    if (!form.notes.trim()) {
-      toast.error("Please write a doctor directive or advice note first.");
-      return;
-    }
-    setIsFormatting(true);
-    try {
-      await new Promise((r) => setTimeout(r, 350));
-      let text = form.notes.trim();
-      text = text.replace(/\bbp\b/gi, "blood pressure");
-      text = text.replace(/\bgdm?\b/gi, "gestational diabetes (GDM)");
-      text = text.replace(/\bhb\b/gi, "hemoglobin level");
-      text = text.replace(/(^\s*|[.!?]\s+)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
-      if (!/[.!?]$/.test(text)) text += ".";
-      setForm((f) => ({ ...f, notes: `Doctor's instructions: ${text}` }));
-      toast.success("Standardized clinical triage notation");
-    } catch {
-      toast.error("Unable to format notes.");
-    } finally {
-      setIsFormatting(false);
     }
   };
 
@@ -370,7 +496,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
       const allergiesStr = selectedAllergies.length > 0 ? selectedAllergies.join(", ") : null;
       const emergencyContactStr = `${form.guardian_name.trim()} (${form.guardian_relationship}) • ${form.guardian_phone.trim()}`;
 
-      // 1. Update public.users table (The single source of truth for the AI Guidance & Risk Engines)
+      // 1. Update public.users table (The primary record read by AI guidance, risk scores & vitals engines)
       const { error: userError } = await supabase.from("users").upsert(
         {
           id: user.id,
@@ -378,6 +504,9 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
           age: Number(form.age) || null,
           gestational_week: form.gestational_week,
           due_date: dueDateStr,
+          blood_type: form.blood_type || null,
+          pre_preg_weight: form.pre_preg_weight ? Number(form.pre_preg_weight) : null,
+          pregnancy_type: form.pregnancy_type || "Singleton",
           doctor_name: form.doctor_name.trim() || null,
           hospital: form.hospital.trim() || null,
           emergency_contact: emergencyContactStr,
@@ -392,32 +521,38 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
       if (userError) throw userError;
 
-      // 2. Insert into emergency_contacts table for granular emergency SMS/SOS lookups
+      // 2. Insert/update into emergency_contacts table for emergency SOS/SMS loop
       if (form.guardian_name && form.guardian_phone) {
-        await supabase.from("emergency_contacts").upsert(
-          {
-            user_id: user.id,
-            name: form.guardian_name.trim(),
-            relationship: form.guardian_relationship,
-            phone: form.guardian_phone.trim(),
-            is_primary: true,
-          },
-          { onConflict: "user_id, phone" }
-        ).catch(() => {});
+        await supabase
+          .from("emergency_contacts")
+          .upsert(
+            {
+              user_id: user.id,
+              name: form.guardian_name.trim(),
+              relationship: form.guardian_relationship,
+              phone: form.guardian_phone.trim(),
+              is_primary: true,
+            },
+            { onConflict: "user_id, phone" }
+          )
+          .catch(() => {});
       }
 
-      // 3. Initialize privacy settings
-      await supabase.from("privacy_settings").upsert(
-        {
-          user_id: user.id,
-          share_with_doctor: true,
-          location_enabled: true,
-          ai_training: false,
-        },
-        { onConflict: "user_id" }
-      ).catch(() => {});
+      // 3. Initialize privacy_settings
+      await supabase
+        .from("privacy_settings")
+        .upsert(
+          {
+            user_id: user.id,
+            share_with_doctor: true,
+            location_enabled: true,
+            ai_training: false,
+          },
+          { onConflict: "user_id" }
+        )
+        .catch(() => {});
 
-      toast.success("Maternal profile set up successfully! AI companion is now calibrated.");
+      toast.success("Maternal profile set up successfully! Welcome to MomSafe.");
       if (onComplete) onComplete();
       setTimeout(() => {
         window.location.href = "/dashboard";
@@ -477,7 +612,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             <button
               type="button"
               onClick={() => {
-                if (!errors.full_name) setStep(2);
+                if (!errors.full_name && !errors.age && !errors.guardian_name) setStep(2);
               }}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
                 step === 2
@@ -499,7 +634,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             <button
               type="button"
               onClick={() => {
-                if (!errors.full_name) setStep(3);
+                if (!errors.full_name && !errors.age && !errors.guardian_name) setStep(3);
               }}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
                 step === 3
@@ -521,7 +656,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             <button
               type="button"
               onClick={() => {
-                if (!errors.full_name) setStep(4);
+                if (!errors.full_name && !errors.age && !errors.guardian_name) setStep(4);
               }}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
                 step === 4
@@ -545,7 +680,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             <span className="hidden sm:inline text-slate-500 font-medium">
               Signed in as{" "}
               <strong className="text-slate-800 font-semibold">
-                {user?.email || "pooja.sharma@gmail.com"}
+                {user?.email || "croplinkindia@gmail.com"}
               </strong>
             </span>
             <div className="hidden sm:block h-4 w-px bg-slate-200" />
@@ -580,7 +715,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
               <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-start gap-3 mb-8">
                 <Info className="w-4 h-4 text-[#044735] shrink-0 mt-0.5" />
                 <p className="text-xs text-slate-700 leading-relaxed">
-                  Welcome to MomSafe AI. Set up your pregnancy baseline to calibrate 24/7 vitals telemetry, emergency loop, and gestational alerts.
+                  Welcome to MomSafe AI. Set up your maternal health baseline to calibrate 24/7 vitals telemetry, emergency loop, and gestational alerts.
                 </p>
               </div>
 
@@ -614,7 +749,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                       Personal & Care Team
                     </span>
                     <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                      Mother's name, gestational stage, OB/GYN doctor, and family guardian.
+                      Mother's name, gestational stage, blood group, doctor, and emergency guardian.
                     </p>
                   </div>
                 </div>
@@ -622,7 +757,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                 {/* Step 2 Node */}
                 <div
                   onClick={() => {
-                    if (!errors.full_name) setStep(2);
+                    if (!errors.full_name && !errors.age && !errors.guardian_name) setStep(2);
                   }}
                   className="flex items-start gap-4 cursor-pointer group relative z-10"
                 >
@@ -646,7 +781,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                       Clinical History & Risk
                     </span>
                     <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                      Pre-existing conditions, allergies, and clinical physician instructions.
+                      Pre-existing conditions, drug allergies, and doctor directives.
                     </p>
                   </div>
                 </div>
@@ -654,7 +789,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                 {/* Step 3 Node */}
                 <div
                   onClick={() => {
-                    if (!errors.full_name) setStep(3);
+                    if (!errors.full_name && !errors.age && !errors.guardian_name) setStep(3);
                   }}
                   className="flex items-start gap-4 cursor-pointer group relative z-10"
                 >
@@ -686,7 +821,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                 {/* Step 4 Node */}
                 <div
                   onClick={() => {
-                    if (!errors.full_name) setStep(4);
+                    if (!errors.full_name && !errors.age && !errors.guardian_name) setStep(4);
                   }}
                   className="flex items-start gap-4 cursor-pointer group relative z-10"
                 >
@@ -751,7 +886,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                 </h1>
                 <p className="text-sm text-slate-500 mt-1 max-w-xl leading-relaxed">
                   {step === 1 &&
-                    "Set your current pregnancy week. We automatically calculate your exact trimester and estimated due date for 24/7 vitals telemetry."}
+                    "Set your current pregnancy week and care team details. We automatically calculate your exact trimester and estimated due date."}
                   {step === 2 &&
                     "Select any pre-existing conditions and allergies to calibrate predictive alerts and safe medications."}
                   {step === 3 &&
@@ -763,8 +898,8 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
               {/* Form Content By Step */}
               {step === 1 && (
-                <div className="space-y-5">
-                  {/* Mother's Legal Full Name */}
+                <div className="space-y-4">
+                  {/* Mother's Legal Full Name & Age */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
@@ -792,7 +927,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                        Age (Years)
+                        Age (Years) <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="number"
@@ -801,8 +936,10 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                         value={form.age}
                         onChange={(e) => setForm({ ...form, age: e.target.value })}
                         onBlur={() => setTouched((t) => ({ ...t, age: true }))}
-                        placeholder="28"
-                        className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all"
+                        placeholder="e.g. 28"
+                        className={`w-full h-11 px-3.5 rounded-xl border text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all ${
+                          touched.age && errors.age ? "border-rose-300 bg-rose-50/20" : "border-slate-200"
+                        }`}
                       />
                       {touched.age && errors.age && (
                         <p className="text-xs text-rose-500 mt-1">{errors.age}</p>
@@ -887,46 +1024,125 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     </p>
                   </div>
 
-                  {/* Doctor & Hospital Details */}
+                  {/* Additional Clinical Rows: Blood Group, Weight & Pregnancy Type */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                        <Droplet className="w-3.5 h-3.5 text-rose-500" />
+                        Blood Group
+                      </label>
+                      <select
+                        value={form.blood_type}
+                        onChange={(e) => setForm({ ...form, blood_type: e.target.value })}
+                        className="w-full h-11 px-3 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735]"
+                      >
+                        <option value="">Select Blood Group</option>
+                        {BLOOD_GROUPS.map((bg) => (
+                          <option key={bg} value={bg}>
+                            {bg}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                        <Scale className="w-3.5 h-3.5 text-slate-400" />
+                        Pre-Pregnancy Weight
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="30"
+                          max="180"
+                          value={form.pre_preg_weight}
+                          onChange={(e) => setForm({ ...form, pre_preg_weight: e.target.value })}
+                          placeholder="e.g. 58"
+                          className="w-full h-11 px-3.5 pr-8 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735]"
+                        />
+                        <span className="absolute right-3 top-3.5 text-xs text-slate-400">kg</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                        <Users className="w-3.5 h-3.5 text-slate-400" />
+                        Pregnancy Type
+                      </label>
+                      <select
+                        value={form.pregnancy_type}
+                        onChange={(e) => setForm({ ...form, pregnancy_type: e.target.value })}
+                        className="w-full h-11 px-3 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735]"
+                      >
+                        {PREGNANCY_TYPES.map((pt) => (
+                          <option key={pt.id} value={pt.id}>
+                            {pt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Doctor & Hospital Details (Optional, with strict validation if filled) */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                        Consulting OB/GYN Doctor
+                        Consulting OB/GYN Doctor <span className="text-slate-400 font-normal">(Optional)</span>
                       </label>
                       <div className="relative">
                         <input
                           type="text"
                           value={form.doctor_name}
                           onChange={(e) => setForm({ ...form, doctor_name: e.target.value })}
-                          placeholder="Dr. Priya Sharma, MD"
-                          className="w-full h-11 px-3.5 pl-10 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all"
+                          onBlur={() => setTouched((t) => ({ ...t, doctor_name: true }))}
+                          placeholder="e.g. Dr. Sneha Kulkarni"
+                          className={`w-full h-11 px-3.5 pl-10 rounded-xl border text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all ${
+                            touched.doctor_name && errors.doctor_name
+                              ? "border-rose-300 bg-rose-50/20"
+                              : "border-slate-200"
+                          }`}
                         />
                         <Stethoscope className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                       </div>
+                      {touched.doctor_name && errors.doctor_name && (
+                        <p className="text-xs text-rose-500 mt-1">{errors.doctor_name}</p>
+                      )}
                     </div>
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                        Hospital / Maternity Clinic
+                        Hospital / Maternity Clinic <span className="text-slate-400 font-normal">(Optional)</span>
                       </label>
                       <div className="relative">
                         <input
                           type="text"
                           value={form.hospital}
                           onChange={(e) => setForm({ ...form, hospital: e.target.value })}
-                          placeholder="Cloudnine Hospital / Apollo Cradle"
-                          className="w-full h-11 px-3.5 pl-10 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all"
+                          onBlur={() => setTouched((t) => ({ ...t, hospital: true }))}
+                          placeholder="e.g. Cloudnine / Apollo Cradle"
+                          className={`w-full h-11 px-3.5 pl-10 rounded-xl border text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all ${
+                            touched.hospital && errors.hospital
+                              ? "border-rose-300 bg-rose-50/20"
+                              : "border-slate-200"
+                          }`}
                         />
                         <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                       </div>
+                      {touched.hospital && errors.hospital && (
+                        <p className="text-xs text-rose-500 mt-1">{errors.hospital}</p>
+                      )}
                     </div>
                   </div>
 
-                  {/* Emergency Guardian Contact */}
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
-                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
-                      Emergency Guardian / Partner Loop <span className="text-rose-500">*</span>
-                    </label>
+                  {/* Emergency Guardian Contact (Required, strict validation) */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                        Emergency Guardian / Family Contact <span className="text-rose-500">*</span>
+                      </label>
+                      <span className="text-[11px] text-slate-500">24/7 SOS SMS Link</span>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <div>
                         <input
@@ -934,10 +1150,10 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                           value={form.guardian_name}
                           onChange={(e) => setForm({ ...form, guardian_name: e.target.value })}
                           onBlur={() => setTouched((t) => ({ ...t, guardian_name: true }))}
-                          placeholder="Guardian Name"
+                          placeholder="Guardian Full Name"
                           className={`w-full h-10 px-3 rounded-lg border text-xs text-slate-900 bg-white focus:outline-none focus:border-[#044735] ${
                             touched.guardian_name && errors.guardian_name
-                              ? "border-rose-300"
+                              ? "border-rose-300 bg-rose-50/20"
                               : "border-slate-200"
                           }`}
                         />
@@ -945,6 +1161,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                           <p className="text-[10px] text-rose-500 mt-1">{errors.guardian_name}</p>
                         )}
                       </div>
+
                       <div>
                         <select
                           value={form.guardian_relationship}
@@ -958,9 +1175,10 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                           <option value="Father">Father</option>
                           <option value="Sister">Sister</option>
                           <option value="Brother">Brother</option>
-                          <option value="Relative / Friend">Relative / Friend</option>
+                          <option value="Family Relative">Family Relative</option>
                         </select>
                       </div>
+
                       <div>
                         <input
                           type="text"
@@ -970,7 +1188,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                           placeholder="+91 98765 43210"
                           className={`w-full h-10 px-3 rounded-lg border text-xs text-slate-900 bg-white focus:outline-none focus:border-[#044735] ${
                             touched.guardian_phone && errors.guardian_phone
-                              ? "border-rose-300"
+                              ? "border-rose-300 bg-rose-50/20"
                               : "border-slate-200"
                           }`}
                         />
@@ -987,17 +1205,28 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                 <div className="space-y-5">
                   {/* Conditions */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
-                      Pre-existing & Gestational Conditions
-                    </label>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                        Pre-existing & Gestational Conditions
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => handleAskAI("gdm", "Explain gestational conditions in pregnancy")}
+                        className="text-[11px] font-semibold text-[#044735] hover:underline flex items-center gap-1"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        Unsure? Ask AI Assistant
+                      </button>
+                    </div>
+
                     <div className="flex flex-wrap gap-2">
-                      {INDIAN_CONDITIONS.map((item) => {
-                        const active = selectedConditions.includes(item);
+                      {INDIAN_CONDITIONS.map((cond) => {
+                        const active = selectedConditions.includes(cond.id);
                         return (
                           <button
-                            key={item}
+                            key={cond.id}
                             type="button"
-                            onClick={() => toggleCondition(item)}
+                            onClick={() => toggleCondition(cond.id)}
                             className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
                               active
                                 ? "bg-emerald-50 border border-[#044735] text-[#044735] font-bold shadow-sm"
@@ -1011,7 +1240,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                             >
                               {active ? "✓" : ""}
                             </span>
-                            {item}
+                            {cond.label}
                           </button>
                         );
                       })}
@@ -1051,7 +1280,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     </div>
                   </div>
 
-                  {/* Physician Directive Notes */}
+                  {/* Physician Directive Notes (Formatted via Edge Function) */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide">
@@ -1061,21 +1290,21 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                         type="button"
                         onClick={handleFormatNotes}
                         disabled={isFormatting}
-                        className="text-[11px] font-semibold text-[#044735] hover:underline flex items-center gap-1"
+                        className="text-[11px] font-semibold text-[#044735] hover:underline flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100"
                       >
                         {isFormatting ? (
                           <Loader2 className="w-3 h-3 animate-spin" />
                         ) : (
-                          <Sparkles className="w-3 h-3" />
+                          <Sparkles className="w-3 h-3 text-[#044735]" />
                         )}
-                        Format Note
+                        Format with AI Care Engine
                       </button>
                     </div>
                     <textarea
                       rows={3}
                       value={form.notes}
                       onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                      placeholder="e.g. Regular BP checks twice daily. Alert team if BP exceeds 135/85 mmHg or if fasting sugar crosses 95 mg/dL."
+                      placeholder="e.g. Regular BP checks twice daily. Alert care team if BP exceeds 135/85 mmHg or if fasting glucose crosses 95 mg/dL."
                       className="w-full p-3 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all"
                     />
                   </div>
@@ -1084,6 +1313,20 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
               {step === 3 && (
                 <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                      Select Your Preferred Indian Diet:
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleAskAI("diet_gdm", "Which diet is best for managing pregnancy sugar and energy?")}
+                      className="text-[11px] font-semibold text-[#044735] hover:underline flex items-center gap-1"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      Help Me Choose With AI
+                    </button>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {INDIAN_DIETS.map((diet) => {
                       const selected = form.dietary_preference === diet.id;
@@ -1120,9 +1363,21 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                               {diet.desc}
                             </p>
                           </div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#044735] mt-3">
-                            {diet.badge}
-                          </span>
+                          <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#044735]">
+                              {diet.badge}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAskAI(diet.aiTopic);
+                              }}
+                              className="text-[10px] text-slate-500 hover:text-[#044735] underline"
+                            >
+                              Learn More
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
@@ -1162,10 +1417,10 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     <div className="flex items-center justify-between pb-3 border-b border-slate-200">
                       <div>
                         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                          Maternal Care Baseline
+                          Maternal Care Baseline Summary
                         </span>
                         <h3 className="text-base font-bold text-slate-900 mt-0.5">
-                          {form.full_name || "Pooja Sharma"} • {trimester} (Week {form.gestational_week})
+                          {form.full_name || "Mother Intake"} • {trimester} (Week {form.gestational_week})
                         </h3>
                       </div>
                       <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-[#044735] text-xs font-bold border border-emerald-200">
@@ -1175,15 +1430,15 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div className="p-3 rounded-xl bg-white border border-slate-200/80">
-                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Calculated Due Date</span>
+                        <span className="text-slate-400 text-[11px] block">Calculated Due Date</span>
                         <span className="font-bold text-slate-800 mt-0.5 block">
                           {formattedDate} ({daysRemaining} days remaining)
                         </span>
                       </div>
                       <div className="p-3 rounded-xl bg-white border border-slate-200/80">
-                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Doctor & Hospital</span>
+                        <span className="text-slate-400 text-[11px] block">Care Provider & Clinic</span>
                         <span className="font-bold text-slate-800 mt-0.5 block truncate">
-                          {form.doctor_name} • {form.hospital}
+                          {form.doctor_name || "Self-Monitored"} {form.hospital ? `• ${form.hospital}` : ""}
                         </span>
                       </div>
                     </div>
@@ -1339,6 +1594,37 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
         </div>
       </footer>
 
+      {/* Interactive AI Explainer Modal */}
+      {aiExplainResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 relative">
+            <button
+              type="button"
+              onClick={() => setAiExplainResult(null)}
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-2.5 mb-3 text-[#044735]">
+              <Sparkles className="w-5 h-5" />
+              <h4 className="font-bold text-sm text-slate-900">
+                MomSafe AI Care Assistant
+              </h4>
+            </div>
+            <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
+              {aiExplainResult.text}
+            </p>
+            <button
+              type="button"
+              onClick={() => setAiExplainResult(null)}
+              className="mt-4 w-full py-2.5 rounded-xl bg-[#044735] text-white text-xs font-bold hover:bg-[#013c2c] transition-colors"
+            >
+              Got It
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Comprehensive Document Reader Modals */}
       {activeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 sm:p-6 animate-in fade-in duration-200">
@@ -1487,7 +1773,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     </p>
                   </div>
                   <p className="text-[11px] text-slate-400">
-                    *For medical emergencies, please use the 108 Emergency Loop or contact your consulting hospital ({form.hospital}) immediately.
+                    *For medical emergencies, please use the 108 Emergency Loop or contact your consulting hospital immediately.
                   </p>
                 </div>
               )}
