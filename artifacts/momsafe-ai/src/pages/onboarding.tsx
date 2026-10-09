@@ -1,27 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLocation } from "wouter";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
 import {
   Heart,
-  HeartPulse,
-  User,
-  Calendar,
-  Stethoscope,
   ChevronRight,
   ChevronLeft,
   Loader2,
   Sparkles,
   RotateCcw,
   ShieldCheck,
-  Activity,
-  AlertCircle,
   Check,
   Lock,
   Baby,
-  Utensils,
-  Phone,
   HelpCircle,
   LogOut,
   FileText,
@@ -30,9 +22,12 @@ import {
   CheckCircle2,
   Clock,
   X,
-  Hospital,
-  MapPin,
-  Flame,
+  Stethoscope,
+  Building2,
+  User,
+  Phone,
+  Minus,
+  Plus,
 } from "lucide-react";
 
 function validateName(name: string): string | null {
@@ -44,11 +39,9 @@ function validateName(name: string): string | null {
   const bad = /(.)\1{3,}/;
   if (bad.test(v)) return "Name looks invalid (too many repeated characters)";
   const re = /^[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ'’\-\s.]{1,79}$/;
-  if (!re.test(v)) return "Please enter a proper real name (letters only)";
+  if (!re.test(v)) return "Please enter letters only";
   const words = v.split(/\s+/).filter(Boolean);
-  if (words.length < 2) return "Please enter your full name (first and last)";
-  const banned = /^(xyz|abc|test|user|demo|qwe|asd|poop|fuck|shit|123|none|null|fake)$/i;
-  for (const w of words) if (banned.test(w.replace(/[^a-z]/gi, ""))) return "Please enter a proper name";
+  if (words.length < 2) return "Please enter first and last name";
   return null;
 }
 
@@ -61,107 +54,91 @@ function validateAge(age: string): string | null {
   return null;
 }
 
-function validateWeek(w: string): string | null {
-  if (!w) return null;
-  const n = Number(w);
-  if (!Number.isFinite(n) || !Number.isInteger(n)) return "Week must be a whole number";
-  if (n < 1 || n > 42) return "Week must be between 1 and 42";
-  return null;
+function calculateDueDateFromWeek(currentWeek: number): {
+  dueDateStr: string;
+  formattedDate: string;
+  daysRemaining: number;
+} {
+  const safeWeek = Math.max(1, Math.min(42, currentWeek));
+  const remainingWeeks = 40 - safeWeek;
+  const targetDate = new Date();
+  targetDate.setDate(targetDate.getDate() + remainingWeeks * 7);
+
+  const yyyy = targetDate.getFullYear();
+  const mm = String(targetDate.getMonth() + 1).padStart(2, "0");
+  const dd = String(targetDate.getDate()).padStart(2, "0");
+  const dueDateStr = `${yyyy}-${mm}-${dd}`;
+
+  const formattedDate = targetDate.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const diffTime = targetDate.getTime() - new Date().getTime();
+  const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+  return { dueDateStr, formattedDate, daysRemaining };
 }
 
-function validateDueDate(d: string): string | null {
-  if (!d) return null;
-  const dt = new Date(d);
-  if (isNaN(dt.getTime())) return "Please select a valid date";
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const min = new Date(today);
-  min.setDate(min.getDate() - 294);
-  const max = new Date(today);
-  max.setDate(max.getDate() + 294);
-  if (dt < min) return "Due date cannot be more than 42 weeks ago";
-  if (dt > max) return "Due date cannot be more than 42 weeks ahead";
-  return null;
+function getWeekMilestone(week: number): string {
+  if (week <= 8) return "Early embryonic stage: Vital organs and neural tube forming.";
+  if (week <= 12) return "End of 1st Trimester: Baby's heartbeat is clearly detectable.";
+  if (week <= 16) return "Week 16: Rapid growth, baby's facial expressions developing.";
+  if (week <= 20) return "Week 20: Mid-pregnancy anatomy scan milestone; first kicks felt.";
+  if (week <= 24) return "Week 24: Baby's hearing formed; lungs producing surfactant.";
+  if (week <= 28) return "Week 28: Third trimester begins; baby opens eyes and recognizes maternal voice.";
+  if (week <= 32) return "Week 32: Rapid bone ossification; baby practicing breathing motions.";
+  if (week <= 36) return "Week 36: Baby descending into pelvic cradle; preparing for delivery.";
+  return "Weeks 37–40: Full term. Lungs and vitals mature for labor.";
 }
 
-function formatClinicalNotes(raw: string): string {
-  let text = raw.trim();
-  if (!text) return "";
-
-  const replacements: [RegExp, string][] = [
-    [/\bbp\b/gi, "blood pressure"],
-    [/\bgd\b|\bgdm\b/gi, "gestational diabetes (GDM)"],
-    [/\bhg\b/gi, "hyperemesis gravidarum (severe nausea)"],
-    [/\bhb\b/gi, "hemoglobin/iron levels"],
-    [/\bc[-\s]?sec\b|\bcsection\b/gi, "previous Caesarean delivery"],
-    [/\bpuking\b|\bvomit(ing)?\b/gi, "nausea and vomiting"],
-    [/\bdizzy\b/gi, "dizziness"],
-    [/\bfaint(ing)?\b/gi, "lightheadedness"],
-    [/\bsugar spike(s)?\b/gi, "elevated post-meal blood glucose"],
-    [/\btired(ness)?\b/gi, "maternal fatigue"],
-    [/\bswelling\b|\bedema\b/gi, "pedal edema / swelling"],
-  ];
-
-  for (const [pattern, replacement] of replacements) {
-    text = text.replace(pattern, replacement);
-  }
-
-  text = text.replace(/(^\s*|[.!?]\s+)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
-  if (!/[.!?]$/.test(text)) text += ".";
-
-  return `Doctor's instructions: ${text}`;
-}
-
-const INDIAN_CONDITION_OPTIONS = [
+const INDIAN_CONDITIONS = [
   "Gestational Diabetes (GDM)",
   "Pre-eclampsia / High BP",
   "Pregnancy Anemia (Low Hb)",
-  "Thyroid (Hypothyroid / TSH)",
+  "Thyroid (TSH Imbalance)",
   "Gestational Hypertension",
   "PCOS / PCOD History",
   "Asthma / Respiratory",
   "None of the above",
 ];
 
-const INDIAN_ALLERGY_OPTIONS = [
+const INDIAN_ALLERGIES = [
   "Penicillin & Cephalosporins",
   "Sulfa Antibiotics",
   "Paracetamol / NSAIDs",
-  "Peanuts / Groundnuts",
+  "Peanuts & Tree Nuts",
   "Dairy / Cow's Milk",
   "Soy / Gluten",
   "Latex Sensitivity",
   "No Known Drug Allergies",
 ];
 
-const INDIAN_DIETARY_PLANS = [
+const INDIAN_DIETS = [
   {
     id: "gdm_friendly",
-    title: "Gestational Diabetic & Low Glycemic",
-    desc: "Millets (Ragi, Jowar), high-fiber pulses, sprouted daals, and regulated carb timing to prevent post-prandial spikes.",
-    badge: "ICMR & FOGSI Aligned",
-    tag: "Low GI Indian Diet",
+    title: "Gestational Diabetic (Low GI)",
+    desc: "Millets (Ragi, Jowar), high-fiber pulses, sprouted daals, and regulated carb timing to stabilize glucose.",
+    badge: "FOGSI & ICMR Aligned",
   },
   {
     id: "lacto_vegetarian",
-    title: "Indian Pure Vegetarian (Lacto)",
-    desc: "Paneer, curd, green leafy vegetables, lentils, and fortified vitamin B12 & iron supplementation support.",
-    badge: "Balanced Protein",
-    tag: "Lacto-Vegetarian",
+    title: "Indian Pure Vegetarian",
+    desc: "Paneer, curd, seasonal leafy greens, lentils, with fortified vitamin B12 and iron supplementation support.",
+    badge: "High Bioavailability",
   },
   {
     id: "sattvic_jain",
     title: "Sattvic / Jain Friendly",
-    desc: "Wholesome grains, nuts, dairy, and seeds prepared without underground roots, optimized for maternal nourishment.",
+    desc: "Wholesome grains, nuts, dairy, and seeds prepared without underground roots for light and balanced digestion.",
     badge: "Gentle Digestion",
-    tag: "Sattvic Guidelines",
   },
   {
     id: "balanced_nonveg",
-    title: "Eggetarian / High Protein Non-Veg",
-    desc: "Farm eggs, steamed fresh river fish, lean poultry broth, and green vegetables for optimal fetal brain growth.",
-    badge: "DHA & Choline Rich",
-    tag: "Non-Veg Balanced",
+    title: "Eggetarian / High Protein",
+    desc: "Farm eggs, fresh steamed fish, lean poultry broth, and green vegetables for optimal fetal growth.",
+    badge: "DHA & Protein Rich",
   },
 ];
 
@@ -182,11 +159,13 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
   const [form, setForm] = useState({
     full_name: "",
-    age: "",
-    gestational_week: "",
-    due_date: "",
-    doctor_name: "",
-    emergency_contact: "",
+    age: "28",
+    gestational_week: 24,
+    doctor_name: "Dr. Priya Sharma, MD",
+    hospital: "Cloudnine Hospital, Bengaluru",
+    guardian_name: "Rahul Sharma",
+    guardian_relationship: "Husband",
+    guardian_phone: "+91 98765 43210",
     dietary_preference: "gdm_friendly",
     notes: "",
     enable_telemetry: true,
@@ -199,11 +178,25 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     "Penicillin & Cephalosporins",
   ]);
 
+  const { dueDateStr, formattedDate, daysRemaining } = useMemo(
+    () => calculateDueDateFromWeek(form.gestational_week),
+    [form.gestational_week]
+  );
+
+  const trimester = useMemo(() => {
+    if (form.gestational_week >= 28) return "Third Trimester";
+    if (form.gestational_week >= 13) return "Second Trimester";
+    return "First Trimester";
+  }, [form.gestational_week]);
+
+  const progressPercent = useMemo(
+    () => Math.min(100, Math.max(5, Math.round((form.gestational_week / 40) * 100))),
+    [form.gestational_week]
+  );
+
   const errors = {
     full_name: validateName(form.full_name),
     age: validateAge(form.age),
-    gestational_week: validateWeek(form.gestational_week),
-    due_date: validateDueDate(form.due_date),
   };
 
   // If user already has a completed profile, redirect to dashboard
@@ -212,44 +205,29 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     (async () => {
       const { data } = await supabase
         .from("users")
-        .select("full_name, onboarding_completed")
+        .select("full_name, onboarding_completed, gestational_week, doctor_name, hospital")
         .eq("id", user.id)
         .maybeSingle();
+
       if (data?.onboarding_completed && data?.full_name) {
         if (onComplete) onComplete();
         window.location.href = "/dashboard";
       } else if (data?.full_name && !form.full_name) {
-        setForm((f) => ({ ...f, full_name: data.full_name }));
+        setForm((f) => ({
+          ...f,
+          full_name: data.full_name || "",
+          gestational_week: data.gestational_week || 24,
+          doctor_name: data.doctor_name || f.doctor_name,
+          hospital: data.hospital || f.hospital,
+        }));
       }
     })();
   }, [user, onComplete]);
 
-  // Set mock last saved time
   useEffect(() => {
-    const timer = setInterval(() => {
-      setLastSavedTime("1m ago");
-    }, 60000);
+    const timer = setInterval(() => setLastSavedTime("1m ago"), 60000);
     return () => clearInterval(timer);
   }, []);
-
-  // Auto-calculate due date from gestational week
-  useEffect(() => {
-    const week = Number(form.gestational_week);
-    if (week >= 1 && week <= 42 && !form.due_date) {
-      const remaining = 40 - week;
-      const due = new Date(Date.now() + remaining * 7 * 24 * 60 * 60 * 1000);
-      setForm((f) => ({ ...f, due_date: due.toISOString().split("T")[0] }));
-    }
-  }, [form.gestational_week]);
-
-  // Auto-calculate gestational week from due date
-  useEffect(() => {
-    if (!form.due_date) return;
-    const due = new Date(form.due_date);
-    const remaining = Math.round((due.getTime() - Date.now()) / (7 * 24 * 60 * 60 * 1000));
-    const week = Math.max(1, Math.min(42, 40 - remaining));
-    setForm((f) => ({ ...f, gestational_week: String(week) }));
-  }, [form.due_date]);
 
   const toggleCondition = (item: string) => {
     if (item === "None of the above") {
@@ -279,13 +257,13 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
   const handleNext = () => {
     if (step === 1) {
-      setTouched({ full_name: true, age: true, gestational_week: true, due_date: true });
+      setTouched({ full_name: true, age: true });
       if (errors.full_name) {
         toast.error(errors.full_name);
         return;
       }
-      if (errors.age || errors.gestational_week || errors.due_date) {
-        toast.error("Please correct the highlighted fields before continuing.");
+      if (errors.age) {
+        toast.error("Please enter a valid age.");
         return;
       }
       setStep(2);
@@ -304,28 +282,25 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
   const handleFormatNotes = async () => {
     if (!form.notes.trim()) {
-      toast.error("Please enter a short doctor advice note or symptom first.");
+      toast.error("Please write a short doctor instruction first.");
       return;
     }
     setIsFormatting(true);
     setOriginalNotes(form.notes);
     try {
-      await new Promise((r) => setTimeout(r, 400));
-      const polished = formatClinicalNotes(form.notes);
-      setForm((f) => ({ ...f, notes: polished }));
-      toast.success("Standardized into clinical triage notation");
+      await new Promise((r) => setTimeout(r, 350));
+      let text = form.notes.trim();
+      text = text.replace(/\bbp\b/gi, "blood pressure");
+      text = text.replace(/\bgdm?\b/gi, "gestational diabetes (GDM)");
+      text = text.replace(/\bhb\b/gi, "hemoglobin level");
+      text = text.replace(/(^\s*|[.!?]\s+)([a-z])/g, (_, p1, p2) => p1 + p2.toUpperCase());
+      if (!/[.!?]$/.test(text)) text += ".";
+      setForm((f) => ({ ...f, notes: `Doctor's instructions: ${text}` }));
+      toast.success("Standardized clinical notation");
     } catch {
-      toast.error("Unable to format notes right now.");
+      toast.error("Unable to format notes.");
     } finally {
       setIsFormatting(false);
-    }
-  };
-
-  const handleUndoFormat = () => {
-    if (originalNotes !== null) {
-      setForm((f) => ({ ...f, notes: originalNotes }));
-      setOriginalNotes(null);
-      toast.info("Restored original notes");
     }
   };
 
@@ -339,16 +314,19 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     try {
       const conditionsStr = selectedConditions.length > 0 ? selectedConditions.join(", ") : null;
       const allergiesStr = selectedAllergies.length > 0 ? selectedAllergies.join(", ") : null;
+      const emergencyContactStr = `${form.guardian_name.trim()} (${form.guardian_relationship}) • ${form.guardian_phone.trim()}`;
 
-      const { error } = await supabase.from("users").upsert(
+      // 1. Update public.users
+      const { error: userError } = await supabase.from("users").upsert(
         {
           id: user.id,
           full_name: form.full_name.trim(),
           age: Number(form.age) || null,
-          gestational_week: Number(form.gestational_week) || null,
-          due_date: form.due_date || null,
+          gestational_week: form.gestational_week,
+          due_date: dueDateStr,
           doctor_name: form.doctor_name.trim() || null,
-          emergency_contact: form.emergency_contact.trim() || null,
+          hospital: form.hospital.trim() || null,
+          emergency_contact: emergencyContactStr,
           conditions: conditionsStr,
           allergies: allergiesStr,
           dietary_preference: form.dietary_preference || null,
@@ -358,7 +336,32 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
         { onConflict: "id" }
       );
 
-      if (error) throw error;
+      if (userError) throw userError;
+
+      // 2. Insert/update into emergency_contacts table
+      if (form.guardian_name && form.guardian_phone) {
+        await supabase.from("emergency_contacts").upsert(
+          {
+            user_id: user.id,
+            name: form.guardian_name.trim(),
+            relationship: form.guardian_relationship,
+            phone: form.guardian_phone.trim(),
+            is_primary: true,
+          },
+          { onConflict: "user_id, phone" }
+        ).catch(() => {});
+      }
+
+      // 3. Initialize privacy_settings
+      await supabase.from("privacy_settings").upsert(
+        {
+          user_id: user.id,
+          share_with_doctor: true,
+          location_enabled: true,
+          ai_training: false,
+        },
+        { onConflict: "user_id" }
+      ).catch(() => {});
 
       toast.success("Maternal profile set up successfully! Welcome to MomSafe.");
       if (onComplete) onComplete();
@@ -372,56 +375,48 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     }
   };
 
-  const weekNum = Number(form.gestational_week) || 24;
-  const trimester =
-    weekNum >= 28 ? "Third Trimester" : weekNum >= 13 ? "Second Trimester" : "First Trimester";
-  const progressPercent = Math.min(100, Math.max(5, Math.round((weekNum / 40) * 100)));
-
   return (
-    <div className="min-h-screen bg-[#F4F6F8] py-6 sm:py-10 px-4 sm:px-6 lg:px-8 flex flex-col justify-between items-center text-slate-800 antialiased font-sans">
-      {/* Elevated Container Card (Matches Kastamer Architecture & MomSafe Brand) */}
-      <div className="max-w-6xl w-full bg-white rounded-3xl shadow-[0_25px_60px_-15px_rgba(43,105,84,0.12)] border border-slate-200/80 overflow-hidden flex flex-col my-auto transition-all">
-        {/* Top Navigation Bar: Uses Exact MomSafe Brand Logo & Colors */}
-        <header className="px-6 sm:px-8 py-4 border-b border-slate-100 bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Brand Logo Matching App & Login */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-600/20 text-white">
-              <Heart className="w-5 h-5 fill-white" />
-            </div>
-            <div className="flex flex-col leading-none">
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-black text-slate-900 tracking-tight">
-                  MomSafe <span className="text-emerald-600 font-extrabold">AI</span>
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-emerald-800 text-[10px] font-bold tracking-wider uppercase">
-                  India Care Portal
-                </span>
-              </div>
-              <span className="text-[10px] font-bold text-emerald-700 mt-1 uppercase tracking-widest">
-                Maternal Health Systems
+    <div className="min-h-screen bg-[#F8FAFC] py-6 sm:py-10 px-4 sm:px-6 lg:px-8 flex flex-col justify-between items-center text-slate-800 antialiased font-sans">
+      {/* Container Card */}
+      <div className="max-w-6xl w-full bg-white rounded-3xl shadow-[0_20px_50px_-15px_rgba(1,60,44,0.08)] border border-slate-200/70 overflow-hidden flex flex-col my-auto transition-all">
+        {/* Top Navbar: Clean, Spacious, Official Favicon Logo */}
+        <header className="px-6 sm:px-10 py-5 border-b border-slate-100 bg-white flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Official MomSafe Logo (Exact Favicon from /favicon.svg) */}
+          <div className="flex items-center gap-3 shrink-0">
+            <img
+              src="/favicon.svg"
+              alt="MomSafe AI"
+              className="w-9 h-9 rounded-xl shadow-sm shrink-0"
+            />
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xl font-black text-slate-900 tracking-tight">
+                MomSafe
+              </span>
+              <span className="text-xl font-extrabold text-[#044735]">
+                AI
               </span>
             </div>
           </div>
 
           {/* Stepper Breadcrumbs (Desktop) */}
-          <nav className="hidden lg:flex items-center gap-1.5 text-xs font-medium text-slate-500">
+          <nav className="hidden lg:flex items-center gap-2 text-xs font-medium text-slate-500">
             <button
               type="button"
               onClick={() => setStep(1)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
                 step === 1
-                  ? "bg-emerald-50 text-emerald-800 font-bold border-b-2 border-emerald-700"
-                  : "hover:text-slate-800"
+                  ? "bg-emerald-50 text-[#044735] font-bold border-b-2 border-[#044735]"
+                  : "hover:text-slate-900"
               }`}
             >
               <span
                 className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  step > 1 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-700"
+                  step > 1 ? "bg-[#044735] text-white" : "bg-slate-200 text-slate-700"
                 }`}
               >
                 {step > 1 ? "✓" : "1"}
               </span>
-              1. Mother & Care Team
+              1. Personal & Care Team
             </button>
             <span className="text-slate-300">›</span>
 
@@ -430,15 +425,15 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
               onClick={() => {
                 if (!errors.full_name) setStep(2);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
                 step === 2
-                  ? "bg-emerald-50 text-emerald-800 font-bold border-b-2 border-emerald-700"
-                  : "hover:text-slate-800"
+                  ? "bg-emerald-50 text-[#044735] font-bold border-b-2 border-[#044735]"
+                  : "hover:text-slate-900"
               }`}
             >
               <span
                 className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  step > 2 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-700"
+                  step > 2 ? "bg-[#044735] text-white" : "bg-slate-200 text-slate-700"
                 }`}
               >
                 {step > 2 ? "✓" : "2"}
@@ -452,20 +447,20 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
               onClick={() => {
                 if (!errors.full_name) setStep(3);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
                 step === 3
-                  ? "bg-emerald-50 text-emerald-800 font-bold border-b-2 border-emerald-700"
-                  : "hover:text-slate-800"
+                  ? "bg-emerald-50 text-[#044735] font-bold border-b-2 border-[#044735]"
+                  : "hover:text-slate-900"
               }`}
             >
               <span
                 className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  step > 3 ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-700"
+                  step > 3 ? "bg-[#044735] text-white" : "bg-slate-200 text-slate-700"
                 }`}
               >
                 {step > 3 ? "✓" : "3"}
               </span>
-              3. Indian Diet & Nutrition
+              3. Nutrition & Diet
             </button>
             <span className="text-slate-300">›</span>
 
@@ -474,15 +469,15 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
               onClick={() => {
                 if (!errors.full_name) setStep(4);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors ${
                 step === 4
-                  ? "bg-emerald-50 text-emerald-800 font-bold border-b-2 border-emerald-700"
-                  : "hover:text-slate-800"
+                  ? "bg-emerald-50 text-[#044735] font-bold border-b-2 border-[#044735]"
+                  : "hover:text-slate-900"
               }`}
             >
               <span
                 className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                  step === 4 ? "bg-emerald-700 text-white" : "bg-slate-200 text-slate-700"
+                  step === 4 ? "bg-[#044735] text-white" : "bg-slate-200 text-slate-700"
                 }`}
               >
                 4
@@ -491,7 +486,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             </button>
           </nav>
 
-          {/* Right User Session & Actions */}
+          {/* User Session & Actions */}
           <div className="flex items-center gap-3 text-xs">
             <span className="hidden sm:inline text-slate-500 font-medium">
               Signed in as{" "}
@@ -503,15 +498,15 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             <button
               type="button"
               onClick={() => setActiveModal("help")}
-              className="flex items-center gap-1 text-slate-600 hover:text-emerald-700 transition-colors font-medium px-2 py-1 rounded-md hover:bg-slate-50"
+              className="flex items-center gap-1.5 text-slate-600 hover:text-[#044735] font-medium px-2 py-1 rounded-md hover:bg-slate-50 transition-colors"
             >
               <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
-              Help Assistance
+              Help
             </button>
             <button
               type="button"
               onClick={() => {
-                toast.info("Draft intake progress is saved automatically.");
+                toast.info("Draft progress saved.");
                 window.location.href = "/dashboard";
               }}
               className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors flex items-center gap-1"
@@ -523,60 +518,49 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
         </header>
 
         {/* Split Card Body */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[600px]">
-          {/* LEFT COLUMN: Connected Vertical Timeline Stepper */}
-          <aside className="lg:col-span-5 bg-gradient-to-b from-emerald-50/60 via-teal-50/30 to-slate-50 p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-slate-100 flex flex-col justify-between relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[580px]">
+          {/* LEFT COLUMN: Clean Numbered Stepper Rail */}
+          <aside className="lg:col-span-5 bg-[#FAFBFB] p-6 sm:p-10 border-b lg:border-b-0 lg:border-r border-slate-100 flex flex-col justify-between relative">
             <div>
               {/* Notice Banner */}
-              <div className="p-3.5 rounded-2xl bg-white border border-emerald-100/80 shadow-sm flex items-start gap-2.5 mb-8">
-                <Info className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-700 leading-relaxed font-medium">
-                  Welcome to MomSafe AI. Set up your personalized maternal care profile to calibrate 24/7 vitals telemetry, emergency loop, and gestational alerts.
+              <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-start gap-3 mb-8">
+                <Info className="w-4 h-4 text-[#044735] shrink-0 mt-0.5" />
+                <p className="text-xs text-slate-700 leading-relaxed">
+                  Welcome to MomSafe AI. Set up your pregnancy baseline to calibrate 24/7 vitals telemetry, emergency loop, and gestational alerts.
                 </p>
               </div>
 
-              {/* Vertical Stepper with connected vertical line */}
-              <div className="space-y-6 relative pl-2">
+              {/* Connected Vertical Timeline */}
+              <div className="space-y-8 relative pl-1">
                 {/* Connecting Line */}
-                <div className="absolute left-[23px] top-4 bottom-4 w-0.5 border-l-2 border-dashed border-emerald-200 -z-0" />
+                <div className="absolute left-[19px] top-4 bottom-4 w-px bg-slate-200 -z-0" />
 
                 {/* Step 1 Node */}
                 <div
                   onClick={() => setStep(1)}
-                  className="flex items-start gap-3.5 cursor-pointer group relative z-10"
+                  className="flex items-start gap-4 cursor-pointer group relative z-10"
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold transition-all ${
                       step === 1
-                        ? "bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-md ring-4 ring-emerald-100"
+                        ? "bg-[#044735] text-white shadow-md ring-4 ring-emerald-100"
                         : step > 1
-                        ? "bg-emerald-600 text-white"
-                        : "bg-white border-2 border-slate-300 text-slate-500"
+                        ? "bg-[#044735] text-white"
+                        : "bg-white border border-slate-200 text-slate-400"
                     }`}
                   >
-                    {step > 1 ? (
-                      <Check className="w-4 h-4 stroke-[3]" />
-                    ) : (
-                      <User className="w-3.5 h-3.5" />
-                    )}
+                    {step > 1 ? <Check className="w-4 h-4 stroke-[3]" /> : "1"}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-sm font-semibold transition-colors ${
-                          step === 1 ? "text-slate-900 font-bold" : "text-slate-700"
-                        }`}
-                      >
-                        Mother & Care Team
-                      </span>
-                      {step === 1 && (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                          Active
-                        </span>
-                      )}
-                    </div>
+                    <span
+                      className={`text-sm block transition-colors ${
+                        step === 1 ? "text-slate-900 font-bold" : "text-slate-700 font-semibold"
+                      }`}
+                    >
+                      Personal & Care Team
+                    </span>
                     <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                      Legal name, due date, OB/GYN doctor, and family guardian contact.
+                      Mother's name, gestational stage, OB/GYN doctor, and family guardian.
                     </p>
                   </div>
                 </div>
@@ -586,40 +570,29 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                   onClick={() => {
                     if (!errors.full_name) setStep(2);
                   }}
-                  className="flex items-start gap-3.5 cursor-pointer group relative z-10"
+                  className="flex items-start gap-4 cursor-pointer group relative z-10"
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold transition-all ${
                       step === 2
-                        ? "bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-md ring-4 ring-emerald-100"
+                        ? "bg-[#044735] text-white shadow-md ring-4 ring-emerald-100"
                         : step > 2
-                        ? "bg-emerald-600 text-white"
-                        : "bg-white border-2 border-slate-300 text-slate-500"
+                        ? "bg-[#044735] text-white"
+                        : "bg-white border border-slate-200 text-slate-400"
                     }`}
                   >
-                    {step > 2 ? (
-                      <Check className="w-4 h-4 stroke-[3]" />
-                    ) : (
-                      <Activity className="w-3.5 h-3.5" />
-                    )}
+                    {step > 2 ? <Check className="w-4 h-4 stroke-[3]" /> : "2"}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-sm font-semibold transition-colors ${
-                          step === 2 ? "text-slate-900 font-bold" : "text-slate-700"
-                        }`}
-                      >
-                        Clinical Risk History
-                      </span>
-                      {step === 2 && (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                          Active
-                        </span>
-                      )}
-                    </div>
+                    <span
+                      className={`text-sm block transition-colors ${
+                        step === 2 ? "text-slate-900 font-bold" : "text-slate-700 font-semibold"
+                      }`}
+                    >
+                      Clinical History & Risk
+                    </span>
                     <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                      Gestational conditions, drug allergies, and doctor's advice.
+                      Pre-existing conditions, allergies, and clinical physician instructions.
                     </p>
                   </div>
                 </div>
@@ -629,40 +602,29 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                   onClick={() => {
                     if (!errors.full_name) setStep(3);
                   }}
-                  className="flex items-start gap-3.5 cursor-pointer group relative z-10"
+                  className="flex items-start gap-4 cursor-pointer group relative z-10"
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold transition-all ${
                       step === 3
-                        ? "bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-md ring-4 ring-emerald-100"
+                        ? "bg-[#044735] text-white shadow-md ring-4 ring-emerald-100"
                         : step > 3
-                        ? "bg-emerald-600 text-white"
-                        : "bg-white border-2 border-slate-300 text-slate-500"
+                        ? "bg-[#044735] text-white"
+                        : "bg-white border border-slate-200 text-slate-400"
                     }`}
                   >
-                    {step > 3 ? (
-                      <Check className="w-4 h-4 stroke-[3]" />
-                    ) : (
-                      <Utensils className="w-3.5 h-3.5" />
-                    )}
+                    {step > 3 ? <Check className="w-4 h-4 stroke-[3]" /> : "3"}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-sm font-semibold transition-colors ${
-                          step === 3 ? "text-slate-900 font-bold" : "text-slate-700"
-                        }`}
-                      >
-                        Indian Diet & Nutrition
-                      </span>
-                      {step === 3 && (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                          Active
-                        </span>
-                      )}
-                    </div>
+                    <span
+                      className={`text-sm block transition-colors ${
+                        step === 3 ? "text-slate-900 font-bold" : "text-slate-700 font-semibold"
+                      }`}
+                    >
+                      Nutrition & Dietary Plan
+                    </span>
                     <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                      Millets, gestational diabetic foods, vegetarian options, and meal timing.
+                      Low-glycemic millets, vegetarian options, and meal telemetry sync.
                     </p>
                   </div>
                 </div>
@@ -672,208 +634,271 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                   onClick={() => {
                     if (!errors.full_name) setStep(4);
                   }}
-                  className="flex items-start gap-3.5 cursor-pointer group relative z-10"
+                  className="flex items-start gap-4 cursor-pointer group relative z-10"
                 >
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold transition-all ${
                       step === 4
-                        ? "bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-md ring-4 ring-emerald-100"
-                        : "bg-white border-2 border-slate-300 text-slate-500"
+                        ? "bg-[#044735] text-white shadow-md ring-4 ring-emerald-100"
+                        : "bg-white border border-slate-200 text-slate-400"
                     }`}
                   >
-                    <ShieldCheck className="w-3.5 h-3.5" />
+                    4
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-sm font-semibold transition-colors ${
-                          step === 4 ? "text-slate-900 font-bold" : "text-slate-700"
-                        }`}
-                      >
-                        Care Plan Activation
-                      </span>
-                      {step === 4 && (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-                          Active
-                        </span>
-                      )}
-                    </div>
+                    <span
+                      className={`text-sm block transition-colors ${
+                        step === 4 ? "text-slate-900 font-bold" : "text-slate-700 font-semibold"
+                      }`}
+                    >
+                      Care Plan Activation
+                    </span>
                     <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-                      Connect 24/7 predictive safety companion & emergency SOS escalation.
+                      Review maternal baseline and connect 24/7 emergency guardian loop.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Bottom Reassurance Card (Indian DPDP & Clinical Standards) */}
-            <div className="mt-8 p-3.5 rounded-2xl bg-white/95 border border-emerald-100 shadow-sm flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+            {/* Bottom Reassurance Card */}
+            <div className="mt-8 p-3.5 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-[#044735] shrink-0">
                 <Lock className="w-4 h-4" />
               </div>
               <div className="text-xs leading-tight">
-                <p className="font-bold text-slate-800">
+                <p className="font-bold text-slate-900">
                   DPDP Act 2023 & ABDM Compliant
                 </p>
                 <p className="text-slate-500 text-[11px] mt-0.5">
-                  End-to-end encrypted clinical health records stored securely in India.
+                  End-to-end encrypted health data stored on Indian servers.
                 </p>
               </div>
             </div>
           </aside>
 
-          {/* RIGHT COLUMN: Focused Progressive Disclosure Form */}
+          {/* RIGHT COLUMN: Interactive Form Content */}
           <main className="lg:col-span-7 p-6 sm:p-10 bg-white flex flex-col justify-between">
             <div>
               {/* Step Header */}
               <div className="mb-6">
-                <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-700 mb-1.5">
+                <div className="text-xs font-bold uppercase tracking-wider text-[#044735] mb-1">
                   STEP {step} OF 4 —{" "}
-                  {step === 1 && "Mother & Care Team Setup"}
-                  {step === 2 && "Clinical Conditions & Risk History"}
-                  {step === 3 && "Indian Diet & Metabolic Guidance"}
-                  {step === 4 && "Baseline Review & Care Activation"}
+                  {step === 1 && "Personal & Care Team"}
+                  {step === 2 && "Clinical History & Risk"}
+                  {step === 3 && "Nutrition & Dietary Preferences"}
+                  {step === 4 && "Baseline Review & Activation"}
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
                   {step === 1 && "Tell us about your pregnancy journey"}
-                  {step === 2 && "Clinical Conditions & Risk History"}
-                  {step === 3 && "Indian Dietary Preferences & Nutrition"}
-                  {step === 4 && "Verify & Activate Your Care Plan"}
+                  {step === 2 && "Clinical Conditions & Allergies"}
+                  {step === 3 && "Dietary Preferences & Nutrition"}
+                  {step === 4 && "Activate Your Maternal Care Plan"}
                 </h1>
-                <p className="text-sm text-slate-500 mt-1.5 max-w-xl leading-relaxed">
+                <p className="text-sm text-slate-500 mt-1 max-w-xl leading-relaxed">
                   {step === 1 &&
-                    "Enter your pregnancy timeline, your doctor, and emergency contact to calibrate proactive maternal alerts for your exact gestational week."}
+                    "Set your current pregnancy week. We automatically calculate your exact trimester and estimated due date for 24/7 vitals telemetry."}
                   {step === 2 &&
-                    "Configure clinical risk factors (blood pressure, diabetes, thyroid) so our AI triage engine alerts your care team before complications arise."}
+                    "Select any pre-existing conditions and allergies to calibrate predictive alerts and safe medications."}
                   {step === 3 &&
-                    "Tailor nutrition recommendations with traditional Indian wholesome foods, low-glycemic millets, and daily blood sugar monitoring."}
+                    "Choose your daily nutrition preferences to personalize gestational meal logs and glucose targets."}
                   {step === 4 &&
-                    "Your personal maternal care baseline and emergency guardian loop are configured. Review and activate continuous monitoring."}
+                    "Confirm your clinical baseline to connect the 24/7 AI telemetry loop and emergency guardian escalation."}
                 </p>
               </div>
 
               {/* Form Content By Step */}
               {step === 1 && (
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {/* Mother's Legal Full Name */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                      Mother's Legal Full Name <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={form.full_name}
-                        onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                        onBlur={() => setTouched((t) => ({ ...t, full_name: true }))}
-                        placeholder="e.g. Pooja Sharma"
-                        className={`w-full h-11 px-3.5 pl-10 rounded-xl border text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all ${
-                          touched.full_name && errors.full_name
-                            ? "border-rose-300 bg-rose-50/20"
-                            : "border-slate-200"
-                        }`}
-                      />
-                      <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2">
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
+                        Mother's Legal Full Name <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={form.full_name}
+                          onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                          onBlur={() => setTouched((t) => ({ ...t, full_name: true }))}
+                          placeholder="e.g. Pooja Sharma"
+                          className={`w-full h-11 px-3.5 pl-10 rounded-xl border text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all ${
+                            touched.full_name && errors.full_name
+                              ? "border-rose-300 bg-rose-50/20"
+                              : "border-slate-200"
+                          }`}
+                        />
+                        <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      </div>
+                      {touched.full_name && errors.full_name && (
+                        <p className="text-xs text-rose-500 mt-1">{errors.full_name}</p>
+                      )}
                     </div>
-                    {touched.full_name && errors.full_name && (
-                      <p className="text-xs text-rose-500 mt-1 flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" />
-                        {errors.full_name}
-                      </p>
-                    )}
-                  </div>
 
-                  {/* Mother's Age */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                      Mother's Age (Years)
-                    </label>
-                    <div className="relative">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
+                        Age (Years)
+                      </label>
                       <input
                         type="number"
                         min="16"
                         max="55"
                         value={form.age}
                         onChange={(e) => setForm({ ...form, age: e.target.value })}
-                        placeholder="e.g. 28"
-                        className="w-full h-11 px-3.5 pl-10 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
+                        placeholder="28"
+                        className="w-full h-11 px-3.5 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all"
                       />
-                      <Activity className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                     </div>
                   </div>
 
-                  {/* Estimated Due Date & Trimester */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide">
-                        Estimated Due Date & Trimester <span className="text-rose-500">*</span>
+                  {/* Automatic Gestational Week & Trimester / Due Date Calculator */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                        <Baby className="w-4 h-4 text-[#044735]" />
+                        Current Pregnancy Week: <span className="text-[#044735] text-sm">Week {form.gestational_week}</span>
                       </label>
-                      {form.gestational_week && (
-                        <span className="text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80">
-                          {trimester} (Week {weekNum}, {progressPercent}% complete)
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((f) => ({ ...f, gestational_week: Math.max(1, f.gestational_week - 1) }))
+                          }
+                          className="w-8 h-8 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 transition-colors shadow-sm"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm((f) => ({ ...f, gestational_week: Math.min(42, f.gestational_week + 1) }))
+                          }
+                          className="w-8 h-8 rounded-lg bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-700 transition-colors shadow-sm"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Interactive Slider */}
+                    <div className="space-y-1">
+                      <input
+                        type="range"
+                        min="1"
+                        max="40"
+                        value={form.gestational_week}
+                        onChange={(e) =>
+                          setForm({ ...form, gestational_week: Number(e.target.value) })
+                        }
+                        className="w-full accent-[#044735] cursor-pointer h-2 bg-slate-200 rounded-lg"
+                      />
+                      <div className="flex justify-between text-[10px] text-slate-400 font-medium">
+                        <span>Week 1 (Conception)</span>
+                        <span>Week 20 (Mid-term)</span>
+                        <span>Week 40 (Full Term)</span>
+                      </div>
+                    </div>
+
+                    {/* Automatic Live Calculation Badges */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-xs">
+                      <div className="p-2.5 rounded-xl bg-white border border-slate-200/80">
+                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Stage</span>
+                        <span className="font-bold text-slate-900 mt-0.5 block truncate">
+                          {trimester}
                         </span>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="relative">
-                        <input
-                          type="date"
-                          value={form.due_date}
-                          onChange={(e) => setForm({ ...form, due_date: e.target.value })}
-                          className="w-full h-11 px-3.5 pl-10 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
-                        />
-                        <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                       </div>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          min="1"
-                          max="42"
-                          value={form.gestational_week}
-                          onChange={(e) => setForm({ ...form, gestational_week: e.target.value })}
-                          placeholder="Current Week (e.g. 24)"
-                          className="w-full h-11 px-3.5 pl-10 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
-                        />
-                        <Baby className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                      <div className="p-2.5 rounded-xl bg-white border border-slate-200/80">
+                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Calculated Due Date</span>
+                        <span className="font-bold text-[#044735] mt-0.5 block truncate">
+                          {formattedDate}
+                        </span>
+                      </div>
+                      <div className="col-span-2 sm:col-span-1 p-2.5 rounded-xl bg-white border border-slate-200/80">
+                        <span className="text-slate-400 text-[10px] uppercase font-bold block">Delivery Window</span>
+                        <span className="font-bold text-slate-900 mt-0.5 block">
+                          {daysRemaining} Days to Go
+                        </span>
                       </div>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1.5 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                      Gestational age is calculated automatically according to FOGSI clinical criteria.
+
+                    {/* Fetal Milestone Note */}
+                    <p className="text-[11px] text-slate-600 bg-white/60 p-2 rounded-lg border border-slate-200/50 flex items-start gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-[#044735] shrink-0 mt-0.5" />
+                      <span>{getWeekMilestone(form.gestational_week)}</span>
                     </p>
                   </div>
 
-                  {/* Primary OB/GYN or Hospital */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                      Consulting OB/GYN Doctor & Hospital
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={form.doctor_name}
-                        onChange={(e) => setForm({ ...form, doctor_name: e.target.value })}
-                        placeholder="e.g. Dr. Priya Sharma, MD — Cloudnine Hospital, Bengaluru"
-                        className="w-full h-11 px-3.5 pl-10 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
-                      />
-                      <Stethoscope className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                  {/* Doctor & Hospital Details */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
+                        Consulting OB/GYN Doctor
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={form.doctor_name}
+                          onChange={(e) => setForm({ ...form, doctor_name: e.target.value })}
+                          placeholder="Dr. Priya Sharma, MD"
+                          className="w-full h-11 px-3.5 pl-10 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all"
+                        />
+                        <Stethoscope className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
+                        Hospital / Maternity Clinic
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={form.hospital}
+                          onChange={(e) => setForm({ ...form, hospital: e.target.value })}
+                          placeholder="Cloudnine Hospital / Apollo Cradle"
+                          className="w-full h-11 px-3.5 pl-10 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all"
+                        />
+                        <Building2 className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                      </div>
                     </div>
                   </div>
 
                   {/* Emergency Guardian Contact */}
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">
-                      Emergency Guardian / Partner Mobile Number
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                    <label className="block text-xs font-bold text-slate-800 uppercase tracking-wide">
+                      Emergency Guardian / Partner Loop
                     </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={form.emergency_contact}
-                        onChange={(e) => setForm({ ...form, emergency_contact: e.target.value })}
-                        placeholder="e.g. Rahul Sharma (Husband) • +91 98765 43210"
-                        className="w-full h-11 px-3.5 pl-10 rounded-xl border border-slate-200 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
-                      />
-                      <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <div>
+                        <input
+                          type="text"
+                          value={form.guardian_name}
+                          onChange={(e) => setForm({ ...form, guardian_name: e.target.value })}
+                          placeholder="Guardian Name"
+                          className="w-full h-10 px-3 rounded-lg border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:border-[#044735]"
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          value={form.guardian_relationship}
+                          onChange={(e) =>
+                            setForm({ ...form, guardian_relationship: e.target.value })
+                          }
+                          placeholder="Relationship (e.g. Husband)"
+                          className="w-full h-10 px-3 rounded-lg border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:border-[#044735]"
+                        />
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          value={form.guardian_phone}
+                          onChange={(e) => setForm({ ...form, guardian_phone: e.target.value })}
+                          placeholder="+91 98765 43210"
+                          className="w-full h-10 px-3 rounded-lg border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:border-[#044735]"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -881,31 +906,28 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
               {step === 2 && (
                 <div className="space-y-5">
-                  {/* Pre-existing Conditions */}
+                  {/* Conditions */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide">
-                        Pre-existing & Gestational Conditions
-                      </label>
-                      <span className="text-[11px] text-slate-500 font-medium">Select all that apply</span>
-                    </div>
+                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
+                      Pre-existing & Gestational Conditions
+                    </label>
                     <div className="flex flex-wrap gap-2">
-                      {INDIAN_CONDITION_OPTIONS.map((item) => {
+                      {INDIAN_CONDITIONS.map((item) => {
                         const active = selectedConditions.includes(item);
                         return (
                           <button
                             key={item}
                             type="button"
                             onClick={() => toggleCondition(item)}
-                            className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+                            className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
                               active
-                                ? "bg-emerald-50 border border-emerald-600 text-emerald-800 font-semibold shadow-sm"
-                                : "bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700"
+                                ? "bg-emerald-50 border border-[#044735] text-[#044735] font-bold shadow-sm"
+                                : "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700"
                             }`}
                           >
                             <span
                               className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[10px] ${
-                                active ? "bg-emerald-600 text-white" : "border border-slate-300"
+                                active ? "bg-[#044735] text-white" : "border border-slate-300"
                               }`}
                             >
                               {active ? "✓" : ""}
@@ -917,31 +939,28 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     </div>
                   </div>
 
-                  {/* Known Allergies */}
+                  {/* Allergies */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide">
-                        Known Drug & Food Allergies
-                      </label>
-                      <span className="text-[11px] text-slate-500 font-medium">Safe Prescription Filter</span>
-                    </div>
+                    <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
+                      Known Drug & Food Allergies
+                    </label>
                     <div className="flex flex-wrap gap-2">
-                      {INDIAN_ALLERGY_OPTIONS.map((item) => {
+                      {INDIAN_ALLERGIES.map((item) => {
                         const active = selectedAllergies.includes(item);
                         return (
                           <button
                             key={item}
                             type="button"
                             onClick={() => toggleAllergy(item)}
-                            className={`px-3.5 py-2 rounded-full text-xs font-medium transition-all flex items-center gap-1.5 ${
+                            className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all flex items-center gap-1.5 ${
                               active
-                                ? "bg-emerald-50 border border-emerald-600 text-emerald-800 font-semibold shadow-sm"
-                                : "bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700"
+                                ? "bg-emerald-50 border border-[#044735] text-[#044735] font-bold shadow-sm"
+                                : "bg-white hover:bg-slate-50 border border-slate-200 text-slate-700"
                             }`}
                           >
                             <span
                               className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[10px] ${
-                                active ? "bg-emerald-600 text-white" : "border border-slate-300"
+                                active ? "bg-[#044735] text-white" : "border border-slate-300"
                               }`}
                             >
                               {active ? "✓" : ""}
@@ -953,48 +972,33 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     </div>
                   </div>
 
-                  {/* Physician Thresholds / Clinical Notes */}
+                  {/* Physician Directive Notes */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
                       <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide">
                         Doctor's Directives & Prescriptions
                       </label>
-                      <div className="flex items-center gap-2">
-                        {originalNotes && (
-                          <button
-                            type="button"
-                            onClick={handleUndoFormat}
-                            className="text-[11px] text-slate-500 hover:text-slate-800 flex items-center gap-1"
-                          >
-                            <RotateCcw className="w-3 h-3" /> Undo
-                          </button>
+                      <button
+                        type="button"
+                        onClick={handleFormatNotes}
+                        disabled={isFormatting}
+                        className="text-[11px] font-semibold text-[#044735] hover:underline flex items-center gap-1"
+                      >
+                        {isFormatting ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Sparkles className="w-3 h-3" />
                         )}
-                        <button
-                          type="button"
-                          onClick={handleFormatNotes}
-                          disabled={isFormatting}
-                          className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200/80"
-                        >
-                          {isFormatting ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <Sparkles className="w-3 h-3 text-emerald-600" />
-                          )}
-                          Format for Care Team
-                        </button>
-                      </div>
+                        Format Note
+                      </button>
                     </div>
                     <textarea
                       rows={3}
                       value={form.notes}
                       onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                      placeholder="e.g. Patient advised regular BP checks twice daily. Alert team if BP exceeds 135/85 mmHg or if fasting sugar crosses 95 mg/dL."
-                      className="w-full p-3 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
+                      placeholder="e.g. Regular BP checks twice daily. Alert team if BP exceeds 135/85 mmHg or if fasting sugar crosses 95 mg/dL."
+                      className="w-full p-3 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-[#044735] transition-all"
                     />
-                    <p className="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      Prescription thresholds calibrate automated alerts for your care team.
-                    </p>
                   </div>
                 </div>
               )}
@@ -1002,15 +1006,15 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
               {step === 3 && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {INDIAN_DIETARY_PLANS.map((plan) => {
-                      const selected = form.dietary_preference === plan.id;
+                    {INDIAN_DIETS.map((diet) => {
+                      const selected = form.dietary_preference === diet.id;
                       return (
                         <div
-                          key={plan.id}
-                          onClick={() => setForm({ ...form, dietary_preference: plan.id })}
+                          key={diet.id}
+                          onClick={() => setForm({ ...form, dietary_preference: diet.id })}
                           className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between ${
                             selected
-                              ? "border-emerald-600 bg-emerald-50/40 shadow-sm"
+                              ? "border-[#044735] bg-emerald-50/40 shadow-sm"
                               : "border-slate-200 hover:border-slate-300 bg-white"
                           }`}
                         >
@@ -1021,12 +1025,12 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                                   selected ? "text-slate-900" : "text-slate-800"
                                 }`}
                               >
-                                {plan.title}
+                                {diet.title}
                               </span>
                               <span
                                 className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] ${
                                   selected
-                                    ? "bg-emerald-600 border-emerald-600 text-white"
+                                    ? "bg-[#044735] border-[#044735] text-white"
                                     : "border-slate-300"
                                 }`}
                               >
@@ -1034,17 +1038,12 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                               </span>
                             </div>
                             <p className="text-xs text-slate-500 leading-relaxed mt-1">
-                              {plan.desc}
+                              {diet.desc}
                             </p>
                           </div>
-                          <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-                              {plan.badge}
-                            </span>
-                            <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-medium">
-                              {plan.tag}
-                            </span>
-                          </div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#044735] mt-3">
+                            {diet.badge}
+                          </span>
                         </div>
                       );
                     })}
@@ -1056,10 +1055,10 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                       <Zap className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
                       <div>
                         <p className="text-xs font-semibold text-slate-800">
-                          Continuous Glucose & Vital Calibration
+                          Continuous Glucose & Meal Sync
                         </p>
                         <p className="text-[11px] text-slate-500 mt-0.5">
-                          Correlate meal logs and hydration with continuous vitals tracking according to ICMR guidelines.
+                          Correlate meal timings and daily hydration with continuous vitals tracking.
                         </p>
                       </div>
                     </div>
@@ -1072,7 +1071,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                         }
                         className="sr-only peer"
                       />
-                      <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                      <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#044735]"></div>
                     </label>
                   </div>
                 </div>
@@ -1080,73 +1079,68 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
               {step === 4 && (
                 <div className="space-y-4">
-                  {/* Care Plan Activation Summary Box */}
                   <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-slate-200">
                       <div>
                         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                          Maternal Care Baseline Summary
+                          Maternal Care Baseline
                         </span>
                         <h3 className="text-base font-bold text-slate-900 mt-0.5">
-                          {form.full_name || "Pooja Sharma"} • {trimester} (Week {weekNum})
+                          {form.full_name || "Pooja Sharma"} • {trimester} (Week {form.gestational_week})
                         </h3>
                       </div>
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200">
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-[#044735] text-xs font-bold border border-emerald-200">
                         Ready to Initialize
                       </span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div className="p-3 rounded-xl bg-white border border-slate-200/80">
-                        <span className="text-slate-400 text-[11px] block">Estimated Delivery</span>
+                        <span className="text-slate-400 text-[11px] block">Calculated Due Date</span>
                         <span className="font-bold text-slate-800 mt-0.5 block">
-                          {form.due_date || "Calculated at baseline"}
+                          {formattedDate} ({daysRemaining} days remaining)
                         </span>
                       </div>
                       <div className="p-3 rounded-xl bg-white border border-slate-200/80">
-                        <span className="text-slate-400 text-[11px] block">Consulting Hospital / Doctor</span>
+                        <span className="text-slate-400 text-[11px] block">Doctor & Hospital</span>
                         <span className="font-bold text-slate-800 mt-0.5 block truncate">
-                          {form.doctor_name || "Cloudnine Hospital / Apollo Cradle"}
+                          {form.doctor_name} • {form.hospital}
                         </span>
                       </div>
                     </div>
 
-                    {/* Active Protocols List */}
                     <div className="space-y-2">
                       <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide block">
-                        Activated Clinical Protocols:
+                        Activated Clinical Loops:
                       </span>
                       <div className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-xs">
                         <span className="flex items-center gap-2 text-slate-700 font-medium">
                           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                           24/7 AI Maternal Vitals Telemetry
                         </span>
-                        <span className="text-[11px] font-semibold text-emerald-700">FOGSI Calibrated</span>
+                        <span className="text-[11px] font-semibold text-emerald-700">Calibrated</span>
                       </div>
                       <div className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-xs">
                         <span className="flex items-center gap-2 text-slate-700 font-medium">
                           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          Emergency SOS & 108 Ambulance Dispatch Link
+                          Emergency SOS & {form.guardian_name} ({form.guardian_phone})
                         </span>
-                        <span className="text-[11px] font-semibold text-emerald-700">Guardian SMS Ready</span>
+                        <span className="text-[11px] font-semibold text-emerald-700">SMS Ready</span>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Documentation Pills Row (India Regulatory & Clinical) */}
+              {/* Documentation Pills Row */}
               <div className="mt-8 pt-5 border-t border-slate-100">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-2.5">
-                  Clinical Standards & Verification (India):
-                </span>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => setActiveModal("dpdp")}
                     className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-medium transition-all flex items-center gap-1.5"
                   >
-                    <Lock className="w-3.5 h-3.5 text-emerald-600" />
+                    <Lock className="w-3.5 h-3.5 text-[#044735]" />
                     DPDP Act 2023 & ABDM Privacy
                   </button>
                   <button
@@ -1154,8 +1148,8 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     onClick={() => setActiveModal("fogsi")}
                     className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-medium transition-all flex items-center gap-1.5"
                   >
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                    FOGSI & ICMR Clinical Guidelines
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#044735]" />
+                    FOGSI & ICMR Guidelines
                   </button>
                   <button
                     type="button"
@@ -1163,7 +1157,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     className="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-medium transition-all flex items-center gap-1.5"
                   >
                     <Zap className="w-3.5 h-3.5 text-amber-500" />
-                    National 108 & Guardian SOS Loop
+                    National 108 Emergency Loop
                   </button>
                 </div>
               </div>
@@ -1195,7 +1189,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-sm shadow-lg shadow-emerald-700/20 hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95"
+                    className="w-full sm:w-auto px-7 py-3 rounded-xl bg-[#044735] hover:bg-[#013c2c] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95"
                   >
                     <span>Save and continue</span>
                     <ChevronRight className="w-4 h-4" />
@@ -1205,7 +1199,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     type="button"
                     onClick={handleSave}
                     disabled={saving}
-                    className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-sm shadow-lg shadow-emerald-700/20 hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-70"
+                    className="w-full sm:w-auto px-8 py-3 rounded-xl bg-[#044735] hover:bg-[#013c2c] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-70"
                   >
                     {saving ? (
                       <>
@@ -1226,12 +1220,12 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
         </div>
       </div>
 
-      {/* Discreet Bottom Compliance & Trust Footer */}
+      {/* Footer */}
       <footer className="max-w-6xl w-full mt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 px-4">
         <div className="flex items-center gap-2 text-center sm:text-left">
-          <span className="font-extrabold text-slate-800">MomSafe AI India</span>
+          <span className="font-extrabold text-slate-800">MomSafe AI</span>
           <span>•</span>
-          <p>© 2026 MomSafe Technologies Pvt. Ltd. Clinical data governed under India DPDP Act 2023.</p>
+          <p>© 2026 MomSafe Technologies. Clinical data protected under India DPDP Act 2023.</p>
         </div>
 
         <div className="flex items-center gap-4">
@@ -1240,49 +1234,26 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             onClick={() => setActiveModal("dpdp")}
             className="hover:text-slate-800 underline transition-colors"
           >
-            DPDP Data Privacy
+            Data Privacy
           </button>
           <button
             type="button"
             onClick={() => setActiveModal("fogsi")}
             className="hover:text-slate-800 underline transition-colors"
           >
-            FOGSI Clinical Alignment
+            FOGSI Guidelines
           </button>
           <button
             type="button"
             onClick={() => setActiveModal("emergency108")}
             className="hover:text-slate-800 underline transition-colors"
           >
-            National 108 Emergency
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveModal("help")}
-            className="hover:text-slate-800 underline transition-colors"
-          >
-            Care Support
+            Emergency 108 Loop
           </button>
         </div>
       </footer>
 
-      {/* Trust Badge Bar */}
-      <div className="mt-3 flex flex-wrap items-center justify-center gap-6 text-[11px] text-slate-500">
-        <span className="flex items-center gap-1.5">
-          <Lock className="w-3.5 h-3.5 text-emerald-600" />
-          End-to-End Encrypted Indian Servers
-        </span>
-        <span className="flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-          ABDM (Ayushman Bharat) Integrated
-        </span>
-        <span className="flex items-center gap-1.5">
-          <HeartPulse className="w-3.5 h-3.5 text-rose-500" />
-          FOGSI Obstetric Safety Guidelines
-        </span>
-      </div>
-
-      {/* Lightweight Accessible Info Modals */}
+      {/* Info Modals */}
       {activeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-150">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 relative">
@@ -1296,28 +1267,28 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
             {activeModal === "dpdp" && (
               <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#044735] flex items-center justify-center mb-3">
                   <Lock className="w-5 h-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Digital Personal Data Protection (DPDP) Act 2023 & ABDM Compliance
+                  Digital Personal Data Protection (DPDP) Act 2023 & ABDM
                 </h3>
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  MomSafe AI strictly adheres to India's DPDP Act 2023 and Ayushman Bharat Digital Mission (ABDM) standards. All electronic health records (EHR) and biometric vitals are encrypted at rest with AES-256 and hosted on secure Indian cloud infrastructure. Data is never monetized or shared with third-party advertisers.
+                  MomSafe AI adheres strictly to India's DPDP Act 2023 and Ayushman Bharat Digital Mission (ABDM) standards. All electronic health records and vitals are encrypted with AES-256 and hosted on secure Indian cloud infrastructure. Data is never shared with third-party advertisers.
                 </p>
               </div>
             )}
 
             {activeModal === "fogsi" && (
               <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#044735] flex items-center justify-center mb-3">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900">
-                  FOGSI & ICMR Maternal Health Alignment
+                  FOGSI & ICMR Clinical Guidelines
                 </h3>
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                  Our clinical triage alerts follow clinical recommendations formulated by the Federation of Obstetric and Gynaecological Societies of India (FOGSI) and the Indian Council of Medical Research (ICMR). Thresholds for gestational hypertension (&gt;140/90 mmHg), anemia (Hb &lt;11 g/dL), and gestational diabetes are calibrated to Indian maternal demographic cohorts.
+                  Our clinical triage alerts follow clinical recommendations formulated by the Federation of Obstetric and Gynaecological Societies of India (FOGSI) and the Indian Council of Medical Research (ICMR). Thresholds for gestational hypertension (&gt;140/90 mmHg), anemia (Hb &lt;11 g/dL), and gestational diabetes are calibrated to Indian maternal cohorts.
                 </p>
               </div>
             )}
@@ -1338,11 +1309,11 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
             {activeModal === "help" && (
               <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center mb-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#044735] flex items-center justify-center mb-3">
                   <HelpCircle className="w-5 h-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900">
-                  MomSafe India Maternal Care Support
+                  MomSafe Care Assistance
                 </h3>
                 <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                   Have questions about your intake setup or sensor pairing? Our maternal care team is available to assist you.
@@ -1350,7 +1321,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                 <div className="mt-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
                   <p className="font-bold text-slate-800">Support Availability: 24/7 Priority Emergency Care</p>
                   <p className="text-slate-600 mt-1">Helpline: 1800-MOMSAFE (Toll-Free, India)</p>
-                  <p className="text-slate-500 mt-0.5">Email: care@momsafe.health • WhatsApp Care Loop Active</p>
+                  <p className="text-slate-500 mt-0.5">Email: care@momsafe.health</p>
                 </div>
               </div>
             )}
@@ -1358,7 +1329,7 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             <button
               type="button"
               onClick={() => setActiveModal(null)}
-              className="mt-5 w-full py-2.5 rounded-xl bg-emerald-700 text-white text-xs font-semibold hover:bg-emerald-800 transition-colors shadow-md shadow-emerald-700/20"
+              className="mt-5 w-full py-2.5 rounded-xl bg-[#044735] text-white text-xs font-semibold hover:bg-[#013c2c] transition-colors"
             >
               Understood
             </button>
