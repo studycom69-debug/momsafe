@@ -250,6 +250,96 @@ const INDIAN_DIETS = [
   },
 ];
 
+interface NutritionDietDetail {
+  id: string;
+  title: string;
+  badge: string;
+  whyHelpful: string;
+  recommendedFoods: string[];
+  foodsToLimit: string[];
+  clinicalNote: string;
+}
+
+const DIET_DETAILS: Record<string, NutritionDietDetail> = {
+  gdm_friendly: {
+    id: "gdm_friendly",
+    title: "Gestational Diabetic (Low GI)",
+    badge: "FOGSI & ICMR Aligned",
+    whyHelpful: "Regulates blood glucose levels to prevent post-meal sugar spikes while providing continuous energy for fetal growth without excessive birth weight risks.",
+    recommendedFoods: [
+      "Millets (Ragi, Jowar, Bajra rotis)",
+      "Sprouted green moong dal & boiled chana",
+      "Methi (fenugreek) paratha with fresh curd",
+      "Roasted makhana & soaked chia seed water",
+      "Green vegetables (palak, methi, lauki, tori)",
+    ],
+    foodsToLimit: [
+      "Polished white rice and refined maida",
+      "Sweetened beverages, sodas & packaged juices",
+      "Deep-fried snacks, halwa and jalebi/mithai",
+      "Potatoes in large single portions",
+    ],
+    clinicalNote: "Pair carbohydrates with protein (dal/curd) to blunt glucose absorption. Monitor fasting & 2-hour postprandial sugar as scheduled by your doctor.",
+  },
+  lacto_vegetarian: {
+    id: "lacto_vegetarian",
+    title: "Indian Pure Vegetarian",
+    badge: "High Bioavailability",
+    whyHelpful: "Provides plant-based proteins, natural calcium, and essential dietary fiber for healthy digestive transit and fetal skeletal growth.",
+    recommendedFoods: [
+      "Fresh paneer (cottage cheese) & thick curd/chaas",
+      "Lentils, rajma, chole, and sprouted pulses",
+      "Palak and moringa (drumstick) leaves",
+      "Besan chilla with finely grated vegetables",
+      "Soaked almonds and walnuts daily",
+    ],
+    foodsToLimit: [
+      "Excess ghee or overly greasy curries",
+      "Ultra-processed packaged vegetarian snacks",
+      "Skipping meals or consuming only carb-heavy foods",
+    ],
+    clinicalNote: "Combine iron-rich greens with vitamin C (lemon juice, amla) for enhanced absorption. Take daily B12 & folic acid supplements.",
+  },
+  sattvic_jain: {
+    id: "sattvic_jain",
+    title: "Sattvic / Jain Friendly",
+    badge: "Gentle Digestion",
+    whyHelpful: "Minimizes gastrointestinal reflux, bloating, and maternal discomfort while preserving traditional spiritual food purity guidelines.",
+    recommendedFoods: [
+      "Light moong dal khichdi with a teaspoon of pure A2 cow ghee",
+      "Lauki (bottle gourd), tinda, and pumpkin preparations",
+      "Fresh cow milk with cardamom and soaked nuts",
+      "Tender coconut water and buttermilk (chaas)",
+      "Whole wheat and barley porridge",
+    ],
+    foodsToLimit: [
+      "Underground tubers and root vegetables",
+      "Overly spicy or pungent foods that aggravate heartburn",
+      "Stale or refrigerated leftover meals",
+    ],
+    clinicalNote: "Ensure steady protein intake through dairy, lentils, and roasted seeds to meet increased 2nd & 3rd trimester fetal protein needs.",
+  },
+  balanced_nonveg: {
+    id: "balanced_nonveg",
+    title: "Eggetarian / High Protein",
+    badge: "DHA & Protein Rich",
+    whyHelpful: "Delivers complete bioavailable amino acids and omega-3 fatty acids (DHA/EPA) essential for rapid fetal brain and ocular development.",
+    recommendedFoods: [
+      "Well-cooked boiled or scrambled farm eggs",
+      "Freshwater fish (Rohu, Katla) cooked thoroughly",
+      "Clear chicken bone broth soup",
+      "Lentil curries and fresh green salads",
+      "Fortified yogurt and curd",
+    ],
+    foodsToLimit: [
+      "Raw or runny half-boiled eggs (salmonella risk)",
+      "High-mercury predatory marine fish (shark, swordfish)",
+      "Spicy street food meats and undercooked poultry",
+    ],
+    clinicalNote: "Always ensure eggs and meats are cooked to safe internal temperatures. Do not consume raw shellfish or sushi during pregnancy.",
+  },
+};
+
 interface OnboardingProps {
   onComplete?: () => void;
 }
@@ -265,13 +355,16 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
   const [lastSavedTime, setLastSavedTime] = useState<string>("Just now");
   const [activeModal, setActiveModal] = useState<"dpdp" | "fogsi" | "emergency108" | "help" | null>(null);
 
-  // AI Explainer State
-  const [aiExplainResult, setAiExplainResult] = useState<{
-    topic: string;
+  // Condition AI Modal State (Dedicated to Step 2 Pre-existing Conditions)
+  const [conditionModal, setConditionModal] = useState<{
+    type: "empty" | "loading" | "result";
+    title: string;
     text: string;
-    tips?: string[];
-    doctorNote?: string;
+    keyCheck?: string;
   } | null>(null);
+
+  // Nutrition Details Modal State (Dedicated to Step 3 Nutrition Cards - completely separate)
+  const [nutritionModal, setNutritionModal] = useState<NutritionDietDetail | null>(null);
 
   // Form State: Starts completely clean and EMPTY (no hardcoded prefill)
   const [form, setForm] = useState({
@@ -369,9 +462,28 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
     }
   };
 
-  // Call Supabase Edge Function 'care-assist' powered by OpenAI gpt-4o-mini
-  const handleAskAI = async (topicKey: string, customQuery?: string) => {
-    setIsExplaining(true);
+  // Dedicated Fast AI Explainer for Pre-existing conditions (handles 0, 1, or 2+ conditions)
+  const handleAskConditionsAI = async () => {
+    // 1. If user chose no option or only 'None of the above', show instant instructional prompt without network lag
+    const activeList = selectedConditions.filter((c) => c !== "None of the above");
+
+    if (activeList.length === 0) {
+      setConditionModal({
+        type: "empty",
+        title: "No Conditions Selected",
+        text: "What would you like to ask? Please select any condition from the buttons in the pre-existing conditions list first (e.g. Gestational Diabetes, High BP, Thyroid), and our AI Care Assistant will briefly explain what it means for your pregnancy!",
+      });
+      return;
+    }
+
+    // 2. If 1 or more conditions selected, display loading immediately and request fast concise explanation
+    const titleText = activeList.join(" & ");
+    setConditionModal({
+      type: "loading",
+      title: titleText,
+      text: "Generating brief clinical explanation...",
+    });
+
     try {
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/care-assist`,
@@ -382,10 +494,8 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
             apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
           },
           body: JSON.stringify({
-            action: "explain",
-            topic: topicKey,
-            raw_text: customQuery || topicKey,
-            context: "maternal_onboarding",
+            action: "explain_conditions",
+            conditions: activeList,
             gestational_week: form.gestational_week,
           }),
         }
@@ -393,19 +503,27 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
       const data = await res.json();
       if (data?.explanation) {
-        setAiExplainResult({
-          topic: data.topic || topicKey.replace(/_/g, " ").toUpperCase(),
+        setConditionModal({
+          type: "result",
+          title: data.title || titleText,
           text: data.explanation,
-          tips: data.practical_tips || [],
-          doctorNote: data.doctor_note || "",
+          keyCheck: data.key_check,
         });
       } else {
-        toast.info("AI Care Explainer: Aligned with FOGSI maternal safety guidelines.");
+        setConditionModal({
+          type: "result",
+          title: titleText,
+          text: "Regular maternal monitoring and doctor checkups ensure optimal health for both mother and baby.",
+          keyCheck: "Follow doctor-scheduled antenatal screenings.",
+        });
       }
     } catch {
-      toast.info("MomSafe AI guidelines: Follow FOGSI clinical prenatal advice.");
-    } finally {
-      setIsExplaining(false);
+      setConditionModal({
+        type: "result",
+        title: titleText,
+        text: "Follow standard antenatal checkups and report any unusual symptoms to your consulting OB/GYN doctor.",
+        keyCheck: "Regular vitals checks as scheduled.",
+      });
     }
   };
 
@@ -1285,11 +1403,16 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                       </label>
                       <button
                         type="button"
-                        onClick={() => handleAskAI("gdm", "Explain gestational conditions in pregnancy")}
-                        className="text-[11px] font-semibold text-[#044735] hover:underline flex items-center gap-1"
+                        onClick={handleAskConditionsAI}
+                        className="text-[11px] font-semibold text-[#044735] hover:underline flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 shadow-2xs hover:bg-emerald-100/60 transition-colors"
                       >
-                        <Sparkles className="w-3 h-3" />
-                        Unsure? Ask AI Assistant
+                        <Sparkles className="w-3.5 h-3.5 text-[#044735]" />
+                        <span>Ask AI About Condition{selectedConditions.filter(c => c !== "None of the above").length > 1 ? "s" : ""}</span>
+                        {selectedConditions.filter(c => c !== "None of the above").length > 0 && (
+                          <span className="w-4 h-4 rounded-full bg-[#044735] text-white text-[10px] font-bold flex items-center justify-center">
+                            {selectedConditions.filter(c => c !== "None of the above").length}
+                          </span>
+                        )}
                       </button>
                     </div>
 
@@ -1391,19 +1514,12 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                     <span className="text-xs font-semibold text-slate-700 uppercase tracking-wide">
                       Select Your Preferred Indian Diet:
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => handleAskAI("diet_gdm", "Which diet is best for managing pregnancy sugar and energy?")}
-                      className="text-[11px] font-semibold text-[#044735] hover:underline flex items-center gap-1"
-                    >
-                      <Sparkles className="w-3 h-3" />
-                      Help Me Choose With AI
-                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {INDIAN_DIETS.map((diet) => {
                       const selected = form.dietary_preference === diet.id;
+                      const details = DIET_DETAILS[diet.id];
                       return (
                         <div
                           key={diet.id}
@@ -1445,11 +1561,11 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleAskAI(diet.aiTopic);
+                                if (details) setNutritionModal(details);
                               }}
-                              className="text-[10px] text-slate-500 hover:text-[#044735] underline"
+                              className="text-[11px] font-semibold text-[#044735] hover:text-[#013c2c] px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 hover:bg-emerald-100 transition-colors"
                             >
-                              Learn More
+                              Learn More →
                             </button>
                           </div>
                         </div>
@@ -1866,28 +1982,28 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
           </div>
         </div>
       )}
-      {/* AI Guidance Explainer Modal (OpenAI gpt-4o-mini powered) */}
-      {aiExplainResult && (
+      {/* Condition AI Modal (Dedicated to Step 2 Pre-existing Conditions) */}
+      {conditionModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
             {/* Header */}
-            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-50/60 to-teal-50/30">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-50/70 to-teal-50/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#044735] flex items-center justify-center text-white shadow-sm">
+                <div className="w-10 h-10 rounded-2xl bg-[#044735] flex items-center justify-center text-white shadow-sm shrink-0">
                   <Sparkles className="w-5 h-5 text-emerald-300" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-slate-900 text-base">
-                    {aiExplainResult.topic}
+                  <h3 className="font-extrabold text-slate-900 text-base leading-snug">
+                    {conditionModal.title}
                   </h3>
                   <span className="text-[11px] text-emerald-700 font-semibold block">
-                    MomSafe AI Guidance • FOGSI / ICMR Aligned
+                    Pre-existing Condition Guidance • FOGSI / ICMR
                   </span>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setAiExplainResult(null)}
+                onClick={() => setConditionModal(null)}
                 className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-slate-800 flex items-center justify-center transition-colors shadow-sm"
               >
                 <X className="w-4 h-4" />
@@ -1896,48 +2012,164 @@ export default function Onboarding({ onComplete }: OnboardingProps = {}) {
 
             {/* Body */}
             <div className="p-6 overflow-y-auto space-y-4 text-xs text-slate-700 leading-relaxed">
-              <p className="text-sm font-medium text-slate-800 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200/70">
-                {aiExplainResult.text}
-              </p>
-
-              {aiExplainResult.tips && aiExplainResult.tips.length > 0 && (
-                <div className="space-y-2 pt-1">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Practical Care Tips for Mother
-                  </h4>
-                  <div className="space-y-1.5">
-                    {aiExplainResult.tips.map((tip, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-start gap-2 p-2.5 rounded-xl bg-emerald-50/50 border border-emerald-100/80 text-slate-800"
-                      >
-                        <CheckCircle2 className="w-4 h-4 text-[#044735] shrink-0 mt-0.5" />
-                        <span className="text-xs">{tip}</span>
-                      </div>
-                    ))}
+              {conditionModal.type === "empty" ? (
+                <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-2 text-amber-900">
+                  <div className="flex items-center gap-2 font-bold text-sm">
+                    <Info className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>Select a condition first</span>
                   </div>
+                  <p className="text-xs leading-relaxed text-amber-800">
+                    {conditionModal.text}
+                  </p>
                 </div>
-              )}
+              ) : conditionModal.type === "loading" ? (
+                <div className="py-8 flex flex-col items-center justify-center space-y-3 text-center">
+                  <Loader2 className="w-7 h-7 text-[#044735] animate-spin" />
+                  <p className="text-xs text-slate-500 font-medium">
+                    Consulting MomSafe Care Engine for {conditionModal.title}...
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-sm font-medium text-slate-800 leading-relaxed">
+                    {conditionModal.text}
+                  </div>
 
-              {aiExplainResult.doctorNote && (
-                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200/60 text-amber-900 text-xs flex items-start gap-2">
-                  <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                  <span>{aiExplainResult.doctorNote}</span>
+                  {conditionModal.keyCheck && (
+                    <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-100 flex items-start gap-2.5 text-xs text-slate-800">
+                      <CheckCircle2 className="w-4 h-4 text-[#044735] shrink-0 mt-0.5" />
+                      <div>
+                        <span className="font-bold text-[#044735] block mb-0.5">Key Clinical Focus:</span>
+                        <span>{conditionModal.keyCheck}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <p className="text-[11px] text-slate-400 leading-tight">
+                    *This guidance is for patient education. Always follow your obstetrician's individual care plan.
+                  </p>
                 </div>
               )}
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between">
-              <span className="text-[11px] text-slate-400">
-                Powered by MomSafe Clinical Engine
-              </span>
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/60 flex items-center justify-end">
               <button
                 type="button"
-                onClick={() => setAiExplainResult(null)}
+                onClick={() => setConditionModal(null)}
                 className="px-5 py-2.5 rounded-xl bg-[#044735] text-white text-xs font-bold hover:bg-[#013c2c] transition-colors"
               >
-                Understood, Close
+                {conditionModal.type === "empty" ? "Select Conditions Now" : "Understood, Close"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Nutrition Plan Details Modal (Dedicated to Step 3 Nutrition Cards - completely separate) */}
+      {nutritionModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-emerald-50/80 to-teal-50/30">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-[#044735] flex items-center justify-center text-white shadow-sm shrink-0">
+                  <Heart className="w-5 h-5 text-emerald-300" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-base">
+                    {nutritionModal.title}
+                  </h3>
+                  <span className="text-[11px] text-emerald-700 font-semibold uppercase tracking-wider block">
+                    {nutritionModal.badge}
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setNutritionModal(null)}
+                className="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-400 hover:text-slate-800 flex items-center justify-center transition-colors shadow-sm"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 overflow-y-auto space-y-4 text-xs text-slate-700 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-emerald-50/40 border border-emerald-100/70">
+                <span className="text-[10px] uppercase font-bold text-[#044735] block mb-1">
+                  Why this helps you & baby:
+                </span>
+                <p className="text-xs text-slate-800 font-medium leading-relaxed">
+                  {nutritionModal.whyHelpful}
+                </p>
+              </div>
+
+              {/* Recommended Foods */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#044735]" />
+                  Recommended Indian Foods to Eat
+                </h4>
+                <div className="grid grid-cols-1 gap-1.5">
+                  {nutritionModal.recommendedFoods.map((food, i) => (
+                    <div
+                      key={i}
+                      className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center gap-2 text-slate-800 text-xs font-medium"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#044735]" />
+                      <span>{food}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Foods to Limit */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-rose-700 flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 text-rose-500" />
+                  Foods to Limit or Avoid
+                </h4>
+                <div className="grid grid-cols-1 gap-1.5">
+                  {nutritionModal.foodsToLimit.map((food, i) => (
+                    <div
+                      key={i}
+                      className="p-2.5 rounded-xl bg-rose-50/40 border border-rose-100 flex items-center gap-2 text-rose-950 text-xs"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                      <span>{food}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Clinical Note */}
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200/60 text-amber-900 text-[11px] leading-relaxed flex items-start gap-2">
+                <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <span>{nutritionModal.clinicalNote}</span>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setNutritionModal(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-medium hover:bg-slate-100 transition-colors"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setForm((f) => ({ ...f, dietary_preference: nutritionModal.id }));
+                  toast.success(`Selected diet: ${nutritionModal.title}`);
+                  setNutritionModal(null);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-[#044735] text-white text-xs font-bold hover:bg-[#013c2c] transition-colors flex items-center gap-1.5 shadow-sm"
+              >
+                <Check className="w-3.5 h-3.5 stroke-[3]" />
+                Choose This Diet Plan
               </button>
             </div>
           </div>
