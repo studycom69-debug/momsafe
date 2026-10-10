@@ -6,6 +6,19 @@ export interface FoodLog {
   [key: string]: any;
 }
 
+export function parseSafeDate(val: any): Date {
+  if (!val) return new Date();
+  if (val instanceof Date) return val;
+  const str = String(val).trim();
+  const isoStr = str.includes("T") ? str : str.replace(" ", "T");
+  const withTz =
+    isoStr.endsWith("Z") || /[+-]\d{2}(:\d{2})?$/.test(isoStr)
+      ? isoStr
+      : `${isoStr}Z`;
+  const parsed = new Date(withTz);
+  return isNaN(parsed.getTime()) ? new Date(val) : parsed;
+}
+
 /**
  * Calculates the precise start (Sun 00:00:00) and end (Sat 23:59:59.999) 
  * of the week for a given date using current date and day index.
@@ -38,13 +51,14 @@ export function getWeeklyChartData(meals: FoodLog[], weekStart: Date, weekEnd: D
   // Loop logs
   meals.forEach((item) => {
     // 2. NORMALIZE LOG DATES
-    const date = new Date(item.created_at);
+    const logDate = parseSafeDate(item.created_at || item.logged_at);
+    const date = new Date(logDate);
     date.setHours(0, 0, 0, 0);
     
     // 3. FILTER CORRECTLY (Ensure date >= startOfWeek && date <= endOfWeek)
     if (date.getTime() >= weekStart.getTime() && date.getTime() <= weekEnd.getTime()) {
       // derive the day index (0=Sun ... 6=Sat)
-      const dayIndex = new Date(item.created_at).getDay();
+      const dayIndex = logDate.getDay();
       // Accumulate calories
       weekData[dayIndex] += Math.floor(item.calories || 0);
       filteredLogs.push(item);

@@ -25,7 +25,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/AuthContext";
 import { toast } from "sonner";
-import { getWeekRange, getWeeklyChartData } from "@/lib/nutrition-chart-logic";
+import { getWeekRange, getWeeklyChartData, parseSafeDate } from "@/lib/nutrition-chart-logic";
 
 function MacroBar({
   label,
@@ -183,7 +183,9 @@ export default function Nutrition() {
 
   const todayMeals = meals.filter((meal) => {
     const today = new Date().toDateString();
-    return new Date(meal.created_at).toDateString() === today;
+    return (
+      parseSafeDate(meal.created_at || meal.logged_at).toDateString() === today
+    );
   });
 
   // Dynamic totals from food_logs
@@ -591,6 +593,7 @@ export default function Nutrition() {
 
     setIsSaving(true);
     try {
+      const nowIso = new Date().toISOString();
       const { error } = await supabase.from("food_logs").insert([
         {
           user_id: user.id,
@@ -601,6 +604,8 @@ export default function Nutrition() {
           carbs: preview.carbs,
           fat: preview.fat,
           fiber: preview.fiber,
+          created_at: nowIso,
+          logged_at: nowIso,
         },
       ]);
 
@@ -1460,7 +1465,10 @@ export default function Nutrition() {
                             </span>
                           </div>
                           <span className="px-2 py-0.5 rounded-lg text-[10px] font-black text-gray-400 bg-gray-50 border border-gray-100">
-                            {format(parseISO(meal.created_at), "hh:mm a")}
+                            {format(
+                              parseSafeDate(meal.created_at || meal.logged_at),
+                              "hh:mm a",
+                            )}
                           </span>
                         </div>
 
