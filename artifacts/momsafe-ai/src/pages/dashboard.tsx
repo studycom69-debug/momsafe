@@ -1248,7 +1248,7 @@ export default function Dashboard() {
           history = h.values.length > 0 ? h.values : v.history;
           historyTimestamps = h.timestamps;
 
-          if (vitalsRows.length > 0) {
+          if (vitalsRows.length > 0 && hr != null) {
             const hrValues = vitalsRows
               .map((r) => r.heart_rate)
               .filter((v: any) => v != null);
@@ -1257,9 +1257,11 @@ export default function Dashboard() {
                 ? hrValues.reduce((a: number, b: number) => a + b, 0) /
                   hrValues.length
                 : hr;
-            const deviation = ((hr - avg) / (avg || 1)) * 100;
-            change = `${deviation >= 0 ? "+" : ""}${deviation.toFixed(1)}%`;
-            trend = deviation > 0 ? "up" : deviation < 0 ? "down" : "stable";
+            if (avg != null) {
+              const deviation = ((hr - avg) / (avg || 1)) * 100;
+              change = `${deviation >= 0 ? "+" : ""}${deviation.toFixed(1)}%`;
+              trend = deviation > 0 ? "up" : deviation < 0 ? "down" : "stable";
+            }
           }
         }
         if (v.label === "Blood Pressure") {
@@ -1277,7 +1279,7 @@ export default function Dashboard() {
           history = h.values.length > 0 ? h.values : v.history;
           historyTimestamps = h.timestamps;
 
-          if (vitalsRows.length > 0) {
+          if (vitalsRows.length > 0 && sys != null) {
             const sysValues = vitalsRows
               .map((r) => r.systolic_bp)
               .filter((v: any) => v != null);
@@ -1286,9 +1288,11 @@ export default function Dashboard() {
                 ? sysValues.reduce((a: number, b: number) => a + b, 0) /
                   sysValues.length
                 : sys;
-            const deviation = ((sys - avg) / (avg || 1)) * 100;
-            change = `${deviation >= 0 ? "+" : ""}${deviation.toFixed(1)}%`;
-            trend = deviation > 0 ? "up" : deviation < 0 ? "down" : "stable";
+            if (avg != null) {
+              const deviation = ((sys - avg) / (avg || 1)) * 100;
+              change = `${deviation >= 0 ? "+" : ""}${deviation.toFixed(1)}%`;
+              trend = deviation > 0 ? "up" : deviation < 0 ? "down" : "stable";
+            }
           }
         }
         if (v.label === "SpO2") {
