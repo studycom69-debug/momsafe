@@ -165,10 +165,14 @@ export default function Sidebar() {
             className="flex items-center gap-3 no-underline group overflow-hidden"
           >
             <motion.div
-              whileHover={{ rotate: 15, scale: 1.1 }}
-              className="w-10 h-10 bg-gradient-to-br from-[#00685f] to-teal-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-200"
+              whileHover={{ rotate: 10, scale: 1.05 }}
+              className="w-10 h-10 bg-white rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border border-slate-200/80 p-1.5 overflow-hidden"
             >
-              <HeartPulse className="w-5 h-5 text-white" />
+              <img
+                src="/favicon.svg"
+                alt="MomSafe AI"
+                className="w-full h-full object-contain"
+              />
             </motion.div>
             <AnimatePresence mode="wait">
               {!isCollapsed && (

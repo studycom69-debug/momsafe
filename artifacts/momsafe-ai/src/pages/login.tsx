@@ -222,9 +222,11 @@ export default function Login() {
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => (window.location.href = "/landing.html")}
             >
-              <div className="bg-gradient-to-br from-emerald-500 to-teal-700 p-2 rounded-xl text-white shadow-lg shadow-emerald-500/20">
-                <Heart className="w-4 h-4" fill="white" />
-              </div>
+              <img
+                src="/favicon.svg"
+                alt="MomSafe AI"
+                className="w-8 h-8 rounded-xl object-contain shadow-xs"
+              />
               <span className="text-lg font-black tracking-tighter">
                 MomSafe
               </span>
@@ -254,9 +256,11 @@ export default function Login() {
               className="flex items-center gap-3 cursor-pointer"
               onClick={() => (window.location.href = "/landing.html")}
             >
-              <div className="bg-gradient-to-br from-emerald-500 to-teal-700 p-2.5 rounded-2xl text-white shadow-lg shadow-emerald-500/20">
-                <Heart className="w-5 h-5" fill="white" />
-              </div>
+              <img
+                src="/favicon.svg"
+                alt="MomSafe AI"
+                className="w-10 h-10 rounded-2xl object-contain shadow-xs"
+              />
               <div className="flex flex-col leading-none">
                 <span className="text-xl font-black tracking-tighter">
                   MomSafe
@@ -677,13 +681,12 @@ export default function Login() {
         <div className="flex-1 flex flex-col justify-center items-center bg-white px-6 py-10 sm:px-12 lg:px-24">
           <div className="w-full max-w-md space-y-8">
             <div className="text-center sm:text-left space-y-4">
-              <div className="flex items-center justify-center sm:justify-start space-x-2 text-md3-primary">
-                <span
-                  className="material-symbols-outlined text-3xl"
-                  style={{ fontVariationSettings: '"FILL" 1' }}
-                >
-                  local_hospital
-                </span>
+              <div className="flex items-center justify-center sm:justify-start space-x-3 text-md3-primary">
+                <img
+                  src="/favicon.svg"
+                  alt="MomSafe AI"
+                  className="w-9 h-9 rounded-xl object-contain shadow-xs shrink-0"
+                />
                 <h1 className="font-headline-md text-2xl font-bold tracking-tight">
                   MomSafe AI
                 </h1>
