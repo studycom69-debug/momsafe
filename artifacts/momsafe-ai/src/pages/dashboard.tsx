@@ -1095,8 +1095,8 @@ export default function Dashboard() {
           .from("food_logs")
           .select("*")
           .eq("user_id", userId)
-          .gte("logged_at", fiveDaysAgo)
-          .order("logged_at", { ascending: false })
+          .gte("created_at", fiveDaysAgo)
+          .order("created_at", { ascending: false })
           .limit(20),
         supabase
           .from("water_intake")
@@ -1489,8 +1489,8 @@ export default function Dashboard() {
             type: "meal",
             title: "Meal logged",
             description: `${f.meal_type} - ${f.food_name}`,
-            timestamp: new Date(f.logged_at).getTime(),
-            rawDate: new Date(f.logged_at),
+            timestamp: new Date(f.created_at || f.logged_at).getTime(),
+            rawDate: new Date(f.created_at || f.logged_at),
           });
         });
       }
