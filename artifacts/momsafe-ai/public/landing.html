@@ -81,7 +81,8 @@
               "description": "MomSafe AI is a maternal health technology platform helping pregnant women through AI-powered health insights, personalized pregnancy support, health monitoring, and connected care.",
               "sameAs": [
                 "https://www.instagram.com/momsafe.ai/",
-                "https://www.linkedin.com/company/momsafe/"
+                "https://www.linkedin.com/company/momsafe/",
+                "https://x.com/momsafe_ai"
               ]
             }
           ]
@@ -98,6 +99,96 @@
         <style>
             html {
                 scroll-behavior: smooth;
+            }
+
+            /* Floating Pill Navbar */
+            .ms-nav-container {
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border: 1px solid rgba(220, 226, 223, 0.85);
+                border-radius: 9999px;
+                padding: 6px 8px 6px 24px;
+                display: inline-flex;
+                align-items: center;
+                box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
+            }
+            .ms-nav-brand {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+                font-size: 1.125rem;
+                font-weight: 700;
+                color: #191c1e;
+                margin-right: 26px;
+                flex-shrink: 0;
+                text-decoration: none;
+            }
+            .ms-nav-links {
+                display: flex !important;
+                align-items: center !important;
+                gap: 20px !important;
+                margin-right: 26px !important;
+            }
+            .ms-nav-link {
+                display: inline-flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                font-size: 13.5px !important;
+                line-height: 1.15 !important;
+                font-weight: 500 !important;
+                color: #404944 !important;
+                text-decoration: none !important;
+                transition: color 0.15s ease !important;
+                white-space: nowrap !important;
+            }
+            .ms-nav-link:hover {
+                color: #003527 !important;
+            }
+            .ms-nav-btn {
+                background-color: #191c1e;
+                color: #ffffff;
+                border-radius: 9999px;
+                padding: 7px 22px;
+                font-size: 13px;
+                font-weight: 600;
+                line-height: 1.15;
+                text-align: center;
+                display: inline-flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                white-space: nowrap;
+                transition: background-color 0.15s ease;
+                border: none;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+            .ms-nav-btn:hover {
+                background-color: #000000;
+            }
+
+            @media (max-width: 640px) {
+                .ms-nav-container {
+                    padding: 5px 6px 5px 14px;
+                }
+                .ms-nav-brand {
+                    margin-right: 18px;
+                    font-size: 1rem;
+                }
+                .ms-nav-links {
+                    gap: 12px !important;
+                    margin-right: 14px !important;
+                }
+                .ms-nav-link {
+                    font-size: 11.5px !important;
+                }
+                .ms-nav-btn {
+                    padding: 6px 14px;
+                    font-size: 11.5px;
+                }
             }
 
             .landing-icon {
@@ -361,51 +452,37 @@
         <div
             class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-fit px-4"
         >
-            <nav
-                class="bg-surface/90 backdrop-blur-xl border border-outline-variant/30 rounded-full pl-6 pr-2 py-2 flex items-center gap-8 shadow-sm"
-            >
-                <div
-                    class="text-headline-sm font-headline-sm font-bold text-on-surface flex items-center gap-2"
-                >
+            <nav class="ms-nav-container">
+                <a href="/" class="ms-nav-brand">
                     <img
                         src="/favicon.svg"
                         alt="MomSafe AI"
-                        class="w-8 h-8 rounded-lg object-contain shadow-xs shrink-0"
+                        class="w-7 h-7 rounded-lg object-contain shrink-0"
                     />
-                    MomSafe
+                    <span>MomSafe</span>
+                </a>
+                <div class="ms-nav-links">
+                    <a class="ms-nav-link" href="#features">
+                        <span>Features</span>
+                    </a>
+                    <a class="ms-nav-link" href="#how-it-works">
+                        <span>How it</span>
+                        <span>Works</span>
+                    </a>
+                    <a class="ms-nav-link" href="#pricing">
+                        <span>Pricing</span>
+                    </a>
+                    <a class="ms-nav-link" href="/for-hospitals">
+                        <span>For</span>
+                        <span>Hospitals</span>
+                    </a>
+                    <a class="ms-nav-link" href="/about">
+                        <span>About</span>
+                    </a>
                 </div>
-                <div class="hidden md:flex items-center space-x-6">
-                    <a
-                        class="text-on-surface-variant text-sm font-medium hover:text-primary transition-colors duration-200"
-                        href="#features"
-                        >Features</a
-                    >
-                    <a
-                        class="text-on-surface-variant text-sm font-medium hover:text-primary transition-colors duration-200"
-                        href="#how-it-works"
-                        >How it Works</a
-                    >
-                    <a
-                        class="text-on-surface-variant text-sm font-medium hover:text-primary transition-colors duration-200"
-                        href="#pricing"
-                        >Pricing</a
-                    >
-                    <a
-                        class="text-on-surface-variant text-sm font-medium hover:text-primary transition-colors duration-200"
-                        href="/for-hospitals"
-                        >For Hospitals</a
-                    >
-                    <a
-                        class="text-on-surface-variant text-sm font-medium hover:text-primary transition-colors duration-200"
-                        href="/about"
-                        >About</a
-                    >
-                </div>
-                <button
-                    data-action="get-app"
-                    class="bg-[#191c1e] text-white text-sm font-medium py-2.5 px-6 rounded-full hover:bg-black transition-colors shadow-sm ml-2"
-                >
-                    Get the app
+                <button data-action="get-app" class="ms-nav-btn">
+                    <span>Get the</span>
+                    <span>app</span>
                 </button>
             </nav>
         </div>
@@ -3091,6 +3168,15 @@
                                 aria-label="MomSafe AI on LinkedIn"
                             >
                                 <svg class="w-5 h-5 fill-currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                            </a>
+                            <a
+                                href="https://x.com/momsafe_ai"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white/75 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white/40"
+                                aria-label="MomSafe AI on X"
+                            >
+                                <svg class="w-4 h-4 fill-currentColor" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                             </a>
                         </div>
                     </div>
