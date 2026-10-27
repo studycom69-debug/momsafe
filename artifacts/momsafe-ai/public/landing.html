@@ -99,65 +99,77 @@
         <style>
             html {
                 scroll-behavior: smooth;
+                overflow-x: hidden;
+            }
+            body {
+                width: 100%;
+                margin: 0;
             }
 
             /* Floating Pill Navbar */
             .ms-nav-container {
-                background: rgba(255, 255, 255, 0.95);
+                background: rgba(255, 255, 255, 0.94);
                 backdrop-filter: blur(16px);
                 -webkit-backdrop-filter: blur(16px);
-                border: 1px solid rgba(220, 226, 223, 0.85);
+                border: 1px solid rgba(226, 232, 240, 0.85);
                 border-radius: 9999px;
-                padding: 6px 8px 6px 24px;
+                padding: 6px 8px 6px 20px;
+                min-height: 52px;
                 display: inline-flex;
                 align-items: center;
-                box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
+                flex-wrap: nowrap;
+                box-sizing: border-box;
+                box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
             }
             .ms-nav-brand {
                 display: flex;
                 align-items: center;
-                gap: 9px;
-                font-size: 1.125rem;
-                font-weight: 700;
-                color: #191c1e;
-                margin-right: 26px;
+                gap: 8px;
+                font-size: 1.18rem;
+                font-weight: 800;
+                color: #111827;
+                margin-right: 22px;
                 flex-shrink: 0;
                 text-decoration: none;
+                letter-spacing: -0.025em;
+            }
+            .ms-nav-brand img {
+                width: 28px;
+                height: 28px;
+                border-radius: 8px;
             }
             .ms-nav-links {
                 display: flex !important;
                 align-items: center !important;
                 gap: 20px !important;
-                margin-right: 26px !important;
+                margin-right: 18px !important;
+                flex-shrink: 0 !important;
             }
             .ms-nav-link {
-                display: inline-flex !important;
-                flex-direction: column !important;
-                align-items: center !important;
-                justify-content: center !important;
-                text-align: center !important;
+                display: inline-block !important;
                 font-size: 13.5px !important;
-                line-height: 1.15 !important;
                 font-weight: 500 !important;
-                color: #404944 !important;
+                color: #4b5563 !important;
                 text-decoration: none !important;
                 transition: color 0.15s ease !important;
                 white-space: nowrap !important;
+                line-height: 1 !important;
+                padding: 4px 0 !important;
             }
             .ms-nav-link:hover {
-                color: #003527 !important;
+                color: #111827 !important;
             }
             .ms-nav-btn {
                 background-color: #191c1e;
                 color: #ffffff;
                 border-radius: 9999px;
-                padding: 7px 22px;
+                padding: 9px 20px;
                 font-size: 13px;
                 font-weight: 600;
-                line-height: 1.15;
+                line-height: 1;
+                min-height: 38px;
                 text-align: center;
                 display: inline-flex;
-                flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 white-space: nowrap;
@@ -168,6 +180,779 @@
             }
             .ms-nav-btn:hover {
                 background-color: #000000;
+            }
+
+            /* Feel-inspired Hero Section & Typography */
+            /* Feel-inspired Hero Section & Typography */
+            .feel-hero-section {
+                position: relative;
+                overflow: hidden;
+                background-color: #ffffff;
+                background-image:
+                    /* 1. Seamless clean white finish at bottom boundary so nothing bleeds into next section */
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 86%, rgba(255, 255, 255, 0.75) 94%, #ffffff 100%),
+                    /* 2. Crisp, pure-white veil across the upper 55-60% of the hero protecting headline, navbar, CTA */
+                    radial-gradient(ellipse 140% 60% at 50% 0%, #ffffff 0%, #ffffff 72%, rgba(255, 255, 255, 0.96) 86%, rgba(255, 255, 255, 0) 100%),
+                    /* 3. Subtle ambient cool lavender-blue tint in middle */
+                    radial-gradient(ellipse 900px 420px at 50% 60%, rgba(235, 240, 255, 0.35) 0%, rgba(245, 238, 255, 0.22) 45%, rgba(255, 255, 255, 0) 75%),
+                    /* 4. Soft pastel glow gradually emerging in the lower portion around the phone */
+                    radial-gradient(ellipse 750px 320px at 50% 90%, rgba(255, 226, 216, 0.45) 0%, rgba(246, 230, 255, 0.3) 38%, rgba(255, 255, 255, 0) 75%),
+                    /* 5. Lower-left delicate muted blush pink & pale lavender (soft, low opacity, no vivid circles) */
+                    radial-gradient(circle 480px at 15% 92%, rgba(255, 212, 224, 0.35) 0%, rgba(242, 226, 255, 0.2) 45%, rgba(255, 255, 255, 0) 75%),
+                    /* 6. Lower-right delicate pale peach & muted mint (soft, low opacity, no vivid circles) */
+                    radial-gradient(circle 480px at 85% 92%, rgba(215, 248, 238, 0.35) 0%, rgba(255, 236, 222, 0.22) 45%, rgba(255, 255, 255, 0) 75%);
+                padding-top: clamp(92px, 7.5vw, 110px);
+                padding-bottom: 0px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            @media (max-width: 768px) {
+                .feel-hero-section {
+                    padding-top: 72px;
+                    padding-bottom: 24px;
+                    background-image:
+                        radial-gradient(circle at 50% 12%, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.95) 55%, rgba(255, 255, 255, 0) 100%),
+                        radial-gradient(circle at 20% 70%, rgba(255, 198, 210, 0.55) 0%, rgba(235, 218, 255, 0.4) 50%, rgba(255, 255, 255, 0) 80%),
+                        radial-gradient(circle at 80% 75%, rgba(200, 246, 230, 0.55) 0%, rgba(255, 225, 210, 0.4) 50%, rgba(255, 255, 255, 0) 80%);
+                }
+            }
+
+            /* Hero Entrance Keyframes (Smooth orchestrated sequence) */
+            @keyframes msHeroFadeInUp {
+                0% {
+                    opacity: 0;
+                    transform: translateY(22px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .feel-trust-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                font-size: 13px;
+                font-weight: 500;
+                color: #64748b;
+                background: transparent;
+                border: none;
+                padding: 0;
+                margin-bottom: 20px;
+                box-shadow: none;
+                animation: msHeroFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1.05s both;
+            }
+
+            .feel-hero-heading {
+                font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                font-size: clamp(2.35rem, 3.8vw, 3.25rem);
+                font-weight: 800;
+                line-height: 1.08;
+                letter-spacing: -0.035em;
+                color: #111827;
+                max-width: 580px;
+                margin: 0 auto 14px auto;
+                text-align: center;
+                animation: msHeroFadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.92s both;
+            }
+            .feel-hero-heading .feel-line {
+                display: block;
+            }
+            @media (max-width: 768px) {
+                .feel-hero-heading {
+                    font-size: 27px;
+                    line-height: 1.15;
+                    margin-bottom: 12px;
+                    max-width: 92%;
+                    padding: 0 8px;
+                }
+            }
+
+            .feel-hero-subhead {
+                font-size: 15.5px;
+                font-weight: 400;
+                line-height: 1.48;
+                color: #4b5563;
+                max-width: 540px;
+                margin: 0 auto 22px auto;
+                text-align: center;
+                animation: msHeroFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.72s both;
+            }
+            .feel-hero-subhead .feel-sub-line {
+                display: block;
+            }
+            @media (max-width: 768px) {
+                .feel-hero-subhead {
+                    font-size: 14px;
+                    line-height: 1.45;
+                    max-width: 90%;
+                    margin-bottom: 18px;
+                }
+                .feel-hero-subhead .feel-sub-line {
+                    display: inline;
+                }
+            }
+
+            /* Feel-proportioned CTA: rounded rectangular button */
+            .feel-hero-cta {
+                background-color: #191c1e;
+                color: #ffffff;
+                font-size: 14px;
+                font-weight: 600;
+                padding: 11px 24px;
+                border-radius: 12px;
+                border: none;
+                cursor: pointer;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+                margin: 0 auto 0 auto;
+                display: inline-block;
+                animation: msHeroFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+                transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease, box-shadow 0.18s ease;
+            }
+            .feel-hero-cta:hover {
+                background-color: #000000;
+                transform: translateY(-1px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+            }
+
+            /* Phone Mockup Canvas & Architecture */
+            .ms-mockup-wrapper {
+                position: relative;
+                width: 100%;
+                max-width: 1060px;
+                display: flex;
+                justify-content: center;
+                margin-top: 56px;
+                height: 450px;
+            }
+
+            .ms-phone-aura {
+                position: absolute;
+                top: 360px;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 760px;
+                height: 380px;
+                background:
+                    /* Center-bottom soft blush peach and coral right behind phone's lower edge */
+                    radial-gradient(ellipse 520px 240px at 50% 68%, rgba(255, 214, 202, 0.6) 0%, rgba(255, 232, 224, 0.35) 42%, rgba(255, 255, 255, 0) 75%),
+                    /* Left soft pastel lavender */
+                    radial-gradient(circle 280px at 32% 65%, rgba(235, 216, 255, 0.5) 0%, rgba(246, 232, 255, 0.28) 45%, rgba(255, 255, 255, 0) 75%),
+                    /* Right soft muted mint and pale sky */
+                    radial-gradient(circle 280px at 68% 65%, rgba(210, 246, 235, 0.5) 0%, rgba(228, 244, 255, 0.28) 45%, rgba(255, 255, 255, 0) 75%);
+                filter: blur(65px);
+                border-radius: 9999px;
+                z-index: 1;
+                pointer-events: none;
+            }
+
+            /* Subtle translucent fade over the lower phone screen content */
+            .ms-phone-bottom-fade {
+                position: absolute;
+                top: 372px;
+                left: 0;
+                right: 0;
+                height: 72px;
+                background: linear-gradient(
+                    to bottom,
+                    rgba(251, 251, 253, 0) 0%,
+                    rgba(251, 251, 253, 0.35) 35%,
+                    rgba(255, 242, 238, 0.7) 75%,
+                    rgba(255, 234, 228, 0.92) 100%
+                );
+                pointer-events: none;
+                z-index: 25;
+            }
+
+            @media (max-width: 768px) {
+                .ms-mockup-wrapper {
+                    margin-top: 36px;
+                    height: 380px;
+                }
+                .ms-phone-aura {
+                    width: 340px;
+                    height: 340px;
+                    top: 280px;
+                    filter: blur(50px);
+                }
+                .ms-phone-bottom-fade {
+                    top: 300px;
+                    height: 70px;
+                }
+            }
+
+            @keyframes msHeroPhoneRise {
+                0% {
+                    opacity: 0;
+                    transform: translateY(54px) scale(0.97);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            .ms-phone-frame {
+                position: relative;
+                z-index: 10;
+                width: 334px;
+                height: 716px;
+                background: #ffffff;
+                border-radius: 46px;
+                border: 9px solid #191c1e;
+                box-shadow:
+                    0 25px 60px -12px rgba(18, 38, 30, 0.2),
+                    0 12px 24px -8px rgba(0, 0, 0, 0.08);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                flex-shrink: 0;
+                animation: msHeroPhoneRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+                transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+            }
+            @media (max-width: 768px) {
+                .ms-phone-frame {
+                    width: min(308px, calc(100vw - 32px));
+                    height: 640px;
+                    border-radius: 40px;
+                    border-width: 8px;
+                }
+            }
+            .ms-phone-frame:hover {
+                transform: translateY(-4px);
+                box-shadow:
+                    0 35px 70px -14px rgba(18, 38, 30, 0.25),
+                    0 16px 30px -8px rgba(0, 0, 0, 0.1);
+            }
+
+            .ms-phone-island {
+                position: absolute;
+                top: 8px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 96px;
+                height: 24px;
+                background: #191c1e;
+                border-radius: 9999px;
+                z-index: 30;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 10px;
+            }
+            .ms-phone-island-cam {
+                width: 8px;
+                height: 8px;
+                border-radius: 9999px;
+                background: #2b3035;
+            }
+            .ms-phone-island-sensor {
+                width: 6px;
+                height: 6px;
+                border-radius: 9999px;
+                background: #10b981;
+            }
+
+            .ms-phone-statusbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 18px 4px 18px;
+                font-size: 11px;
+                font-weight: 600;
+                color: #191c1e;
+                z-index: 20;
+                position: relative;
+            }
+
+            .ms-phone-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                padding: 4px 11px 14px 11px;
+                background: #fbfbfd;
+                overflow: hidden;
+                text-align: left;
+            }
+
+            /* Phone App Header */
+            .ms-screen-top {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 4px 2px 7px 2px;
+            }
+            .ms-screen-brand {
+                font-family: 'Plus Jakarta Sans', sans-serif;
+                font-size: 16.5px;
+                font-weight: 800;
+                color: #191c1e;
+                letter-spacing: -0.02em;
+            }
+            .ms-screen-avatar {
+                width: 27px;
+                height: 27px;
+                border-radius: 9999px;
+                background: #eef2f6;
+                border: 1px solid #dbe2ea;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #4b5563;
+                font-size: 13px;
+            }
+
+            /* Phone Greeting */
+            .ms-screen-greeting {
+                margin-bottom: 10px;
+                padding: 0 2px;
+            }
+            .ms-screen-title {
+                font-size: 15px;
+                font-weight: 700;
+                color: #191c1e;
+                line-height: 1.25;
+            }
+            .ms-screen-subtitle {
+                font-size: 10.5px;
+                color: #6b7280;
+                margin-top: 1px;
+            }
+
+            /* Main Warm Wellbeing Card (Like Feel's Mood card) */
+            .ms-dash-main {
+                background: #fff8f3;
+                border: 1px solid rgba(247, 219, 204, 0.85);
+                border-radius: 17px;
+                padding: 11px 12px;
+                margin-bottom: 9px;
+                box-shadow: 0 2px 8px rgba(243, 144, 114, 0.05);
+            }
+            .ms-main-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                font-size: 10px;
+                font-weight: 600;
+                color: #c25e24;
+                margin-bottom: 5px;
+            }
+            .ms-main-body {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .ms-main-info {
+                flex: 1;
+            }
+            .ms-main-status {
+                font-size: 15.5px;
+                font-weight: 700;
+                color: #26211c;
+                line-height: 1.2;
+            }
+            .ms-main-desc {
+                font-size: 10px;
+                line-height: 1.32;
+                color: #796f66;
+                margin-top: 2px;
+            }
+            .ms-main-score-box {
+                position: relative;
+                width: 56px;
+                height: 56px;
+                flex-shrink: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .ms-main-score-num {
+                font-size: 19px;
+                font-weight: 800;
+                line-height: 1;
+                color: #c25e24;
+            }
+            .ms-main-score-label {
+                font-size: 7.5px;
+                font-weight: 600;
+                color: #9c7863;
+                margin-top: 1px;
+                text-transform: uppercase;
+            }
+
+            /* Secondary Trio Cards (Sleep, Heart Rate, Activity) */
+            .ms-dash-trio {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 5px;
+                margin-bottom: 9px;
+            }
+            .ms-trio-card {
+                border-radius: 13px;
+                padding: 8px 3px;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                transition: transform 0.2s ease;
+            }
+            .ms-trio-card:hover {
+                transform: translateY(-1px);
+            }
+            .ms-trio-icon {
+                margin-bottom: 2px;
+            }
+            .ms-trio-label {
+                font-size: 9px;
+                font-weight: 600;
+                margin-bottom: 1px;
+            }
+            .ms-trio-val {
+                font-size: 12.5px;
+                font-weight: 800;
+                line-height: 1.2;
+            }
+            .ms-trio-sub {
+                font-size: 8px;
+                font-weight: 500;
+                margin-top: 1px;
+            }
+
+            /* Color schemes for trio */
+            .ms-trio-sleep {
+                background: #f3f0fb;
+                border: 1px solid rgba(216, 203, 244, 0.75);
+            }
+            .ms-trio-sleep .ms-trio-icon { color: #6941c6; }
+            .ms-trio-sleep .ms-trio-label { color: #53389e; }
+            .ms-trio-sleep .ms-trio-val { color: #1e153b; }
+            .ms-trio-sleep .ms-trio-sub { color: #6941c6; }
+
+            .ms-trio-heart {
+                background: #edf8f4;
+                border: 1px solid rgba(178, 233, 212, 0.75);
+            }
+            .ms-trio-heart .ms-trio-icon { color: #007955; }
+            .ms-trio-heart .ms-trio-label { color: #006043; }
+            .ms-trio-heart .ms-trio-val { color: #003527; }
+            .ms-trio-heart .ms-trio-sub { color: #007955; }
+
+            .ms-trio-act {
+                background: #fdf2f2;
+                border: 1px solid rgba(254, 205, 202, 0.75);
+            }
+            .ms-trio-act .ms-trio-icon { color: #e11d48; }
+            .ms-trio-act .ms-trio-label { color: #be123c; }
+            .ms-trio-act .ms-trio-val { color: #4c0519; }
+            .ms-trio-act .ms-trio-sub { color: #e11d48; }
+
+            /* Lower Hydration & Daily Reset Card */
+            .ms-dash-tracker {
+                background: #ffffff;
+                border: 1px solid #eef2f1;
+                border-radius: 14px;
+                padding: 9px 12px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            }
+            .ms-tracker-left {
+                display: flex;
+                align-items: center;
+                gap: 9px;
+            }
+            .ms-tracker-icon {
+                width: 28px;
+                height: 28px;
+                border-radius: 9999px;
+                background: #e0f2fe;
+                color: #0284c7;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .ms-tracker-name {
+                font-size: 11px;
+                font-weight: 700;
+                color: #191c1e;
+                line-height: 1.1;
+            }
+            .ms-tracker-val {
+                font-size: 9.5px;
+                color: #64748b;
+                margin-top: 1px;
+            }
+            .ms-tracker-bar-bg {
+                width: 60px;
+                height: 5px;
+                background: #e2e8f0;
+                border-radius: 9999px;
+                overflow: hidden;
+            }
+            .ms-tracker-bar-fill {
+                width: 76%;
+                height: 100%;
+                background: #0284c7;
+                border-radius: 9999px;
+            }
+
+            /* Routine / Habit Checklist inside phone */
+            .ms-dash-routine {
+                background: #ffffff;
+                border: 1px solid #edf2f0;
+                border-radius: 14px;
+                padding: 9px 12px;
+                margin-top: 8px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            }
+            .ms-routine-header {
+                font-size: 9.5px;
+                font-weight: 700;
+                color: #64748b;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                margin-bottom: 1px;
+            }
+            .ms-routine-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .ms-routine-left {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+            }
+            .ms-routine-text {
+                font-size: 11px;
+                font-weight: 600;
+                color: #191c1e;
+                line-height: 1.1;
+            }
+            .ms-routine-sub {
+                font-size: 9px;
+                color: #64748b;
+            }
+            .ms-routine-tag {
+                font-size: 9px;
+                font-weight: 600;
+                padding: 1px 7px;
+                border-radius: 9999px;
+            }
+            .ms-tag-done {
+                background: #ecfdf5;
+                color: #047857;
+            }
+            .ms-tag-pending {
+                background: #f1f5f9;
+                color: #475569;
+            }
+
+            /* Care Insight / Companion Sync card inside phone */
+            .ms-dash-insight {
+                background: #ffffff;
+                border: 1px solid #edf2f0;
+                border-radius: 14px;
+                padding: 10px 13px;
+                margin-top: 8px;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            }
+            .ms-insight-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .ms-insight-title {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11px;
+                font-weight: 700;
+                color: #191c1e;
+            }
+            .ms-insight-status {
+                font-size: 9px;
+                font-weight: 600;
+                color: #059669;
+                background: #ecfdf5;
+                padding: 1px 7px;
+                border-radius: 9999px;
+            }
+            .ms-insight-body {
+                font-size: 10px;
+                line-height: 1.35;
+                color: #64748b;
+                margin: 0;
+            }
+
+            /* Floating Feature Cards (Feel Proportions & Colors) */
+            .ms-float-card {
+                position: absolute;
+                z-index: 20;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(226, 232, 240, 0.85);
+                border-radius: 16px;
+                padding: 10px 16px 10px 12px;
+                box-shadow:
+                    0 10px 25px -4px rgba(0, 0, 0, 0.05),
+                    0 4px 8px -2px rgba(0, 0, 0, 0.02);
+                display: none;
+                align-items: center;
+                gap: 12px;
+                text-align: left;
+                white-space: nowrap;
+                pointer-events: auto;
+                transition: box-shadow 0.25s ease;
+            }
+            @media (min-width: 960px) {
+                .ms-float-card {
+                    display: flex;
+                }
+            }
+            .ms-float-card:hover {
+                box-shadow:
+                    0 14px 32px -4px rgba(0, 0, 0, 0.09),
+                    0 6px 12px -2px rgba(0, 0, 0, 0.03);
+            }
+
+            .ms-badge-icon {
+                width: 32px;
+                height: 32px;
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            .ms-icon-purple {
+                color: #7e57c2;
+                background: #f4effc;
+            }
+            .ms-icon-green {
+                color: #059669;
+                background: #ecfdf5;
+            }
+            .ms-icon-coral {
+                color: #e11d48;
+                background: #fff1f2;
+            }
+            .ms-icon-gold {
+                color: #d97706;
+                background: #fffbeb;
+            }
+
+            /* Card Entrance Keyframes */
+            @keyframes msCardInTL {
+                0% { opacity: 0; transform: rotate(-3deg) translateY(24px) scale(0.92); }
+                100% { opacity: 1; transform: rotate(-3deg) translateY(0) scale(1); }
+            }
+            @keyframes msCardInTR {
+                0% { opacity: 0; transform: rotate(3deg) translateY(24px) scale(0.92); }
+                100% { opacity: 1; transform: rotate(3deg) translateY(0) scale(1); }
+            }
+            @keyframes msCardInBL {
+                0% { opacity: 0; transform: rotate(2deg) translateY(24px) scale(0.92); }
+                100% { opacity: 1; transform: rotate(2deg) translateY(0) scale(1); }
+            }
+            @keyframes msCardInBR {
+                0% { opacity: 0; transform: rotate(-2deg) translateY(24px) scale(0.92); }
+                100% { opacity: 1; transform: rotate(-2deg) translateY(0) scale(1); }
+            }
+
+            /* Keyframes ensuring rotations are preserved throughout the continuous float */
+            @keyframes msFloatTL {
+                0%, 100% { transform: rotate(-3deg) translateY(0px); }
+                50% { transform: rotate(-3deg) translateY(-6px); }
+            }
+            @keyframes msFloatBL {
+                0%, 100% { transform: rotate(2deg) translateY(0px); }
+                50% { transform: rotate(2deg) translateY(-5px); }
+            }
+            @keyframes msFloatTR {
+                0%, 100% { transform: rotate(3deg) translateY(0px); }
+                50% { transform: rotate(3deg) translateY(-6px); }
+            }
+            @keyframes msFloatBR {
+                0%, 100% { transform: rotate(-2deg) translateY(0px); }
+                50% { transform: rotate(-2deg) translateY(-5px); }
+            }
+
+            .ms-float-card-tl {
+                top: 38px;
+                right: calc(50% + 215px);
+                animation: msCardInTL 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.25s backwards, msFloatTL 6s ease-in-out 1.9s infinite;
+            }
+            .ms-float-card-tl:hover {
+                transform: rotate(-1.5deg) scale(1.02) !important;
+                animation-play-state: paused;
+            }
+
+            .ms-float-card-bl {
+                top: 228px;
+                right: calc(50% + 225px);
+                animation: msCardInBL 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.55s backwards, msFloatBL 7s ease-in-out 2.2s infinite;
+            }
+            .ms-float-card-bl:hover {
+                transform: rotate(3deg) scale(1.02) !important;
+                animation-play-state: paused;
+            }
+
+            .ms-float-card-tr {
+                top: 60px;
+                left: calc(50% + 215px);
+                animation: msCardInTR 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.4s backwards, msFloatTR 6.5s ease-in-out 2.05s infinite;
+            }
+            .ms-float-card-tr:hover {
+                transform: rotate(1.5deg) scale(1.02) !important;
+                animation-play-state: paused;
+            }
+
+            .ms-float-card-br {
+                top: 260px;
+                left: calc(50% + 225px);
+                animation: msCardInBR 0.65s cubic-bezier(0.16, 1, 0.3, 1) 1.7s backwards, msFloatBR 7.5s ease-in-out 2.35s infinite;
+            }
+            .ms-float-card-br:hover {
+                transform: rotate(-1deg) scale(1.02) !important;
+                animation-play-state: paused;
+            }
+
+            .ms-float-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: #191c1e;
+                line-height: 1.2;
+            }
+            .ms-float-sub {
+                font-size: 11px;
+                color: #6b7280;
+                margin-top: 1px;
+            }
+
+            /* Section Breathing Room & Spacing */
+            .ms-section-features {
+                padding-top: clamp(48px, 4.5vw, 68px);
+                padding-bottom: clamp(56px, 5.5vw, 80px);
+            }
+            .ms-section-how-it-works {
+                padding-top: clamp(48px, 4.5vw, 68px);
+                padding-bottom: clamp(56px, 5.5vw, 80px);
             }
 
             /* Desktop Navigation (>= 768px) */
@@ -191,13 +976,14 @@
                 }
                 .ms-nav-container {
                     width: 100% !important;
-                    padding: 7px 10px 7px 16px !important;
+                    padding: 8px 10px 8px 18px !important;
+                    min-height: 52px;
                     justify-content: space-between !important;
                     display: flex !important;
                 }
                 .ms-nav-brand {
                     margin-right: 0 !important;
-                    font-size: 1.05rem !important;
+                    font-size: 1.1rem !important;
                 }
                 .ms-nav-desktop-links {
                     display: none !important;
@@ -214,8 +1000,9 @@
                     background-color: #191c1e;
                     color: #ffffff;
                     border-radius: 9999px;
-                    padding: 7px 15px;
-                    font-size: 12.5px;
+                    padding: 8px 16px;
+                    min-height: 36px;
+                    font-size: 13px;
                     font-weight: 600;
                     line-height: 1;
                     text-align: center;
@@ -556,29 +1343,16 @@
 
                 <!-- Desktop Navigation Links (>= 768px) -->
                 <div class="ms-nav-links ms-nav-desktop-links">
-                    <a class="ms-nav-link" href="#features">
-                        <span>Features</span>
-                    </a>
-                    <a class="ms-nav-link" href="#how-it-works">
-                        <span>How it</span>
-                        <span>Works</span>
-                    </a>
-                    <a class="ms-nav-link" href="#pricing">
-                        <span>Pricing</span>
-                    </a>
-                    <a class="ms-nav-link" href="/for-hospitals">
-                        <span>For</span>
-                        <span>Hospitals</span>
-                    </a>
-                    <a class="ms-nav-link" href="/about">
-                        <span>About</span>
-                    </a>
+                    <a class="ms-nav-link" href="#features">Features</a>
+                    <a class="ms-nav-link" href="#how-it-works">How it Works</a>
+                    <a class="ms-nav-link" href="#pricing">Pricing</a>
+                    <a class="ms-nav-link" href="/for-hospitals">For Hospitals</a>
+                    <a class="ms-nav-link" href="/about">About</a>
                 </div>
 
                 <!-- Desktop CTA Button (>= 768px) -->
                 <button data-action="get-app" class="ms-nav-btn ms-nav-desktop-btn">
-                    <span>Get the</span>
-                    <span>app</span>
+                    Get the app
                 </button>
 
                 <!-- Mobile Actions (< 768px) -->
@@ -631,455 +1405,259 @@
         </div>
         <!-- Main Content -->
         <main class="flex-grow">
-            <!-- Hero Section -->
             <section
-                class="relative pt-40 pb-32 px-margin-mobile md:px-margin-desktop overflow-hidden flex flex-col items-center text-center reveal-up"
+                class="feel-hero-section relative px-margin-mobile md:px-margin-desktop"
             >
                 <!-- Trust Indicator -->
-                <div
-                    class="flex items-center justify-center gap-2 mb-6 text-on-surface-variant text-sm font-medium"
-                >
-                    <svg class="landing-icon text-[16px]"
-                         aria-hidden="true" focusable="false"><use href="#ms-rocket_launch"/></svg>
-                    <span class="">Now in Pilot &mdash; Early Access Open</span>
-                    <span
-                        class="px-2 py-0.5 bg-primary/10 text-primary text-[11px] font-bold rounded-full ml-1"
-                        >Free</span
-                    >
+                <div class="feel-trust-badge">
+                    <svg class="landing-icon text-[13px] text-slate-500 shrink-0" aria-hidden="true" focusable="false"><use href="#ms-rocket_launch"/></svg>
+                    <span>Now in Pilot &mdash; Early Access Open</span>
                 </div>
-                <!-- Typography -->
-                <h1
-                    class="text-[44px] md:text-[64px] leading-[1.1] font-headline-lg font-bold text-on-surface max-w-[800px] mb-6 tracking-tight"
-                >
-                    Your AI Pregnancy Companion for a Safer Journey
+
+                <!-- Big, Bold 2-Line Heading (Feel-Inspired) -->
+                <h1 class="feel-hero-heading">
+                    <span class="feel-line">Smart support for your</span>
+                    <span class="feel-line">pregnancy journey</span>
                 </h1>
-                <p
-                    class="text-[18px] text-on-surface-variant max-w-[640px] mb-10 leading-relaxed"
-                >
-                    Transforming daily health data into personalized medical
-                    insights for a smarter, more connected pregnancy.
+
+                <!-- Subheading (2-Line Desktop) -->
+                <p class="feel-hero-subhead">
+                    <span class="feel-sub-line">Track daily health trends, habits, and check-ins.</span>
+                    <span class="feel-sub-line">One connected companion through pregnancy.</span>
                 </p>
+
                 <!-- CTA -->
                 <button
                     data-action="login"
-                    class="bg-[#191c1e] text-white font-medium py-3.5 px-8 rounded-full hover:bg-black hover:scale-105 transition-all duration-300 shadow-md mb-24"
+                    class="feel-hero-cta"
                 >
                     Start for free
                 </button>
-                <!-- Visual / Phone Mockup Area -->
-                <div
-                    class="relative w-full max-w-[1000px] flex justify-center mt-8"
-                >
-                    <!-- Background Aura -->
-                    <div
-                        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] md:w-[900px] md:h-[900px] gradient-aura rounded-full -z-10 animate-float"
-                    ></div>
-                    <!-- Central Phone HTML Mockup -->
-                    <div
-                        class="relative z-10 w-[280px] md:w-[320px] rounded-[40px] border-[10px] border-[#191c1e] bg-surface-container-lowest overflow-hidden shadow-2xl flex-shrink-0 flex flex-col h-[600px] hover:shadow-[0_30px_60px_rgba(0,53,39,0.15)] hover:-translate-y-2 transition-all duration-500 ease-out"
-                    >
+
+                <!-- Visual / Phone Mockup & Floating Cards Area -->
+                <div class="ms-mockup-wrapper">
+                    <!-- Background Soft Aura -->
+                    <div class="ms-phone-aura animate-float"></div>
+
+                    <!-- Central Phone Mockup -->
+                    <div class="ms-phone-frame">
                         <!-- Dynamic Island -->
-                        <div
-                            class="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 bg-[#191c1e] rounded-full z-20 flex items-center justify-between px-2"
-                        >
-                            <div class="w-2 h-2 rounded-full bg-gray-800"></div>
-                            <div
-                                class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"
-                            ></div>
+                        <div class="ms-phone-island">
+                            <div class="ms-phone-island-cam"></div>
+                            <div class="ms-phone-island-sensor"></div>
                         </div>
+
                         <!-- Phone Status Bar -->
-                        <div
-                            class="flex justify-between items-center px-4 pt-3 pb-2 text-[10px] font-medium z-10"
-                        >
-                            <span class="">9:41</span>
-                            <div class="flex items-center gap-1">
-                                <svg
-                                    class="landing-icon text-[12px]"
-                                     aria-hidden="true" focusable="false"><use href="#ms-signal_cellular_4_bar"/></svg>
-                                <svg
-                                    class="landing-icon text-[12px]"
-                                     aria-hidden="true" focusable="false"><use href="#ms-wifi"/></svg>
-                                <svg
-                                    class="landing-icon text-[12px]"
-                                     aria-hidden="true" focusable="false"><use href="#ms-battery_full"/></svg>
+                        <div class="ms-phone-statusbar">
+                            <span>9:41</span>
+                            <div class="flex items-center gap-1.5">
+                                <svg class="landing-icon text-[11px]" aria-hidden="true" focusable="false"><use href="#ms-signal_cellular_4_bar"/></svg>
+                                <svg class="landing-icon text-[11px]" aria-hidden="true" focusable="false"><use href="#ms-wifi"/></svg>
+                                <svg class="landing-icon text-[11px]" aria-hidden="true" focusable="false"><use href="#ms-battery_full"/></svg>
                             </div>
                         </div>
-                        <!-- Phone Content Area -->
-                        <div
-                            class="flex-grow flex flex-col px-4 pb-6 overflow-hidden bg-gradient-to-b from-primary-fixed-dim/20 to-transparent"
-                        >
-                            <!-- App Header -->
-                            <div
-                                class="flex justify-between items-center py-4 mb-2"
-                            >
-                                <div class="flex flex-col">
-                                    <div
-                                        class="text-[18px] font-bold text-primary-container leading-tight"
-                                    >
-                                        Good morning, Sarah.
-                                    </div>
-                                    <div
-                                        class="text-[10px] text-primary-container/70"
-                                    >
-                                        This is your daily report.
-                                    </div>
-                                </div>
-                                <div class="relative">
-                                    <svg
-                                        class="landing-icon text-primary-container"
-                                         aria-hidden="true" focusable="false"><use href="#ms-notifications"/></svg>
-                                    <div
-                                        class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full border-2 border-surface-container-lowest animate-ping"
-                                    ></div>
-                                    <div
-                                        class="absolute top-0 right-0 w-2 h-2 bg-error rounded-full border-2 border-surface-container-lowest"
-                                    ></div>
+
+                        <!-- Phone Screen Dashboard -->
+                        <div class="ms-phone-content">
+                            <!-- App Top Bar -->
+                            <div class="ms-screen-top">
+                                <div class="ms-screen-brand">MomSafe</div>
+                                <div class="ms-screen-avatar">
+                                    <svg class="landing-icon text-[16px]" aria-hidden="true" focusable="false"><use href="#ms-account_circle"/></svg>
                                 </div>
                             </div>
-                            <!-- Proactive Health Score Gauge -->
-                            <div
-                                class="relative flex flex-col items-center justify-center mb-6 py-4"
-                            >
-                                <div
-                                    class="absolute inset-0 bg-primary-fixed-dim/10 blur-2xl rounded-full animate-pulse"
-                                ></div>
-                                <div class="relative">
-                                    <svg
-                                        class="w-40 h-40 transform -rotate-90"
-                                        viewbox="0 0 100 100"
-                                    >
-                                        <circle
-                                            class="text-primary-fixed/30"
-                                            cx="50"
-                                            cy="50"
-                                            fill="transparent"
-                                            r="44"
-                                            stroke="currentColor"
-                                            stroke-width="6"
-                                        ></circle>
-                                        <circle
-                                            class="text-primary-container progress-ring__circle"
-                                            cx="50"
-                                            cy="50"
-                                            data-target="22.11"
-                                            fill="transparent"
-                                            r="44"
-                                            stroke="currentColor"
-                                            stroke-dasharray="276.46"
-                                            stroke-dashoffset="276.46"
-                                            stroke-linecap="round"
-                                            stroke-width="6"
-                                            style="transition-duration: 2s"
-                                        ></circle>
-                                    </svg>
-                                    <div
-                                        class="absolute inset-0 flex flex-col items-center justify-center"
-                                    >
-                                        <span
-                                            class="text-4xl font-bold text-primary-container leading-none"
-                                            >92</span
-                                        >
-                                        <span
-                                            class="text-[10px] font-medium text-primary-container/80 uppercase tracking-wider mt-1"
-                                            >Health Score</span
-                                        >
-                                    </div>
-                                </div>
+
+                            <!-- Greeting -->
+                            <div class="ms-screen-greeting">
+                                <div class="ms-screen-title">Good morning, Sarah.</div>
+                                <div class="ms-screen-subtitle">This is your daily report.</div>
                             </div>
-                            <!-- Vitals Section -->
-                            <div class="mb-6">
-                                <div
-                                    class="text-[12px] font-bold text-primary-container/60 uppercase tracking-widest mb-3"
-                                >
-                                    Vitals
+
+                            <!-- Main Warm Wellbeing Card (Like Feel's Mood card) -->
+                            <div class="ms-dash-main">
+                                <div class="ms-main-badge">
+                                    <svg class="landing-icon text-[14px]" aria-hidden="true" focusable="false"><use href="#ms-spa"/></svg>
+                                    <span>Pregnancy Wellbeing</span>
                                 </div>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div
-                                        class="glass-panel rounded-2xl p-3 flex flex-col gap-2 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
-                                    >
-                                        <div class="flex items-center gap-2">
-                                            <svg
-                                                class="landing-icon text-primary-container text-[18px] animate-pulse"
-                                                 aria-hidden="true" focusable="false"><use href="#ms-favorite"/></svg>
-                                            <span
-                                                class="text-[11px] font-semibold text-primary-container"
-                                                >Heart Rate</span
-                                            >
-                                        </div>
-                                        <div class="flex items-baseline gap-1">
-                                            <span
-                                                class="text-[16px] font-bold text-primary-container"
-                                                >72</span
-                                            >
-                                            <span
-                                                class="text-[10px] text-primary-container/60"
-                                                >bpm</span
-                                            >
-                                        </div>
-                                        <div
-                                            class="h-4 w-full bg-primary-fixed-dim/20 rounded-full overflow-hidden flex items-end gap-0.5 px-1"
-                                        >
-                                            <div
-                                                class="w-1 h-2 bg-primary-container/40 rounded-t-full bar-element bar-delay-1"
-                                            ></div>
-                                            <div
-                                                class="w-1 h-3 bg-primary-container/40 rounded-t-full bar-element bar-delay-2"
-                                            ></div>
-                                            <div
-                                                class="w-1 h-2.5 bg-primary-container rounded-t-full bar-element bar-delay-3"
-                                            ></div>
-                                            <div
-                                                class="w-1 h-3.5 bg-primary-container/40 rounded-t-full bar-element bar-delay-4"
-                                            ></div>
-                                        </div>
+                                <div class="ms-main-body">
+                                    <div class="ms-main-info">
+                                        <div class="ms-main-status">Steady &amp; On Track</div>
+                                        <div class="ms-main-desc">Daily vitals and check-in logged from your connected band.</div>
                                     </div>
-                                    <div
-                                        class="glass-panel rounded-2xl p-3 flex flex-col gap-2 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
-                                    >
-                                        <div class="flex items-center gap-2">
-                                            <svg
-                                                class="landing-icon text-primary-container text-[18px]"
-                                                 aria-hidden="true" focusable="false"><use href="#ms-water_drop"/></svg>
-                                            <span
-                                                class="text-[11px] font-semibold text-primary-container"
-                                                >Blood Pressure</span
-                                            >
-                                        </div>
-                                        <div class="flex items-baseline gap-1">
-                                            <span
-                                                class="text-[16px] font-bold text-primary-container"
-                                                >110/70</span
-                                            >
-                                        </div>
-                                        <div
-                                            class="h-4 w-full bg-primary-fixed-dim/20 rounded-full overflow-hidden flex items-end gap-0.5 px-1"
-                                        >
-                                            <div
-                                                class="w-1 h-3 bg-primary-container/40 rounded-t-full bar-element bar-delay-2"
-                                            ></div>
-                                            <div
-                                                class="w-1 h-2 bg-primary-container rounded-t-full bar-element bar-delay-1"
-                                            ></div>
-                                            <div
-                                                class="w-1 h-3.5 bg-primary-container/40 rounded-t-full bar-element bar-delay-4"
-                                            ></div>
-                                            <div
-                                                class="w-1 h-2.5 bg-primary-container/40 rounded-t-full bar-element bar-delay-3"
-                                            ></div>
+                                    <div class="ms-main-score-box">
+                                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 44 44">
+                                            <circle cx="22" cy="22" r="18" fill="none" stroke="#fed7aa" stroke-width="4.5"></circle>
+                                            <circle cx="22" cy="22" r="18" fill="none" stroke="#ea580c" stroke-width="4.5" stroke-dasharray="113.1" stroke-dashoffset="20.36" stroke-linecap="round"></circle>
+                                        </svg>
+                                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                            <span class="ms-main-score-num">92</span>
+                                            <span class="ms-main-score-label">of 100</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <!-- Daily Tracking Grid -->
-                            <div>
-                                <div
-                                    class="text-[12px] font-bold text-primary-container/60 uppercase tracking-widest mb-3"
-                                >
-                                    Daily Tracking
+
+                            <!-- Secondary Trio Cards (Sleep, Heart Rate, Activity) -->
+                            <div class="ms-dash-trio">
+                                <!-- Sleep (Lavender) -->
+                                <div class="ms-trio-card ms-trio-sleep">
+                                    <div class="ms-trio-icon">
+                                        <svg class="landing-icon text-[15px]" aria-hidden="true" focusable="false"><use href="#ms-bedtime"/></svg>
+                                    </div>
+                                    <div class="ms-trio-label">Sleep</div>
+                                    <div class="ms-trio-val">7h 42m</div>
+                                    <div class="ms-trio-sub">&bull; Restful</div>
                                 </div>
-                                <div class="grid grid-cols-1 gap-3">
-                                    <div
-                                        class="glass-panel rounded-2xl p-3 flex items-center justify-between shadow-sm hover:shadow-md hover:bg-primary-fixed-dim/5 transition-all duration-300"
-                                    >
-                                        <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-8 h-8 rounded-full bg-primary-fixed-dim/30 flex items-center justify-center text-primary-container"
-                                            >
-                                                <svg
-                                                    class="landing-icon text-[18px]"
-                                                     aria-hidden="true" focusable="false"><use href="#ms-bedtime"/></svg>
-                                            </div>
-                                            <div class="flex flex-col">
-                                                <span
-                                                    class="text-[12px] font-semibold text-primary-container"
-                                                    >Sleep</span
-                                                >
-                                                <span
-                                                    class="text-[10px] text-primary-container/60"
-                                                    >7h 42m • Good</span
-                                                >
-                                            </div>
-                                        </div>
-                                        <svg
-                                            class="landing-icon text-primary-container/40 text-[18px]"
-                                             aria-hidden="true" focusable="false"><use href="#ms-chevron_right"/></svg>
+
+                                <!-- Heart Rate (Mint) -->
+                                <div class="ms-trio-card ms-trio-heart">
+                                    <div class="ms-trio-icon">
+                                        <svg class="landing-icon text-[15px]" aria-hidden="true" focusable="false"><use href="#ms-favorite"/></svg>
                                     </div>
-                                    <div
-                                        class="glass-panel rounded-2xl p-3 flex items-center justify-between shadow-sm hover:shadow-md hover:bg-primary-fixed-dim/5 transition-all duration-300"
-                                    >
-                                        <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-8 h-8 rounded-full bg-primary-fixed-dim/30 flex items-center justify-center text-primary-container"
-                                            >
-                                                <svg
-                                                    class="landing-icon text-[18px]"
-                                                     aria-hidden="true" focusable="false"><use href="#ms-restaurant"/></svg>
-                                            </div>
-                                            <div class="flex flex-col">
-                                                <span
-                                                    class="text-[12px] font-semibold text-primary-container"
-                                                    >Nutrition</span
-                                                >
-                                                <span
-                                                    class="text-[10px] text-primary-container/60"
-                                                    >1,850 / 2,200 kcal</span
-                                                >
-                                            </div>
-                                        </div>
-                                        <div
-                                            class="w-12 h-1.5 bg-primary-fixed-dim/30 rounded-full overflow-hidden"
-                                        >
-                                            <div
-                                                class="h-full bg-primary-container w-0 bar-element"
-                                                style="
-                                                    animation: barGrow 1s
-                                                        ease-out 0.5s forwards;
-                                                    width: 80%;
-                                                    transform-origin: left;
-                                                    transform: scaleX(0);
-                                                "
-                                            ></div>
-                                        </div>
+                                    <div class="ms-trio-label">Heart Rate</div>
+                                    <div class="ms-trio-val">72 bpm</div>
+                                    <div class="ms-trio-sub">&bull; Steady</div>
+                                </div>
+
+                                <!-- Activity / Steps (Blush) -->
+                                <div class="ms-trio-card ms-trio-act">
+                                    <div class="ms-trio-icon">
+                                        <svg class="landing-icon text-[15px]" aria-hidden="true" focusable="false"><use href="#ms-bolt"/></svg>
                                     </div>
-                                    <div
-                                        class="glass-panel rounded-2xl p-3 flex items-center justify-between shadow-sm hover:shadow-md hover:bg-primary-fixed-dim/5 transition-all duration-300"
-                                    >
-                                        <div class="flex items-center gap-3">
-                                            <div
-                                                class="w-8 h-8 rounded-full bg-primary-fixed-dim/30 flex items-center justify-center text-primary-container"
-                                            >
-                                                <svg
-                                                    class="landing-icon text-[18px]"
-                                                     aria-hidden="true" focusable="false"><use href="#ms-local_drink"/></svg>
-                                            </div>
-                                            <div class="flex flex-col">
-                                                <span
-                                                    class="text-[12px] font-semibold text-primary-container"
-                                                    >Hydration</span
-                                                >
-                                                <span
-                                                    class="text-[10px] text-primary-container/60"
-                                                    >1.8L / 2.5L</span
-                                                >
-                                            </div>
-                                        </div>
-                                        <div
-                                            class="w-12 h-1.5 bg-primary-fixed-dim/30 rounded-full overflow-hidden"
-                                        >
-                                            <div
-                                                class="h-full bg-primary-container w-0 bar-element"
-                                                style="
-                                                    animation: barGrow 1s
-                                                        ease-out 0.7s forwards;
-                                                    width: 72%;
-                                                    transform-origin: left;
-                                                    transform: scaleX(0);
-                                                "
-                                            ></div>
-                                        </div>
-                                    </div>
+                                    <div class="ms-trio-label">Movement</div>
+                                    <div class="ms-trio-val">4,820</div>
+                                    <div class="ms-trio-sub">&bull; Steps</div>
                                 </div>
                             </div>
+
+                            <!-- Lower Hydration Tracker -->
+                            <div class="ms-dash-tracker">
+                                <div class="ms-tracker-left">
+                                    <div class="ms-tracker-icon">
+                                        <svg class="landing-icon text-[14px]" aria-hidden="true" focusable="false"><use href="#ms-water_drop"/></svg>
+                                    </div>
+                                    <div>
+                                        <div class="ms-tracker-name">Daily Hydration</div>
+                                        <div class="ms-tracker-val">2.1L / 2.5L target</div>
+                                    </div>
+                                </div>
+                                <div class="ms-tracker-bar-bg">
+                                    <div class="ms-tracker-bar-fill"></div>
+                                </div>
+                            </div>
+
+                            <!-- Today's Habits / Checklist -->
+                            <div class="ms-dash-routine">
+                                <div class="ms-routine-header">Today's Habits</div>
+                                <div class="ms-routine-item">
+                                    <div class="ms-routine-left">
+                                        <svg class="landing-icon text-[14px] text-[#10b981]" aria-hidden="true" focusable="false"><use href="#ms-check_circle"/></svg>
+                                        <div>
+                                            <div class="ms-routine-text">Prenatal Vitamin</div>
+                                            <div class="ms-routine-sub">Logged at 8:30 AM</div>
+                                        </div>
+                                    </div>
+                                    <span class="ms-routine-tag ms-tag-done">Done</span>
+                                </div>
+                                <div class="ms-routine-item">
+                                    <div class="ms-routine-left">
+                                        <svg class="landing-icon text-[14px] text-[#10b981]" aria-hidden="true" focusable="false"><use href="#ms-check_circle"/></svg>
+                                        <div>
+                                            <div class="ms-routine-text">Hydration Goal</div>
+                                            <div class="ms-routine-sub">2.1L logged today</div>
+                                        </div>
+                                    </div>
+                                    <span class="ms-routine-tag ms-tag-done">Done</span>
+                                </div>
+                                <div class="ms-routine-item">
+                                    <div class="ms-routine-left">
+                                        <svg class="landing-icon text-[14px] text-[#64748b]" aria-hidden="true" focusable="false"><use href="#ms-schedule"/></svg>
+                                        <div>
+                                            <div class="ms-routine-text">Evening Rest &amp; Walk</div>
+                                            <div class="ms-routine-sub">15 min • Planned 6:00 PM</div>
+                                        </div>
+                                    </div>
+                                    <span class="ms-routine-tag ms-tag-pending">Scheduled</span>
+                                </div>
+                            </div>
+
+                            <!-- Care Insight / Companion Sync Card -->
+                            <div class="ms-dash-insight">
+                                <div class="ms-insight-header">
+                                    <div class="ms-insight-title">
+                                        <svg class="landing-icon text-[13px] text-[#059669]" aria-hidden="true" focusable="false"><use href="#ms-check_circle"/></svg>
+                                        <span>Today's Summary</span>
+                                    </div>
+                                    <span class="ms-insight-status">Synced</span>
+                                </div>
+                                <p class="ms-insight-body">
+                                    Resting heart rate steady over the past 3 days. Band connected and updating normally.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Subtle Translucent Fade at Bottom of Screen (Emergence Effect) -->
+                        <div class="ms-phone-bottom-fade"></div>
+                    </div>
+
+                    <!-- Floating Feature Cards (Feel Proportions & Colors) -->
+                    <!-- Top Left: Rest with context -->
+                    <div class="ms-float-card ms-float-card-tl">
+                        <div class="ms-badge-icon ms-icon-purple">
+                            <svg class="landing-icon text-[18px]" aria-hidden="true" focusable="false"><use href="#ms-bedtime"/></svg>
+                        </div>
+                        <div>
+                            <div class="ms-float-title">Rest with context</div>
+                            <div class="ms-float-sub">Sleep patterns</div>
                         </div>
                     </div>
-                    <!-- Floating Badges -->
-                    <!-- Top Left -->
-                    <div
-                        class="hidden md:flex absolute top-[25%] left-[8%] bg-surface-container-lowest rounded-2xl p-4 pr-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-outline-variant/20 items-center gap-3 transform -rotate-3 hover:-rotate-1 hover:scale-105 transition-all duration-300 z-20 animate-float"
-                    >
-                        <div
-                            class="text-[#7e57c2] flex items-center justify-center"
-                        >
-                            <svg class="landing-icon text-[24px]"
-                                 aria-hidden="true" focusable="false"><use href="#ms-bedtime"/></svg>
+
+                    <!-- Bottom Left: Keep it realistic -->
+                    <div class="ms-float-card ms-float-card-bl">
+                        <div class="ms-badge-icon ms-icon-green">
+                            <svg class="landing-icon text-[18px]" aria-hidden="true" focusable="false"><use href="#ms-eco"/></svg>
                         </div>
-                        <div class="text-left">
-                            <div
-                                class="text-[14px] text-on-surface font-semibold leading-tight"
-                            >
-                                Rest with context
-                            </div>
-                            <div class="text-[12px] text-on-surface-variant">
-                                Sleep patterns
-                            </div>
+                        <div>
+                            <div class="ms-float-title">Keep it realistic</div>
+                            <div class="ms-float-sub">Small habits</div>
                         </div>
                     </div>
-                    <!-- Bottom Left -->
-                    <div
-                        class="hidden md:flex absolute bottom-[30%] left-[10%] bg-surface-container-lowest rounded-2xl p-4 pr-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-outline-variant/20 items-center gap-3 transform rotate-2 hover:rotate-4 hover:scale-105 transition-all duration-300 z-20 animate-float-delayed-1"
-                    >
-                        <div
-                            class="text-[#2b6954] flex items-center justify-center"
-                        >
-                            <svg class="landing-icon text-[24px]"
-                                 aria-hidden="true" focusable="false"><use href="#ms-spa"/></svg>
+
+                    <!-- Top Right: Plan your energy -->
+                    <div class="ms-float-card ms-float-card-tr">
+                        <div class="ms-badge-icon ms-icon-coral">
+                            <svg class="landing-icon text-[18px]" aria-hidden="true" focusable="false"><use href="#ms-bolt"/></svg>
                         </div>
-                        <div class="text-left">
-                            <div
-                                class="text-[14px] text-on-surface font-semibold leading-tight"
-                            >
-                                Keep it realistic
-                            </div>
-                            <div class="text-[12px] text-on-surface-variant">
-                                Small habits
-                            </div>
+                        <div>
+                            <div class="ms-float-title">Plan your energy</div>
+                            <div class="ms-float-sub">Daily signals</div>
                         </div>
                     </div>
-                    <!-- Top Right -->
-                    <div
-                        class="hidden md:flex absolute top-[35%] right-[8%] bg-surface-container-lowest rounded-2xl p-4 pr-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-outline-variant/20 items-center gap-3 transform rotate-3 hover:rotate-1 hover:scale-105 transition-all duration-300 z-20 animate-float-delayed-2"
-                    >
-                        <div
-                            class="text-[#e53935] flex items-center justify-center"
-                        >
-                            <svg class="landing-icon text-[24px]"
-                                 aria-hidden="true" focusable="false"><use href="#ms-bolt"/></svg>
+
+                    <!-- Bottom Right: Check in daily -->
+                    <div class="ms-float-card ms-float-card-br">
+                        <div class="ms-badge-icon ms-icon-gold">
+                            <svg class="landing-icon text-[18px]" aria-hidden="true" focusable="false"><use href="#ms-spa"/></svg>
                         </div>
-                        <div class="text-left">
-                            <div
-                                class="text-[14px] text-on-surface font-semibold leading-tight"
-                            >
-                                Plan your energy
-                            </div>
-                            <div class="text-[12px] text-on-surface-variant">
-                                Daily signals
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Bottom Right -->
-                    <div
-                        class="hidden md:flex absolute bottom-[25%] right-[10%] bg-surface-container-lowest rounded-2xl p-4 pr-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-outline-variant/20 items-center gap-3 transform -rotate-2 hover:-rotate-4 hover:scale-105 transition-all duration-300 z-20 animate-float-delayed-3"
-                    >
-                        <div
-                            class="text-[#fbc02d] flex items-center justify-center"
-                        >
-                            <svg class="landing-icon text-[24px]"
-                                 aria-hidden="true" focusable="false"><use href="#ms-mood"/></svg>
-                        </div>
-                        <div class="text-left">
-                            <div
-                                class="text-[14px] text-on-surface font-semibold leading-tight"
-                            >
-                                Check in daily
-                            </div>
-                            <div class="text-[12px] text-on-surface-variant">
-                                Mood in seconds
-                            </div>
+                        <div>
+                            <div class="ms-float-title">Check in daily</div>
+                            <div class="ms-float-sub">Mood in seconds</div>
                         </div>
                     </div>
                 </div>
             </section>
             <!-- Feature Grid Section -->
             <section
-                class="px-margin-mobile md:px-margin-desktop bg-surface-container-lowest w-full max-w-container-max mx-auto py-12 reveal-up"
+                class="ms-section-features relative z-10 w-full bg-white"
                 id="features"
             >
-                <div class="text-center mb-12">
-                    <h2
-                        class="text-[32px] md:text-[48px] font-headline-lg font-bold text-on-surface tracking-tight mb-4"
-                    >
-                        Everything for your daily reset
-                    </h2>
+                <div class="w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+                    <div class="text-center mb-10 md:mb-12">
+                        <h2
+                            class="text-[32px] md:text-[48px] font-headline-lg font-bold text-on-surface tracking-tight mb-4"
+                        >
+                            Everything for your daily reset
+                        </h2>
                     <p
                         class="text-[18px] text-on-surface-variant max-w-2xl mx-auto leading-relaxed"
                     >
@@ -2111,9 +2689,10 @@
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
             <section
-                class="px-margin-mobile md:px-margin-desktop py-stack-lg bg-surface reveal-up"
+                class="ms-section-how-it-works w-full px-margin-mobile md:px-margin-desktop bg-surface reveal-up"
                 id="how-it-works"
             >
                 <div class="max-w-container-max mx-auto">
