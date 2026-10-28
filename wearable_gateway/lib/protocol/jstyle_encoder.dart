@@ -60,6 +60,16 @@ class JStyleEncoder {
     return Uint8List.fromList(packet);
   }
 
+  /// Command 0x65: Request stored axillary / spot temperature records
+  /// [mode]: 0 = read latest, 2 = continue next, 0x99 = delete/ack
+  static Uint8List buildGetAxillaryTemperatureData({int mode = 0}) {
+    final packet = _createBuffer();
+    packet[0] = JStyleCmd.getAxillaryTemp; // 0x65
+    packet[1] = mode;
+    _applyCrc(packet);
+    return Uint8List.fromList(packet);
+  }
+
   /// Command 0x53: Request stored sleep history records
   /// [mode]: 0 = read latest, 2 = continue next, 0x99 = delete/ack
   static Uint8List buildGetSleepData({int mode = 0}) {

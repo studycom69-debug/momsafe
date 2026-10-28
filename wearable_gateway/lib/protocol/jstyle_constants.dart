@@ -46,6 +46,7 @@ enum MeasurementType {
   temperature,
   skinTemperature,
   battery,
+  bloodPressure,
 }
 
 enum ReadingSource {

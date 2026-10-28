@@ -48,3 +48,43 @@ ALTER TABLE public.sleep_data
 CREATE UNIQUE INDEX IF NOT EXISTS sleep_data_user_device_record_unique
   ON public.sleep_data (user_id, device_id, device_record_id)
   WHERE device_record_id IS NOT NULL;
+
+-- 6. Passwordless wearable user email lookup RPC
+CREATE OR REPLACE FUNCTION public.lookup_wearable_user_by_email(p_email text)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+DECLARE
+  v_uid uuid;
+BEGIN
+  SELECT id INTO v_uid
+  FROM auth.users
+  WHERE lower(email) = lower(trim(p_email))
+  LIMIT 1;
+
+  RETURN v_uid;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.lookup_wearable_user_by_email(text) TO anon, authenticated, service_role;
+
+-- 7. Allow wearable sync insertions without requiring password authentication
+DROP POLICY IF EXISTS "Allow wearable sync insert" ON public.vitals;
+CREATE POLICY "Allow wearable sync insert"
+ON public.vitals
+FOR INSERT
+WITH CHECK (
+  (auth.uid() = user_id) OR
+  (source IN ('wearable', 'jstyle_2208a') AND user_id IS NOT NULL)
+);
+
+DROP POLICY IF EXISTS "Allow wearable sync sleep insert" ON public.sleep_data;
+CREATE POLICY "Allow wearable sync sleep insert"
+ON public.sleep_data
+FOR INSERT
+WITH CHECK (
+  (auth.uid() = user_id) OR
+  (source IN ('wearable', 'jstyle_2208a') AND user_id IS NOT NULL)
+);

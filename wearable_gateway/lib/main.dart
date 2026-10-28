@@ -55,6 +55,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
   ParsedReading? _latestTemperature;
   ParsedReading? _latestSleep;
   ParsedReading? _latestBattery;
+  ParsedReading? _latestBloodPressure;
 
   // Preserved history records
   final List<ParsedReading> _heartRateHistory = [];
@@ -63,6 +64,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
   final List<ParsedReading> _stressHistory = [];
   final List<ParsedReading> _temperatureHistory = [];
   final List<ParsedReading> _sleepHistory = [];
+  final List<ParsedReading> _bloodPressureHistory = [];
   
   // Loading & error state
   String? _activeRequestName;
@@ -139,6 +141,9 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
       case MeasurementType.battery:
         current = _latestBattery;
         break;
+      case MeasurementType.bloodPressure:
+        current = _latestBloodPressure;
+        break;
     }
 
     // Preserve in history collection (deduplicated by measurement timestamp)
@@ -165,6 +170,8 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
       addToHistory(_temperatureHistory, incoming);
     } else if (incoming.type == MeasurementType.sleep) {
       addToHistory(_sleepHistory, incoming);
+    } else if (incoming.type == MeasurementType.bloodPressure) {
+      addToHistory(_bloodPressureHistory, incoming);
     }
 
     final decision = TelemetryStateResolver.shouldUpdateReading(
@@ -211,6 +218,9 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
             break;
           case MeasurementType.battery:
             _latestBattery = incoming;
+            break;
+          case MeasurementType.bloodPressure:
+            _latestBloodPressure = incoming;
             break;
         }
       });
@@ -544,12 +554,14 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
       if (_latestStress != null) _latestStress!,
       if (_latestTemperature != null) _latestTemperature!,
       if (_latestSleep != null) _latestSleep!,
+      if (_latestBloodPressure != null) _latestBloodPressure!,
       ..._heartRateHistory,
       ..._spo2History,
       ..._hrvHistory,
       ..._stressHistory,
       ..._temperatureHistory,
       ..._sleepHistory,
+      ..._bloodPressureHistory,
     ];
 
     final deviceId = _bleManager.connectedDevice?.remoteId.str ?? "J-Style 2208A";
@@ -575,8 +587,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
   }
 
   void _showCloudSignInDialog() {
-    final emailCtrl = TextEditingController(text: "vaishnavisharma0711@gmail.com");
-    final passCtrl = TextEditingController(text: "123456");
+    final emailCtrl = TextEditingController(text: "studycom69@gmail.com");
 
     showDialog(
       context: context,
@@ -586,90 +597,91 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
 
         return StatefulBuilder(
           builder: (ctx, setDlgState) {
-
-          return AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.cloud_sync, color: Color(0xFFE11D48)),
-                SizedBox(width: 8),
-                Text("MomSafe Cloud Sign-In"),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Sign in with your MomSafe AI account to upload wearable health vitals directly to your pregnancy dashboard.",
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: emailCtrl,
-                  decoration: const InputDecoration(
-                    labelText: "Email",
-                    prefixIcon: Icon(Icons.email, size: 18),
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: passCtrl,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: "Password",
-                    prefixIcon: Icon(Icons.lock, size: 18),
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  ),
-                ),
-                if (errorMsg != null) ...[
-                  const SizedBox(height: 8),
-                  Text(errorMsg!, style: const TextStyle(color: Colors.red, fontSize: 11)),
+            return AlertDialog(
+              title: const Row(
+                children: [
+                  Icon(Icons.cloud_sync, color: Color(0xFFE11D48)),
+                  SizedBox(width: 8),
+                  Text("Connect MomSafe Account"),
                 ],
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text("Cancel"),
               ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE11D48), foregroundColor: Colors.white),
-                onPressed: isLoading
-                    ? null
-                    : () async {
-                        setDlgState(() => isLoading = true);
-                        final session = await _cloudSync.signIn(
-                          email: emailCtrl.text,
-                          password: passCtrl.text,
-                        );
-                        if (session != null) {
-                          if (mounted) {
-                            setState(() {
-                              _cloudSyncStatus = "Signed in as ${session.email}";
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Connect your MomSafe AI account using your Google login email to sync wearable vitals directly to your pregnancy dashboard.",
+                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: emailCtrl,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: "MomSafe Email (Google Account)",
+                      hintText: "user@gmail.com",
+                      prefixIcon: Icon(Icons.email, size: 18),
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    "No password needed. Vitals sync directly to your authenticated profile.",
+                    style: TextStyle(fontSize: 11, color: Colors.black38, fontStyle: FontStyle.italic),
+                  ),
+                  if (errorMsg != null) ...[
+                    const SizedBox(height: 8),
+                    Text(errorMsg!, style: const TextStyle(color: Colors.red, fontSize: 11)),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFE11D48),
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          setDlgState(() {
+                            isLoading = true;
+                            errorMsg = null;
+                          });
+                          final session = await _cloudSync.connectWithEmail(
+                            email: emailCtrl.text.trim(),
+                          );
+                          if (session != null) {
+                            if (mounted) {
+                              setState(() {
+                                _cloudSyncStatus = "Connected as ${session.email}";
+                              });
+                            }
+                            Navigator.pop(ctx);
+                            _handleCloudSync();
+                          } else {
+                            setDlgState(() {
+                              isLoading = false;
+                              errorMsg = "Account not found for ${emailCtrl.text.trim()}. Make sure you have signed in to MomSafe AI web first.";
                             });
                           }
-                          Navigator.pop(ctx);
-                          _handleCloudSync();
-                        } else {
-                          setDlgState(() {
-                            isLoading = false;
-                            errorMsg = "Invalid credentials or network failure. Check credentials.";
-                          });
-                        }
-                      },
-                child: isLoading
-                    ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text("Sign In & Sync"),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
+                        },
+                  child: isLoading
+                      ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text("Connect & Sync"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1037,7 +1049,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
                             icon: _activeRequestName == "Sync Temperature"
                                 ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
                                 : const Icon(Icons.thermostat, color: Colors.deepOrange, size: 18),
-                            label: Text(_activeRequestName == "Sync Temperature" ? "Syncing..." : "Sync Temp (0x62)"),
+                            label: Text(_activeRequestName == "Sync Temperature" ? "Syncing..." : "Sync Temp (0x65/0x62)"),
                             onPressed: isBusy
                                 ? null
                                 : () => _handleMeasurementRequest(
@@ -1246,29 +1258,14 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade50,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.grey.shade300),
-                              ),
-                              child: const Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(Icons.speed, color: Colors.grey, size: 16),
-                                      SizedBox(width: 6),
-                                      Text("Blood Pressure", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black54)),
-                                    ],
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text("N/A (Hardware Limitation)", style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey)),
-                                  SizedBox(height: 2),
-                                  Text("2208A band lacks arterial BP hardware. Use certified arm cuff.", style: TextStyle(fontSize: 9, color: Colors.black45)),
-                                ],
-                              ),
+                            child: _buildMetricTile(
+                              title: "Estimated BP",
+                              reading: _latestBloodPressure,
+                              fallbackUnit: "mmHg",
+                              icon: Icons.speed,
+                              iconColor: Colors.deepPurple,
+                              dateFormat: dateFormat,
+                              timeFormat: timeFormat,
                             ),
                           ),
                         ],
@@ -1313,8 +1310,8 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
                       const SizedBox(height: 6),
                       Text(
                         _cloudSync.isAuthenticated
-                            ? "Logged in as: ${_cloudSync.currentSession?.email}"
-                            : "Connect your MomSafe AI account to sync validated wearable vitals directly to your maternal dashboard.",
+                            ? "Connected to: ${_cloudSync.currentSession?.email}"
+                            : "Connect your MomSafe AI account (Google email) to sync wearable vitals directly to your maternal dashboard.",
                         style: const TextStyle(fontSize: 12, color: Colors.black54),
                       ),
                       if (_cloudSyncStatus != null) ...[
@@ -1339,7 +1336,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
                           if (!_cloudSync.isAuthenticated)
                             OutlinedButton.icon(
                               icon: const Icon(Icons.login, size: 16),
-                              label: const Text("Sign In"),
+                              label: const Text("Connect Account"),
                               onPressed: _showCloudSignInDialog,
                             )
                           else
@@ -1350,7 +1347,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
                                   _cloudSyncStatus = null;
                                 });
                               },
-                              child: const Text("Sign Out", style: TextStyle(fontSize: 12, color: Colors.black45)),
+                              child: const Text("Disconnect", style: TextStyle(fontSize: 12, color: Colors.black45)),
                             ),
                         ],
                       ),
@@ -1441,8 +1438,40 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
     required DateFormat timeFormat,
   }) {
     final hasData = reading != null;
-    final valueStr = hasData ? "${reading.value}" : "--";
+    final valueStr = hasData
+        ? (reading.type == MeasurementType.bloodPressure && reading.secondaryValue != null
+            ? "${reading.value.toInt()}/${reading.secondaryValue!.toInt()}"
+            : (reading.type == MeasurementType.heartRate ||
+                    reading.type == MeasurementType.spo2 ||
+                    reading.type == MeasurementType.hrv ||
+                    reading.type == MeasurementType.stress ||
+                    reading.type == MeasurementType.battery)
+                ? "${reading.value.toInt()}"
+                : "${reading.value}")
+        : "--";
     final unitStr = hasData ? reading.unit : fallbackUnit;
+
+    // Maternal baseline temperature calculation
+    final isTemperature = reading != null &&
+        (reading.type == MeasurementType.temperature || reading.type == MeasurementType.skinTemperature);
+    String? tempBaselineNote;
+    Color tempBaselineColor = Colors.teal;
+    if (isTemperature) {
+      const double baseline = 36.5;
+      final diff = (reading.value - baseline);
+      final diffSign = diff > 0 ? "+" : "";
+      if (diff.abs() < 0.05) {
+        tempBaselineNote = "At baseline (36.5°C)";
+        tempBaselineColor = Colors.teal;
+      } else {
+        tempBaselineNote = "$diffSign${diff.toStringAsFixed(1)}°C ${diff > 0 ? 'above' : 'below'} baseline (36.5°C)";
+        tempBaselineColor = diff > 0.8
+            ? Colors.red.shade700
+            : diff > 0.3
+                ? Colors.orange.shade800
+                : Colors.teal.shade800;
+      }
+    }
 
     // Freshness calculation
     String freshnessLabel = "";
@@ -1539,6 +1568,34 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
               Text(unitStr, style: const TextStyle(fontSize: 12, color: Colors.black54)),
             ],
           ),
+          if (tempBaselineNote != null) ...[
+            const SizedBox(height: 3),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: BoxDecoration(
+                color: tempBaselineColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                tempBaselineNote,
+                style: TextStyle(fontSize: 9.5, color: tempBaselineColor, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+          if (reading?.type == MeasurementType.bloodPressure && hasData) ...[
+            const SizedBox(height: 3),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.deepPurple.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Text(
+                "Estimated (Pulse Wave / JC Vital)",
+                style: TextStyle(fontSize: 8.5, color: Colors.deepPurple, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
           const SizedBox(height: 4),
           if (hasData) ...[
             Text(

@@ -51,6 +51,46 @@ class MomSafeCloudSync {
   MomSafeAuthSession? get currentSession => _session;
   bool get isAuthenticated => _session != null && !_session!.isExpired;
 
+  /// Connect passwordlessly using MomSafe user account email (Google OAuth account)
+  Future<MomSafeAuthSession?> connectWithEmail({required String email}) async {
+    final cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail.isEmpty || !cleanEmail.contains('@')) return null;
+
+    try {
+      final uri = Uri.parse("$supabaseUrl/rest/v1/rpc/lookup_wearable_user_by_email");
+      final request = await _client.postUrl(uri);
+      request.headers.set("apikey", supabaseAnonKey);
+      request.headers.set("Authorization", "Bearer $supabaseAnonKey");
+      request.headers.set("Content-Type", "application/json");
+
+      final body = jsonEncode({
+        "p_email": cleanEmail,
+      });
+      request.write(body);
+
+      final response = await request.close();
+      final responseBody = await response.transform(utf8.decoder).join();
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(responseBody);
+        final String? userId = decoded is String ? decoded : (decoded != null ? decoded.toString() : null);
+        if (userId != null && userId.isNotEmpty && userId != "null") {
+          _session = MomSafeAuthSession(
+            userId: userId,
+            email: cleanEmail,
+            accessToken: supabaseAnonKey,
+            refreshToken: null,
+            expiresAt: DateTime.now().add(const Duration(days: 365)),
+          );
+          return _session;
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Sign in with MomSafe email and password
   Future<MomSafeAuthSession?> signIn({
     required String email,
@@ -187,6 +227,9 @@ class MomSafeCloudSync {
             map["hrv"] = r.value.toInt();
           } else if (r.type == MeasurementType.stress) {
             map["stress"] = r.value.toInt();
+          } else if (r.type == MeasurementType.bloodPressure) {
+            map["systolic_bp"] = r.value.toInt();
+            map["diastolic_bp"] = (r.secondaryValue ?? 80).toInt();
           } else if (r.type == MeasurementType.temperature || r.type == MeasurementType.skinTemperature) {
             map["skin_temperature"] = r.value;
             map["temperature"] = r.value;

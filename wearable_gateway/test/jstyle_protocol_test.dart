@@ -1309,7 +1309,7 @@ void main() {
       ];
 
       final records = JStyleDecoder.decodeAllRecords(hrvAndStressPacket);
-      expect(records.length, equals(2));
+      expect(records.length, equals(3));
 
       final hrv = records.firstWhere((r) => r.type == MeasurementType.hrv);
       expect(hrv.value, equals(54));
@@ -1320,12 +1320,48 @@ void main() {
       expect(stress.value, equals(35));
       expect(stress.unit, equals("score"));
       expect(stress.measurementTimestamp, equals(DateTime(2026, 10, 28, 15, 45, 12)));
+
+      final bp = records.firstWhere((r) => r.type == MeasurementType.bloodPressure);
+      expect(bp.unit, equals("mmHg"));
+      expect(bp.measurementTimestamp, equals(DateTime(2026, 10, 28, 15, 45, 12)));
+      expect(bp.value, isNotNull);
+      expect(bp.secondaryValue, isNotNull);
+    });
+
+    test('Decodes direct blood pressure when bytes 13 & 14 contain systolic and diastolic values', () {
+      final directBpPacket = <int>[
+        0x56, 0x00, 0x00,
+        0x26, 0x10, 0x28, 0x16, 0x00, 0x00, // 2026-10-28 16:00:00
+        50,   // Byte 9: HRV value (50 ms)
+        0,    // Byte 10: Reserved
+        70,   // Byte 11: Heart rate (70 BPM)
+        25,   // Byte 12: Stress score (25 / 100)
+        118,  // Byte 13: Direct systolic BP (118 mmHg)
+        78,   // Byte 14: Direct diastolic BP (78 mmHg)
+        0x56, // Byte 15: Checksum
+      ];
+
+      final records = JStyleDecoder.decodeAllRecords(directBpPacket);
+      final bp = records.firstWhere((r) => r.type == MeasurementType.bloodPressure);
+      expect(bp.value, equals(118));
+      expect(bp.secondaryValue, equals(78));
+      expect(bp.unit, equals("mmHg"));
     });
   });
 
   group('J-Style 2208A Blood Pressure Hardware Limitation Tests', () {
-    test('Explicitly documents and enforces that 2208A does not have optical blood pressure hardware', () {
+    test('Explicitly documents that 2208A uses pulse wave estimated BP and lacks arterial cuff', () {
       expect(JStyleDecoder.isBloodPressureSupportedOn2208A, isFalse);
+      expect(JStyleDecoder.isEstimatedBloodPressureSupported, isTrue);
+    });
+  });
+
+  group('J-Style 2208A Axillary Temperature (0x65) Tests', () {
+    test('Encodes 0x65 command for spot axillary temperature retrieval', () {
+      final packet = JStyleEncoder.buildGetAxillaryTemperatureData(mode: 0);
+      expect(packet[0], equals(JStyleCmd.getAxillaryTemp)); // 0x65
+      expect(packet[1], equals(0x00));
+      expect(packet.length, equals(16));
     });
   });
 
