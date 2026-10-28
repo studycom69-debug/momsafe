@@ -199,110 +199,98 @@ class MomSafeCloudSync {
       final sleepReadings = uploadable.where((r) => r.type == MeasurementType.sleep).toList();
       final vitalsReadings = uploadable.where((r) => r.type != MeasurementType.sleep && r.type != MeasurementType.battery).toList();
 
-      // 2. Upload vitals payloads
-      if (vitalsReadings.isNotEmpty) {
-        final vitalsPayload = vitalsReadings.map((r) {
-          final timestamp = r.measurementTimestamp ?? r.receivedAt;
-          final recordId = buildRecordId(
-            deviceId: deviceId,
-            type: r.type,
-            timestamp: timestamp,
-          );
+      // 2. Prepare vitals payloads
+      final vitalsPayload = vitalsReadings.map((r) {
+        final timestamp = r.measurementTimestamp ?? r.receivedAt;
+        final recordId = buildRecordId(
+          deviceId: deviceId,
+          type: r.type,
+          timestamp: timestamp,
+        );
 
-          final map = <String, dynamic>{
-            "user_id": userId,
-            "source": "wearable",
-            "device_id": deviceId,
-            "firmware_version": "2208A_v1.0",
-            "device_record_id": recordId,
-            "recorded_at": timestamp.toUtc().toIso8601String(),
-            "ingested_at": DateTime.now().toUtc().toIso8601String(),
-          };
+        final map = <String, dynamic>{
+          "source": "wearable",
+          "device_id": deviceId,
+          "firmware_version": "2208A_v1.0",
+          "device_record_id": recordId,
+          "recorded_at": timestamp.toUtc().toIso8601String(),
+        };
 
-          if (r.type == MeasurementType.heartRate) {
-            map["heart_rate"] = r.value.toInt();
-          } else if (r.type == MeasurementType.spo2) {
-            map["spo2"] = r.value.toInt();
-          } else if (r.type == MeasurementType.hrv) {
-            map["hrv"] = r.value.toInt();
-          } else if (r.type == MeasurementType.stress) {
-            map["stress"] = r.value.toInt();
-          } else if (r.type == MeasurementType.bloodPressure) {
-            map["systolic_bp"] = r.value.toInt();
-            map["diastolic_bp"] = (r.secondaryValue ?? 80).toInt();
-          } else if (r.type == MeasurementType.temperature || r.type == MeasurementType.skinTemperature) {
-            map["skin_temperature"] = r.value;
-            map["temperature"] = r.value;
-          }
-          return map;
-        }).toList();
-
-        final uri = Uri.parse("$supabaseUrl/rest/v1/vitals");
-        final request = await _client.postUrl(uri);
-        request.headers.set("apikey", supabaseAnonKey);
-        request.headers.set("Authorization", "Bearer $token");
-        request.headers.set("Content-Type", "application/json");
-        request.headers.set("Prefer", "resolution=merge-duplicates");
-
-        request.write(jsonEncode(vitalsPayload));
-        final response = await request.close();
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          vitalsUploaded = vitalsPayload.length;
-        } else {
-          final errBody = await response.transform(utf8.decoder).join();
-          return SyncResult(
-            success: false,
-            recordsUploaded: 0,
-            recordsDeduplicated: 0,
-            message: "Supabase vitals upload failed (${response.statusCode}): $errBody",
-            syncTime: DateTime.now(),
-          );
+        if (r.type == MeasurementType.heartRate) {
+          map["heart_rate"] = r.value.toInt();
+        } else if (r.type == MeasurementType.spo2) {
+          map["spo2"] = r.value.toInt();
+        } else if (r.type == MeasurementType.hrv) {
+          map["hrv"] = r.value.toInt();
+        } else if (r.type == MeasurementType.stress) {
+          map["stress"] = r.value.toInt();
+        } else if (r.type == MeasurementType.bloodPressure) {
+          map["systolic_bp"] = r.value.toInt();
+          map["diastolic_bp"] = (r.secondaryValue ?? 80).toInt();
+        } else if (r.type == MeasurementType.temperature || r.type == MeasurementType.skinTemperature) {
+          map["skin_temperature"] = r.value;
+          map["temperature"] = r.value;
         }
+        return map;
+      }).toList();
+
+      // 3. Prepare sleep payloads
+      final sleepPayload = sleepReadings.map((r) {
+        final timestamp = r.measurementTimestamp ?? r.receivedAt;
+        final recordId = buildRecordId(
+          deviceId: deviceId,
+          type: MeasurementType.sleep,
+          timestamp: timestamp,
+        );
+
+        return <String, dynamic>{
+          "source": "wearable",
+          "device_id": deviceId,
+          "device_record_id": recordId,
+          "sleep_hours": r.value,
+          "sleep_quality": (r.value >= 7) ? "good" : "average",
+          "recorded_at": timestamp.toUtc().toIso8601String(),
+        };
+      }).toList();
+
+      // 4. Send atomic sync RPC request
+      final uri = Uri.parse("$supabaseUrl/rest/v1/rpc/sync_wearable_records");
+      final request = await _client.postUrl(uri);
+      request.headers.set("apikey", supabaseAnonKey);
+      request.headers.set("Authorization", "Bearer $token");
+      request.headers.set("Content-Type", "application/json");
+
+      final rpcBody = jsonEncode({
+        "p_user_id": userId,
+        "p_vitals": vitalsPayload,
+        "p_sleep": sleepPayload,
+      });
+
+      request.write(rpcBody);
+      final response = await request.close();
+      final responseBody = await response.transform(utf8.decoder).join();
+
+      if (response.statusCode == 200) {
+        final resData = jsonDecode(responseBody) as Map<String, dynamic>? ?? {};
+        final vCount = resData["vitals_uploaded"] as int? ?? vitalsPayload.length;
+        final sCount = resData["sleep_uploaded"] as int? ?? sleepPayload.length;
+        final total = vCount + sCount;
+        return SyncResult(
+          success: true,
+          recordsUploaded: total,
+          recordsDeduplicated: 0,
+          message: "Successfully synchronized $total health records to MomSafe AI cloud.",
+          syncTime: DateTime.now(),
+        );
+      } else {
+        return SyncResult(
+          success: false,
+          recordsUploaded: 0,
+          recordsDeduplicated: 0,
+          message: "Supabase sync error (${response.statusCode}): $responseBody",
+          syncTime: DateTime.now(),
+        );
       }
-
-      // 3. Upload sleep payloads
-      if (sleepReadings.isNotEmpty) {
-        final sleepPayload = sleepReadings.map((r) {
-          final timestamp = r.measurementTimestamp ?? r.receivedAt;
-          final recordId = buildRecordId(
-            deviceId: deviceId,
-            type: MeasurementType.sleep,
-            timestamp: timestamp,
-          );
-
-          return <String, dynamic>{
-            "user_id": userId,
-            "source": "wearable",
-            "device_id": deviceId,
-            "device_record_id": recordId,
-            "sleep_hours": r.value,
-            "sleep_quality": (r.value >= 7) ? "good" : "average",
-            "recorded_at": timestamp.toUtc().toIso8601String(),
-          };
-        }).toList();
-
-        final uri = Uri.parse("$supabaseUrl/rest/v1/sleep_data");
-        final request = await _client.postUrl(uri);
-        request.headers.set("apikey", supabaseAnonKey);
-        request.headers.set("Authorization", "Bearer $token");
-        request.headers.set("Content-Type", "application/json");
-        request.headers.set("Prefer", "resolution=merge-duplicates");
-
-        request.write(jsonEncode(sleepPayload));
-        final response = await request.close();
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          sleepUploaded = sleepPayload.length;
-        }
-      }
-
-      final total = vitalsUploaded + sleepUploaded;
-      return SyncResult(
-        success: true,
-        recordsUploaded: total,
-        recordsDeduplicated: 0,
-        message: "Successfully synchronized $total health records to MomSafe AI cloud.",
-        syncTime: DateTime.now(),
-      );
     } catch (e) {
       return SyncResult(
         success: false,
