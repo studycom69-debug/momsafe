@@ -43,7 +43,8 @@ ALTER TABLE public.sleep_data
   ADD COLUMN IF NOT EXISTS device_record_id text,
   ADD COLUMN IF NOT EXISTS deep_sleep_hours numeric,
   ADD COLUMN IF NOT EXISTS light_sleep_hours numeric,
-  ADD COLUMN IF NOT EXISTS rem_sleep_hours numeric;
+  ADD COLUMN IF NOT EXISTS rem_sleep_hours numeric,
+  ADD COLUMN IF NOT EXISTS date date DEFAULT CURRENT_DATE;
 
 CREATE UNIQUE INDEX IF NOT EXISTS sleep_data_user_device_record_unique
   ON public.sleep_data (user_id, device_id, device_record_id)
@@ -161,7 +162,8 @@ BEGIN
       DO UPDATE SET
         sleep_hours = EXCLUDED.sleep_hours,
         sleep_quality = EXCLUDED.sleep_quality,
-        recorded_at = EXCLUDED.recorded_at;
+        recorded_at = EXCLUDED.recorded_at,
+        date = EXCLUDED.date;
 
       v_sleep_count := v_sleep_count + 1;
     END LOOP;
