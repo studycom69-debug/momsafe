@@ -38,6 +38,10 @@ const vitalDetails = [
   { id: "bp", label: "Blood Pressure", unit: "mmHg", normal: "90–120 / 60–80 mmHg", interpretation: "Slight elevation noted recently. Continue monitoring.", color: "#8b5cf6", normalMin: 110, normalMax: 130 },
   { id: "spo2", label: "SpO2", unit: "%", normal: "95–100%", interpretation: "Consistently healthy oxygen saturation.", color: "#10b981", normalMin: 95, normalMax: 100 },
   { id: "temp", label: "Temperature", unit: "°C", normal: "36.1–37.2°C", interpretation: "Temperature within expected range for pregnancy.", color: "#f59e0b", normalMin: 36.1, normalMax: 37.2 },
+  { id: "skin_temp", label: "Skin Temperature", unit: "°C", normal: "31.0–35.5°C", interpretation: "Peripheral wrist surface temperature. Distinct from core body temperature.", color: "#ec4899", normalMin: 31.0, normalMax: 35.5 },
+  { id: "hrv", label: "Heart Rate Variability (HRV)", unit: "ms", normal: "40–100 ms", interpretation: "Autonomic nervous system recovery and vagal tone adaptability.", color: "#06b6d4", normalMin: 40, normalMax: 100 },
+  { id: "stress", label: "Stress Index", unit: "/100", normal: "0–50 / 100", interpretation: "Autonomic arousal score computed by wearable HRV frequency analysis.", color: "#f97316", normalMin: 0, normalMax: 50 },
+  { id: "sleep", label: "Sleep Duration", unit: "hrs", normal: "7.0–9.0 hrs", interpretation: "Restorative sleep duration logged from wearable or health records.", color: "#6366f1", normalMin: 7.0, normalMax: 9.0 },
   { id: "weight", label: "Weight", unit: "kg", normal: "Expected +0.3–0.5 kg/week", interpretation: "Weight gain within normal parameters.", color: "#ef4444", normalMin: 66, normalMax: 70 },
 ];
 
@@ -78,7 +82,7 @@ export default function Vitals() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showAnalysisModal, setShowAnalysisModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [latestSource, setLatestSource] = useState<"manual" | "esp32" | "unknown">("unknown");
+  const [latestSource, setLatestSource] = useState<string>("unknown");
   const [lastEsp32SeenAt, setLastEsp32SeenAt] = useState<string | null>(null);
 
   const generateVitalsAnalysis = async () => {
@@ -271,19 +275,28 @@ export default function Vitals() {
         ? subDays(new Date(), 1).toISOString()
         : startOfDay(subDays(new Date(), days)).toISOString();
 
-      const { data, error } = await supabase
-        .from("vitals")
-        .select("*")
-        .eq("user_id", user.id)
-        .gte("recorded_at", startDate)
-        .order("recorded_at", { ascending: true });
+      const [vitalsRes, sleepRes] = await Promise.all([
+        supabase
+          .from("vitals")
+          .select("*")
+          .eq("user_id", user.id)
+          .gte("recorded_at", startDate)
+          .order("recorded_at", { ascending: true }),
+        supabase
+          .from("sleep_data")
+          .select("*")
+          .eq("user_id", user.id)
+          .gte("date", startDate.split("T")[0])
+          .order("date", { ascending: true }),
+      ]);
 
-      if (error) throw error;
+      if (vitalsRes.error) throw vitalsRes.error;
 
-      const records = data || [];
+      const records = vitalsRes.data || [];
+      const sleepRecords = sleepRes.data || [];
       setRawRecords(records);
       const latest = records[records.length - 1];
-      setLatestSource((latest?.source as "manual" | "esp32" | undefined) || "unknown");
+      setLatestSource(latest?.source || "unknown");
 
       const latestEsp32 = [...records].reverse().find((r) => r.source === "esp32");
       setLastEsp32SeenAt(latestEsp32?.recorded_at || null);
@@ -301,34 +314,44 @@ export default function Vitals() {
         const getVal = (r: any) => {
           if (!r) return null;
           if (detail.id === "hr") return r.heart_rate;
-          if (detail.id === "bp") return `${r.systolic_bp}/${r.diastolic_bp}`;
+          if (detail.id === "bp") return r.systolic_bp && r.diastolic_bp ? `${r.systolic_bp}/${r.diastolic_bp}` : null;
           if (detail.id === "spo2") return r.spo2;
           if (detail.id === "temp") return r.temperature;
+          if (detail.id === "skin_temp") return r.skin_temperature;
+          if (detail.id === "hrv") return r.hrv;
+          if (detail.id === "stress") return r.stress;
+          if (detail.id === "sleep") return r.sleep_hours;
           if (detail.id === "weight") return r.weight;
           return null;
         };
 
         const getNumVal = (r: any) => {
           if (!r) return null;
-          if (detail.id === "hr") return r.heart_rate;
-          if (detail.id === "bp") return r.systolic_bp; // Use systolic for numeric calcs
-          if (detail.id === "spo2") return r.spo2;
-          if (detail.id === "temp") return r.temperature;
-          if (detail.id === "weight") return r.weight;
+          if (detail.id === "hr") return r.heart_rate != null ? Number(r.heart_rate) : null;
+          if (detail.id === "bp") return r.systolic_bp != null ? Number(r.systolic_bp) : null;
+          if (detail.id === "spo2") return r.spo2 != null ? Number(r.spo2) : null;
+          if (detail.id === "temp") return r.temperature != null ? Number(r.temperature) : null;
+          if (detail.id === "skin_temp") return r.skin_temperature != null ? Number(r.skin_temperature) : null;
+          if (detail.id === "hrv") return r.hrv != null ? Number(r.hrv) : null;
+          if (detail.id === "stress") return r.stress != null ? Number(r.stress) : null;
+          if (detail.id === "sleep") return r.sleep_hours != null ? Number(r.sleep_hours) : null;
+          if (detail.id === "weight") return r.weight != null ? Number(r.weight) : null;
           return null;
         };
 
-        const values = records.map(r => getNumVal(r)).filter((v): v is number => v !== null);
+        const sourceData = detail.id === "sleep" ? sleepRecords : records;
+        const validRecords = sourceData.filter(r => getVal(r) !== null && getVal(r) !== undefined);
+        const values = validRecords.map(r => getNumVal(r)).filter((v): v is number => v !== null);
+        const vitalLatest = validRecords.length > 0 ? validRecords[validRecords.length - 1] : null;
         
-        if (latest) {
-          const currentVal = getNumVal(latest);
-          value = getVal(latest) || "-";
+        if (vitalLatest) {
+          const currentVal = getNumVal(vitalLatest);
+          value = getVal(vitalLatest) || "-";
           
-          // Improved status calculation
           if (detail.id === "bp") {
-            const sys = Number(latest.systolic_bp);
-            const dia = Number(latest.diastolic_bp);
-            const hr = Number(latest.heart_rate);
+            const sys = Number(vitalLatest.systolic_bp);
+            const dia = Number(vitalLatest.diastolic_bp);
+            const hr = Number(vitalLatest.heart_rate);
             if (sys >= 150 || dia >= 100 || (sys >= 140 && hr > 100)) {
               status = "critical";
               interpretation = "Blood pressure is high and requires attention. Combined with elevated heart rate, this suggests significant cardiovascular strain and may require medical consultation.";
@@ -340,8 +363,8 @@ export default function Vitals() {
               interpretation = "Blood pressure is within normal range. This indicates healthy cardiovascular adaptation to pregnancy.";
             }
           } else if (detail.id === "hr") {
-            const hr = Number(latest.heart_rate);
-            const sys = Number(latest.systolic_bp);
+            const hr = Number(vitalLatest.heart_rate);
+            const sys = Number(vitalLatest.systolic_bp);
             if (hr > 110 || hr < 50) status = "critical";
             else if (hr > 100 || hr < 60) status = "warning";
             else status = "normal";
@@ -353,7 +376,7 @@ export default function Vitals() {
               if (sys >= 120) interpretation += " This aligns with elevated blood pressure, indicating systemic physical stress.";
             }
           } else if (detail.id === "spo2") {
-            const s = Number(latest.spo2);
+            const s = Number(vitalLatest.spo2);
             if (s < 90) {
               status = "critical";
               interpretation = "Oxygen levels are low and may require immediate attention. This downward trend could indicate respiratory compromise and should be reported to your provider.";
@@ -365,7 +388,7 @@ export default function Vitals() {
               interpretation = "Oxygen levels are stable. This confirms effective respiratory function and oxygen delivery to both you and your baby.";
             }
           } else if (detail.id === "temp") {
-            const t = Number(latest.temperature);
+            const t = Number(vitalLatest.temperature);
             if (t >= 39) status = "critical";
             else if (t >= 37.5) status = "warning";
             else status = "normal";
@@ -373,6 +396,41 @@ export default function Vitals() {
             if (t < 37.5) interpretation = "Temperature is within expected range. This suggests your immune system is stable and there are no signs of systemic infection.";
             else if (t <= 38) interpretation = "Slight temperature elevation detected. This could be a normal metabolic response or early signs of inflammation.";
             else interpretation = "Elevated temperature detected. This may indicate infection and should be monitored closely for other symptoms like chills or body aches.";
+          } else if (detail.id === "skin_temp") {
+            const st = Number(vitalLatest.skin_temperature);
+            if (st > 36.5 || st < 28.5) status = "warning";
+            else status = "normal";
+
+            if (st > 36.5) interpretation = "Skin surface temperature is elevated. Skin temperature varies with peripheral blood flow and room climate.";
+            else if (st < 29.0) interpretation = "Peripheral skin temperature is cool, commonly due to vasoconstriction or cooler ambient climate.";
+            else interpretation = "Skin surface temperature is within expected resting range for peripheral wrist measurement.";
+          } else if (detail.id === "hrv") {
+            const h = Number(vitalLatest.hrv);
+            if (h < 25) status = "critical";
+            else if (h < 35) status = "warning";
+            else status = "normal";
+
+            if (h < 25) interpretation = "HRV is significantly low. This often reflects heightened systemic fatigue, acute stress, or autonomic strain.";
+            else if (h < 35) interpretation = "HRV is somewhat lower than baseline. Consider prioritizing rest, restorative sleep, and hydration.";
+            else interpretation = "Heart rate variability is healthy, indicating balanced autonomic tone and parasympathetic recovery.";
+          } else if (detail.id === "stress") {
+            const s = Number(vitalLatest.stress);
+            if (s >= 70) status = "critical";
+            else if (s >= 50) status = "warning";
+            else status = "normal";
+
+            if (s >= 70) interpretation = "Elevated autonomic stress score detected. Prioritize quiet recovery, deep breathing exercises, and hydration.";
+            else if (s >= 50) interpretation = "Moderate stress level detected. Balance daytime activities with restorative micro-breaks.";
+            else interpretation = "Autonomic stress index is low and relaxed.";
+          } else if (detail.id === "sleep") {
+            const sh = Number(vitalLatest.sleep_hours);
+            if (sh < 5.0) status = "critical";
+            else if (sh < 7.0) status = "warning";
+            else status = "normal";
+
+            if (sh < 5.0) interpretation = "Significantly reduced sleep duration. Extended sleep restriction impacts cardiovascular stability and maternal immunity.";
+            else if (sh < 7.0) interpretation = "Sleep was slightly below the optimal 7–9 hour target for maternal rest and recovery.";
+            else interpretation = "Healthy restorative sleep duration logged, supporting maternal wellness and recovery.";
           } else if (detail.id === "weight") {
             status = "normal";
             interpretation = "Weight progression is within expected range. Consistent gain at this stage supports healthy fetal development and maternal nutrient storage.";
@@ -387,11 +445,9 @@ export default function Vitals() {
           }
           
           if (values.length > 0 && currentVal !== null) {
-            // Calculate baseline average
             const sum = values.reduce((acc, v) => acc + v, 0);
             const avg = sum / values.length;
             
-            // Calculate percentage change from baseline
             deviation = avg !== 0 ? ((currentVal - avg) / avg) * 100 : 0;
             change = `${deviation > 0 ? "+" : ""}${deviation.toFixed(1)}%`;
             trend = deviation > 0 ? "up" : deviation < 0 ? "down" : "stable";
@@ -408,21 +464,21 @@ export default function Vitals() {
           }
         }
 
-        // Show last 5 readings for history section
-        const formatTimeLabel = (date: string) => {
-          const d = new Date(date);
+        const formatTimeLabel = (dateStr: string) => {
+          const d = new Date(dateStr);
           if (period === "24H") {
             return formatDistanceToNow(d, { addSuffix: true }).replace("about ", "");
           }
           return format(d, "MMM d");
         };
 
-        history = records.slice(-5).map(r => getVal(r)).filter(v => v !== null).reverse();
+        history = validRecords.slice(-5).map(r => getVal(r)).filter(v => v !== null).reverse();
         
-        const chartData = records.map(r => {
+        const chartData = validRecords.map(r => {
+          const recordedDate = r.recorded_at || r.date;
           const base = { 
-            day: formatTimeLabel(r.recorded_at),
-            timestamp: new Date(r.recorded_at).getTime()
+            day: formatTimeLabel(recordedDate),
+            timestamp: new Date(recordedDate).getTime()
           };
           
           if (detail.id === "bp") {
@@ -450,7 +506,6 @@ export default function Vitals() {
 
       setVitalsData(mappedVitals);
 
-      // Comparison data for the bottom chart
       const comp = records.map(r => {
         const d = new Date(r.recorded_at);
         const timeLabel = period === "24H" 
@@ -476,13 +531,19 @@ export default function Vitals() {
   useEffect(() => {
     fetchVitals();
     
-    const channel = supabase
+    const vitalsChannel = supabase
       .channel('vitals-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'vitals', filter: `user_id=eq.${user?.id}` }, () => fetchVitals())
       .subscribe();
 
+    const sleepChannel = supabase
+      .channel('sleep-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sleep_data', filter: `user_id=eq.${user?.id}` }, () => fetchVitals())
+      .subscribe();
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(vitalsChannel);
+      supabase.removeChannel(sleepChannel);
     };
   }, [fetchVitals, user?.id]);
 
@@ -512,7 +573,21 @@ export default function Vitals() {
       // Simulate preparation time for premium feel
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      const headers = ["Date", "Time", "Source", "Steps", "Heart Rate (bpm)", "Systolic BP (mmHg)", "Diastolic BP (mmHg)", "SpO2 (%)", "Temperature (°C)", "Weight (kg)"];
+      const headers = [
+        "Date",
+        "Time",
+        "Source",
+        "Steps",
+        "Heart Rate (bpm)",
+        "Systolic BP (mmHg)",
+        "Diastolic BP (mmHg)",
+        "SpO2 (%)",
+        "Temperature (°C)",
+        "Skin Temp (°C)",
+        "HRV (ms)",
+        "Stress Index",
+        "Weight (kg)"
+      ];
       
       const csvRows = [
         headers.join(","),
@@ -528,6 +603,9 @@ export default function Vitals() {
             r.diastolic_bp || "",
             r.spo2 || "",
             r.temperature || "",
+            r.skin_temperature || "",
+            r.hrv || "",
+            r.stress || "",
             r.weight || ""
           ].join(",");
         })
@@ -888,6 +966,10 @@ export default function Vitals() {
                                 if (v.id === "bp") threshold = 140;
                                 if (v.id === "spo2") { threshold = 92; type = 'below'; }
                                 if (v.id === "temp") threshold = 38;
+                                if (v.id === "skin_temp") threshold = 36.5;
+                                if (v.id === "hrv") { threshold = 35; type = 'below'; }
+                                if (v.id === "stress") threshold = 60;
+                                if (v.id === "sleep") { threshold = 6.5; type = 'below'; }
                                 if (v.id === "weight") return <circle cx={props.cx} cy={props.cy} r={2.5} fill={props.stroke} key={`dot-${props.cx}-${props.cy}`} stroke="white" strokeWidth={1.5} />;
                                 
                                 return renderAbnormalDot(props, threshold, type);

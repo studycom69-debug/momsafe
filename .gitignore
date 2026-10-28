@@ -72,3 +72,16 @@ firebase-adminsdk*.json
 **/.pypirc
 **/.aws/credentials
 **/.aws/config
+
+# Flutter gateway build artifacts
+wearable_gateway/build/
+wearable_gateway/.dart_tool/
+wearable_gateway/.flutter-plugins
+wearable_gateway/.flutter-plugins-dependencies
+wearable_gateway/android/.gradle/
+wearable_gateway/android/app/.gradle/
+wearable_gateway/android/app/.cxx/
+wearable_gateway/android/local.properties
+
+# Vendor SDK reference archives
+artifacts/momsafe-ai/scripts/2208A_SDK/
