@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'ble/wearable_ble_manager.dart';
-import 'protocol/jstyle_constants.dart';
-import 'protocol/jstyle_decoder.dart';
+import 'protocol/momsafe_constants.dart';
+import 'protocol/momsafe_decoder.dart';
 import 'protocol/telemetry_state_resolver.dart';
 import 'sync/momsafe_cloud_sync.dart';
 
@@ -278,7 +278,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
       case GatewayConnectionState.subscribingNotifications:
         return "SUBSCRIBING 0xFFF7 NOTIFICATIONS...";
       case GatewayConnectionState.scanning:
-        return "SCANNING FOR 2208A...";
+        return "SCANNING FOR MOMSAFE BAND...";
       case GatewayConnectionState.error:
         return _bleManager.lastErrorMessage ?? "ERROR (CHECK BLUETOOTH / PERMISSIONS)";
       case GatewayConnectionState.disconnected:
@@ -564,7 +564,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
       ..._bloodPressureHistory,
     ];
 
-    final deviceId = _bleManager.connectedDevice?.remoteId.str ?? "J-Style 2208A";
+    final deviceId = _bleManager.connectedDevice?.remoteId.str ?? "MomSafe Band";
     final result = await _cloudSync.syncReadings(
       readings: allReadings,
       deviceId: deviceId,
@@ -695,7 +695,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("MomSafe Gateway", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text("J-Style 2208A Telemetry Pipeline", style: TextStyle(fontSize: 12, color: Colors.black54)),
+            Text("MomSafe Band Telemetry Pipeline", style: TextStyle(fontSize: 12, color: Colors.black54)),
           ],
         ),
         actions: [
@@ -838,7 +838,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
                     icon: _connectionState == GatewayConnectionState.scanning
                         ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
                         : const Icon(Icons.search),
-                    label: Text(_connectionState == GatewayConnectionState.scanning ? "Scanning..." : "Scan for 2208A"),
+                    label: Text(_connectionState == GatewayConnectionState.scanning ? "Scanning..." : "Scan for MomSafe Band"),
                     onPressed: _connectionState == GatewayConnectionState.scanning
                         ? _bleManager.stopScan
                         : _bleManager.startScan,
@@ -877,7 +877,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Center(
-                    child: Text("No devices found. Tap 'Scan for 2208A' with the band nearby.",
+                    child: Text("No devices found. Tap 'Scan for MomSafe Band' with the band nearby.",
                         style: TextStyle(color: Colors.black54, fontSize: 13)),
                   ),
                 )
@@ -888,14 +888,14 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
                   itemCount: _devices.length,
                   itemBuilder: (context, i) {
                     final d = _devices[i];
-                    final is2208 = d.name.toLowerCase().contains("2208") || d.name.toLowerCase().contains("jstyle");
+                    final isMomSafeBand = d.name.toLowerCase().contains("2208") || d.name.toLowerCase().contains("jstyle");
                     return Card(
                       elevation: 1,
                       margin: const EdgeInsets.symmetric(vertical: 4),
-                      color: is2208 ? const Color(0xFFFFF1F2) : Colors.white,
+                      color: isMomSafeBand ? const Color(0xFFFFF1F2) : Colors.white,
                       child: ListTile(
-                        leading: Icon(Icons.watch, color: is2208 ? const Color(0xFFE11D48) : Colors.grey),
-                        title: Text(d.name, style: TextStyle(fontWeight: is2208 ? FontWeight.bold : FontWeight.normal)),
+                        leading: Icon(Icons.watch, color: isMomSafeBand ? const Color(0xFFE11D48) : Colors.grey),
+                        title: Text(d.name, style: TextStyle(fontWeight: isMomSafeBand ? FontWeight.bold : FontWeight.normal)),
                         subtitle: Text("${d.id} • RSSI: ${d.rssi} dBm"),
                         trailing: ElevatedButton(
                           onPressed: () => _bleManager.connect(d.device),
@@ -1591,7 +1591,7 @@ class _GatewayDashboardScreenState extends State<GatewayDashboardScreen> with Wi
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Text(
-                "Estimated (Pulse Wave / JC Vital)",
+                "Estimated (Pulse Wave / MomSafe Band)",
                 style: TextStyle(fontSize: 8.5, color: Colors.deepPurple, fontWeight: FontWeight.bold),
               ),
             ),

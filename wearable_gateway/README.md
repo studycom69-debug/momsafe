@@ -1,13 +1,13 @@
 # MomSafe Wearable Gateway (Phase 1 Prototype)
 
-Minimal, functional Android Flutter prototype connecting to the **J-Style 2208A** health band to retrieve real-time and spot physiological telemetry (Heart Rate, SpO₂, Battery Level) using the verified vendor BLE protocol.
+Minimal, functional Android Flutter prototype connecting to the **MomSafe Band** health band to retrieve real-time and spot physiological telemetry (Heart Rate, SpO₂, Battery Level) using the verified vendor BLE protocol.
 
 ---
 
 ## 1. Architecture Overview
 
 ```
-[ J-Style 2208A Band ]
+[ MomSafe Band ]
          │
          │ BLE GATT (Service 0xFFF0)
          │  - Write: 0xFFF6 (16-byte frames + CRC-8)
@@ -15,8 +15,8 @@ Minimal, functional Android Flutter prototype connecting to the **J-Style 2208A*
          ▼
 [ MomSafe Wearable Gateway (Android / Flutter) ]
   ├── WearableBleManager (flutter_blue_plus transport)
-  ├── JStyleEncoder (0x55 Spot HR, 0x60 Spot SpO2, 0x13 Battery)
-  ├── JStyleDecoder (BCD timestamp + metric extraction)
+  ├── MomSafeEncoder (0x55 Spot HR, 0x60 Spot SpO2, 0x13 Battery)
+  ├── MomSafeDecoder (BCD timestamp + metric extraction)
   └── Dashboard UI (Live status, Hex diagnostics, Decoded metrics)
 ```
 
@@ -28,7 +28,7 @@ Minimal, functional Android Flutter prototype connecting to the **J-Style 2208A*
 - **Flutter SDK:** 3.19.0 or newer
 - **Android Studio / Android SDK:** API Level 34 (compileSdk), minimum Android 5.0 (minSdk 21)
 - **Physical Device:** Android smartphone with Bluetooth 5.0+ and Location enabled (BLE scanning requirement)
-- **Wearable:** J-Style 2208A charged and in range
+- **Wearable:** MomSafe Band charged and in range
 
 ### Setup & Run Commands
 
@@ -41,7 +41,7 @@ cd wearable_gateway
 flutter pub get
 
 # 2. Run protocol unit tests
-flutter test test/jstyle_protocol_test.dart
+flutter test test/momsafe_protocol_test.dart
 
 # 3. Connect Android phone via USB (with USB Debugging enabled)
 adb devices
@@ -67,7 +67,7 @@ flutter build apk --debug
    - Open the **MomSafe Gateway** app on your Android phone.
    - Grant Bluetooth and Nearby Devices / Location permissions when prompted.
 3. **Scan & Discover:**
-   - Tap **"Scan for 2208A"**.
+   - Tap **"Scan for MomSafe Band"**.
    - Watch the peripheral list populate. The 2208A typically advertises with the name `2208A`, `2208`, or `JStyle`.
 4. **Connect:**
    - Tap **"Connect"** next to your band.

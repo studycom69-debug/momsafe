@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import '../protocol/jstyle_constants.dart';
-import '../protocol/jstyle_decoder.dart';
+import '../protocol/momsafe_constants.dart';
+import '../protocol/momsafe_decoder.dart';
 
 /// Authentication state and session details for MomSafe AI Cloud
 class MomSafeAuthSession {
@@ -39,7 +39,7 @@ class SyncResult {
   });
 }
 
-/// Cloud Sync Integration between J-Style 2208A Flutter Gateway and MomSafe AI Supabase
+/// Cloud Sync Integration between MomSafe Band Flutter Gateway and MomSafe AI Supabase
 class MomSafeCloudSync {
   static const String supabaseUrl = "https://frupdhslwhwyxclhcqve.supabase.co";
   static const String supabaseAnonKey =

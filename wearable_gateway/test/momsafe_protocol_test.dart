@@ -1,72 +1,72 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
-import '../lib/protocol/jstyle_constants.dart';
-import '../lib/protocol/jstyle_encoder.dart';
-import '../lib/protocol/jstyle_decoder.dart';
+import '../lib/protocol/momsafe_constants.dart';
+import '../lib/protocol/momsafe_encoder.dart';
+import '../lib/protocol/momsafe_decoder.dart';
 import '../lib/protocol/telemetry_state_resolver.dart';
 import '../lib/ble/wearable_ble_manager.dart';
 import '../lib/sync/momsafe_cloud_sync.dart';
 
 void main() {
-  group('J-Style 2208A Protocol Encoding Tests', () {
+  group('MomSafe Band Protocol Encoding Tests', () {
     test('Spot Heart Rate command (0x55) has correct length, opcode, and CRC-8', () {
-      final packet = JStyleEncoder.buildGetSpotHeartRate(mode: 0);
+      final packet = MomSafeEncoder.buildGetSpotHeartRate(mode: 0);
 
       expect(packet.length, equals(16));
       expect(packet[0], equals(0x55)); // Opcode
       expect(packet[1], equals(0x00)); // Read latest mode
       expect(packet[15], equals(0x55)); // Checksum (0x55 + 0 = 0x55)
-      expect(JStyleDecoder.verifyCrc(packet), isTrue);
+      expect(MomSafeDecoder.verifyCrc(packet), isTrue);
     });
 
     test('Spot SpO2 command (0x60) has correct length, opcode, and CRC-8', () {
-      final packet = JStyleEncoder.buildGetBloodOxygen(mode: 0);
+      final packet = MomSafeEncoder.buildGetBloodOxygen(mode: 0);
 
       expect(packet.length, equals(16));
       expect(packet[0], equals(0x60)); // Opcode
       expect(packet[1], equals(0x00)); // Read latest mode
       expect(packet[15], equals(0x60)); // Checksum
-      expect(JStyleDecoder.verifyCrc(packet), isTrue);
+      expect(MomSafeDecoder.verifyCrc(packet), isTrue);
     });
 
     test('Battery Level query (0x13) has correct opcode and CRC-8', () {
-      final packet = JStyleEncoder.buildGetBatteryLevel();
+      final packet = MomSafeEncoder.buildGetBatteryLevel();
 
       expect(packet.length, equals(16));
       expect(packet[0], equals(0x13)); // Opcode
       expect(packet[15], equals(0x13)); // Checksum
-      expect(JStyleDecoder.verifyCrc(packet), isTrue);
+      expect(MomSafeDecoder.verifyCrc(packet), isTrue);
     });
 
     test('Spot HRV command (0x56) has correct length, opcode, and CRC-8', () {
-      final packet = JStyleEncoder.buildGetHrvData(mode: 0);
+      final packet = MomSafeEncoder.buildGetHrvData(mode: 0);
 
       expect(packet.length, equals(16));
       expect(packet[0], equals(0x56)); // Opcode
       expect(packet[1], equals(0x00)); // Read latest mode
       expect(packet[15], equals(0x56)); // Checksum (0x56 + 0 = 0x56)
-      expect(JStyleDecoder.verifyCrc(packet), isTrue);
+      expect(MomSafeDecoder.verifyCrc(packet), isTrue);
     });
 
     test('Live HRV measurement trigger (0x28, dataType: 1) has correct opcode, dataType, and CRC-8', () {
-      final startPacket = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 1, open: true);
+      final startPacket = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 1, open: true);
       expect(startPacket.length, equals(16));
       expect(startPacket[0], equals(0x28)); // Opcode
       expect(startPacket[1], equals(0x01)); // dataType: 1 (HRV)
       expect(startPacket[2], equals(0x01)); // open: true
       expect(startPacket[15], equals(0x2A)); // 0x28 + 1 + 1 = 0x2A
-      expect(JStyleDecoder.verifyCrc(startPacket), isTrue);
+      expect(MomSafeDecoder.verifyCrc(startPacket), isTrue);
 
-      final stopPacket = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 1, open: false);
+      final stopPacket = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 1, open: false);
       expect(stopPacket[0], equals(0x28));
       expect(stopPacket[1], equals(0x01));
       expect(stopPacket[2], equals(0x00)); // open: false
       expect(stopPacket[15], equals(0x29)); // 0x28 + 1 + 0 = 0x29
-      expect(JStyleDecoder.verifyCrc(stopPacket), isTrue);
+      expect(MomSafeDecoder.verifyCrc(stopPacket), isTrue);
     });
   });
 
-  group('J-Style 2208A Multi-Record Protocol Decoding Tests', () {
+  group('MomSafe Band Multi-Record Protocol Decoding Tests', () {
     test('Decodes multi-record Spot Heart Rate response and selects the NEWEST record (61 BPM at 11:33:24)', () {
       final multiRecordPacket = <int>[
         // Record 0: 10 bytes (Older historical reading)
@@ -83,7 +83,7 @@ void main() {
         61,  // 61 BPM
       ];
 
-      final allRecords = JStyleDecoder.decodeAllRecords(multiRecordPacket);
+      final allRecords = MomSafeDecoder.decodeAllRecords(multiRecordPacket);
       expect(allRecords.length, equals(3));
       expect(allRecords[0].value, equals(119));
       expect(allRecords[0].measurementTimestamp, equals(DateTime(2026, 10, 27, 18, 50, 24)));
@@ -92,7 +92,7 @@ void main() {
       expect(allRecords[2].value, equals(61));
       expect(allRecords[2].measurementTimestamp, equals(DateTime(2026, 10, 28, 11, 33, 24)));
 
-      final newest = JStyleDecoder.decodePacket(multiRecordPacket);
+      final newest = MomSafeDecoder.decodePacket(multiRecordPacket);
       expect(newest, isNotNull);
       expect(newest!.type, equals(MeasurementType.heartRate));
       expect(newest.value, equals(61));
@@ -113,7 +113,7 @@ void main() {
         93,
       ];
 
-      final newest = JStyleDecoder.decodePacket(multiRecordPacket);
+      final newest = MomSafeDecoder.decodePacket(multiRecordPacket);
       expect(newest, isNotNull);
       expect(newest!.type, equals(MeasurementType.spo2));
       expect(newest.value, equals(93));
@@ -126,7 +126,7 @@ void main() {
         0x13, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x98
       ];
 
-      final reading = JStyleDecoder.decodePacket(rawPacket);
+      final reading = MomSafeDecoder.decodePacket(rawPacket);
 
       expect(reading, isNotNull);
       expect(reading!.type, equals(MeasurementType.battery));
@@ -147,11 +147,11 @@ void main() {
         89, // Valid 89 BPM
       ];
 
-      final allRecords = JStyleDecoder.decodeAllRecords(packetWithEmptySlots);
+      final allRecords = MomSafeDecoder.decodeAllRecords(packetWithEmptySlots);
       expect(allRecords.length, equals(1));
       expect(allRecords[0].value, equals(89));
 
-      final newest = JStyleDecoder.decodePacket(packetWithEmptySlots);
+      final newest = MomSafeDecoder.decodePacket(packetWithEmptySlots);
       expect(newest, isNotNull);
       expect(newest!.value, equals(89));
     });
@@ -354,7 +354,7 @@ void main() {
     });
   });
 
-  group('J-Style Stream Multi-Packet & End-Marker (0xFF) Tests', () {
+  group('MomSafe Band Stream Multi-Packet & End-Marker (0xFF) Tests', () {
     test('isEnd is TRUE only when packet has 0xFF marker at the end per vendor specification', () {
       // Packet without 0xFF at the end (intermediate chunk in flash stream)
       final intermediatePacket = <int>[
@@ -362,7 +362,7 @@ void main() {
         0x26, 0x10, 0x28, 0x12, 0x45, 0x00,
         91,
       ];
-      final records1 = JStyleDecoder.decodeAllRecords(intermediatePacket);
+      final records1 = MomSafeDecoder.decodeAllRecords(intermediatePacket);
       expect(records1.isNotEmpty, isTrue);
       expect(records1.first.isEnd, isFalse, reason: "Intermediate chunk without 0xFF must not trigger premature completer release");
 
@@ -373,7 +373,7 @@ void main() {
         91,
         0xFF, // Vendor end marker
       ];
-      final records2 = JStyleDecoder.decodeAllRecords(terminalPacket);
+      final records2 = MomSafeDecoder.decodeAllRecords(terminalPacket);
       expect(records2.isNotEmpty, isTrue);
       expect(records2.first.isEnd, isTrue, reason: "Packet with 0xFF at the end correctly signals end of stream");
     });
@@ -381,19 +381,19 @@ void main() {
 
   group('Phase 1 & 2: On-Demand & Live Sensor Decoding & Freshness Tests', () {
     test('buildRealTimeActivity (0x09) correctly encodes enable and temp flags with valid CRC-8', () {
-      final packet = JStyleEncoder.buildRealTimeActivity(enable: true, tempEnable: true);
+      final packet = MomSafeEncoder.buildRealTimeActivity(enable: true, tempEnable: true);
 
       expect(packet.length, equals(16));
       expect(packet[0], equals(0x09));
       expect(packet[1], equals(0x01)); // enable = true
       expect(packet[2], equals(0x01)); // tempEnable = true
-      expect(JStyleDecoder.verifyCrc(packet), isTrue);
+      expect(MomSafeDecoder.verifyCrc(packet), isTrue);
 
-      final stopPacket = JStyleEncoder.buildRealTimeActivity(enable: false, tempEnable: false);
+      final stopPacket = MomSafeEncoder.buildRealTimeActivity(enable: false, tempEnable: false);
       expect(stopPacket[0], equals(0x09));
       expect(stopPacket[1], equals(0x00)); // enable = false
       expect(stopPacket[2], equals(0x00)); // tempEnable = false
-      expect(JStyleDecoder.verifyCrc(stopPacket), isTrue);
+      expect(MomSafeDecoder.verifyCrc(stopPacket), isTrue);
     });
 
     test('Decodes 0x09 real-time stream packet extracting live HR from byte 21 (ResolveUtil.getActivityData)', () {
@@ -410,7 +410,7 @@ void main() {
       livePacket[0] = 0x09;
       livePacket[21] = 78; // 78 BPM
 
-      final reading = JStyleDecoder.decodePacket(livePacket);
+      final reading = MomSafeDecoder.decodePacket(livePacket);
       expect(reading, isNotNull);
       expect(reading!.type, equals(MeasurementType.heartRate));
       expect(reading.value, equals(78));
@@ -424,13 +424,13 @@ void main() {
       searchingPacket[0] = 0x09;
       searchingPacket[21] = 0; // Optical sensor has no pulse contact yet
 
-      final reading = JStyleDecoder.decodePacket(searchingPacket);
+      final reading = MomSafeDecoder.decodePacket(searchingPacket);
       expect(reading, isNull, reason: "Unsettled/zero heart rate must not update state");
     });
 
     test('Decodes 0x28 measurement acknowledgment without false telemetry', () {
       final ackPacket = [0x28, 0x03, 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2C];
-      final ack = JStyleDecoder.decodePacket(ackPacket);
+      final ack = MomSafeDecoder.decodePacket(ackPacket);
 
       expect(ack, isNotNull);
       expect(ack!.type, equals(MeasurementType.spo2));
@@ -524,31 +524,31 @@ void main() {
   group('Phase 3: Connection Lifecycle, Reconnect, and Measurement Regression Tests', () {
     test('1. Successful HR measurement followed by a second measurement: stream lifecycle and commands', () {
       // Stream start command (0x09, enable=true)
-      final startCmd = JStyleEncoder.buildRealTimeActivity(enable: true, tempEnable: true);
+      final startCmd = MomSafeEncoder.buildRealTimeActivity(enable: true, tempEnable: true);
       expect(startCmd[0], equals(0x09));
       expect(startCmd[1], equals(0x01));
-      expect(JStyleDecoder.verifyCrc(startCmd), isTrue);
+      expect(MomSafeDecoder.verifyCrc(startCmd), isTrue);
 
       // Packet reception for measurement 1
       final livePacket1 = List<int>.filled(24, 0);
       livePacket1[0] = 0x09;
       livePacket1[21] = 72; // 72 BPM
-      final reading1 = JStyleDecoder.decodePacket(livePacket1);
+      final reading1 = MomSafeDecoder.decodePacket(livePacket1);
       expect(reading1, isNotNull);
       expect(reading1!.value, equals(72));
       expect(reading1.source, equals(ReadingSource.liveSensor));
 
       // Stream stop command (0x09, enable=false)
-      final stopCmd = JStyleEncoder.buildRealTimeActivity(enable: false, tempEnable: false);
+      final stopCmd = MomSafeEncoder.buildRealTimeActivity(enable: false, tempEnable: false);
       expect(stopCmd[0], equals(0x09));
       expect(stopCmd[1], equals(0x00));
-      expect(JStyleDecoder.verifyCrc(stopCmd), isTrue);
+      expect(MomSafeDecoder.verifyCrc(stopCmd), isTrue);
 
       // Subsequent measurement 2 without reconnecting
       final livePacket2 = List<int>.filled(24, 0);
       livePacket2[0] = 0x09;
       livePacket2[21] = 76; // 76 BPM
-      final reading2 = JStyleDecoder.decodePacket(livePacket2);
+      final reading2 = MomSafeDecoder.decodePacket(livePacket2);
       expect(reading2, isNotNull);
       expect(reading2!.value, equals(76));
       expect(reading2.source, equals(ReadingSource.liveSensor));
@@ -575,7 +575,7 @@ void main() {
       expect(manager.lastErrorMessage, contains("device not connected"));
 
       // sendCommand while disconnected
-      final sent = await manager.sendCommand(JStyleEncoder.buildGetBatteryLevel(), "CMD_Battery");
+      final sent = await manager.sendCommand(MomSafeEncoder.buildGetBatteryLevel(), "CMD_Battery");
       expect(sent, isFalse);
       expect(manager.lastErrorMessage, contains("device not connected"));
     });
@@ -604,26 +604,26 @@ void main() {
       final settlingPacket = List<int>.filled(24, 0);
       settlingPacket[0] = 0x09;
       settlingPacket[21] = 0; // 0 BPM
-      final settlingReading = JStyleDecoder.decodePacket(settlingPacket);
+      final settlingReading = MomSafeDecoder.decodePacket(settlingPacket);
       expect(settlingReading, isNull, reason: "0 BPM indicates settling/searching contact");
 
       // Case B: Corrupt/out of range optical sample (255 BPM or 10 BPM)
       final outOfRangePacket = List<int>.filled(24, 0);
       outOfRangePacket[0] = 0x09;
       outOfRangePacket[21] = 255;
-      final outOfRangeReading = JStyleDecoder.decodePacket(outOfRangePacket);
+      final outOfRangeReading = MomSafeDecoder.decodePacket(outOfRangePacket);
       expect(outOfRangeReading, isNull, reason: "255 BPM is outside 30-240 physiological range");
 
       // Case C: Valid optical pulse (74 BPM)
       final validPacket = List<int>.filled(24, 0);
       validPacket[0] = 0x09;
       validPacket[21] = 74;
-      final validReading = JStyleDecoder.decodePacket(validPacket);
+      final validReading = MomSafeDecoder.decodePacket(validPacket);
       expect(validReading, isNotNull);
       expect(validReading!.value, equals(74));
 
       // Case D: Missing notifications (0 bytes received)
-      final emptyReading = JStyleDecoder.decodePacket([]);
+      final emptyReading = MomSafeDecoder.decodePacket([]);
       expect(emptyReading, isNull);
     });
 
@@ -674,7 +674,7 @@ void main() {
         0x26, 0x10, 0x28, 0x14, 0x29, 0x90, // 2026-10-28 14:29:90 (impossible time)
         85,
       ];
-      final invalidReading = JStyleDecoder.decodePacket(invalidSecondPacket);
+      final invalidReading = MomSafeDecoder.decodePacket(invalidSecondPacket);
       expect(invalidReading, isNull, reason: "Seconds > 59 must be rejected as invalid date");
 
       // Packet with valid second: 45 (0x45 in BCD)
@@ -683,30 +683,30 @@ void main() {
         0x26, 0x10, 0x28, 0x14, 0x29, 0x45, // 2026-10-28 14:29:45
         85,
       ];
-      final validReading = JStyleDecoder.decodePacket(validSecondPacket);
+      final validReading = MomSafeDecoder.decodePacket(validSecondPacket);
       expect(validReading, isNotNull);
       expect(validReading!.measurementTimestamp, equals(DateTime(2026, 10, 28, 14, 29, 45)));
     });
 
     test('11. Command encoding: 0x28 dataType 2 commands Green PPG heart-rate optical mode', () {
       // Start 0x28 dataType 2 (Green PPG Heart Rate)
-      final startHr = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 2, open: true);
+      final startHr = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 2, open: true);
       expect(startHr.length, equals(16));
       expect(startHr[0], equals(0x28), reason: "Opcode 0x28 (Health Measurement Control)");
       expect(startHr[1], equals(0x02), reason: "dataType 2 (Heart Rate / Green PPG)");
       expect(startHr[2], equals(0x01), reason: "open: true (start test)");
-      expect(JStyleDecoder.verifyCrc(startHr), isTrue);
+      expect(MomSafeDecoder.verifyCrc(startHr), isTrue);
 
       // Stop 0x28 dataType 2 (Green PPG Heart Rate)
-      final stopHr = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 2, open: false);
+      final stopHr = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 2, open: false);
       expect(stopHr.length, equals(16));
       expect(stopHr[0], equals(0x28));
       expect(stopHr[1], equals(0x02));
       expect(stopHr[2], equals(0x00), reason: "open: false (stop test)");
-      expect(JStyleDecoder.verifyCrc(stopHr), isTrue);
+      expect(MomSafeDecoder.verifyCrc(stopHr), isTrue);
 
       // Contrast with SpO2 (dataType 3 / Red PPG)
-      final startSpo2 = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 3, open: true);
+      final startSpo2 = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 3, open: true);
       expect(startSpo2[1], equals(0x03), reason: "dataType 3 (SpO2 / Red PPG)");
     });
 
@@ -715,7 +715,7 @@ void main() {
       samplePacket[0] = 0x09;
       samplePacket[21] = 84; // 84 BPM at byte 21
 
-      final parsed = JStyleDecoder.decodePacket(samplePacket);
+      final parsed = MomSafeDecoder.decodePacket(samplePacket);
       expect(parsed, isNotNull);
       expect(parsed!.type, equals(MeasurementType.heartRate));
       expect(parsed.value, equals(84));
@@ -962,27 +962,27 @@ void main() {
   });
 
   group('Phase 4: HRV (Heart Rate Variability) Protocol & Measurement Feature Tests', () {
-    test('1. JStyleEncoder.buildGetHrvData encodes opcode 0x56 with mode and valid additive CRC-8', () {
+    test('1. MomSafeEncoder.buildGetHrvData encodes opcode 0x56 with mode and valid additive CRC-8', () {
       // Mode 0: Read latest / start
-      final pkt0 = JStyleEncoder.buildGetHrvData(mode: 0);
+      final pkt0 = MomSafeEncoder.buildGetHrvData(mode: 0);
       expect(pkt0.length, equals(16));
       expect(pkt0[0], equals(0x56));
       expect(pkt0[1], equals(0x00));
       expect(pkt0[15], equals(0x56));
-      expect(JStyleDecoder.verifyCrc(pkt0), isTrue);
+      expect(MomSafeDecoder.verifyCrc(pkt0), isTrue);
 
       // Mode 2: Continue next
-      final pkt2 = JStyleEncoder.buildGetHrvData(mode: 2);
+      final pkt2 = MomSafeEncoder.buildGetHrvData(mode: 2);
       expect(pkt2[0], equals(0x56));
       expect(pkt2[1], equals(0x02));
       expect(pkt2[15], equals(0x58)); // 0x56 + 2 = 0x58
-      expect(JStyleDecoder.verifyCrc(pkt2), isTrue);
+      expect(MomSafeDecoder.verifyCrc(pkt2), isTrue);
 
       // Mode 0x99: Delete / clear
-      final pktDelete = JStyleEncoder.buildGetHrvData(mode: 0x99);
+      final pktDelete = MomSafeEncoder.buildGetHrvData(mode: 0x99);
       expect(pktDelete[0], equals(0x56));
       expect(pktDelete[1], equals(0x99));
-      expect(JStyleDecoder.verifyCrc(pktDelete), isTrue);
+      expect(MomSafeDecoder.verifyCrc(pktDelete), isTrue);
     });
 
     test('2. Decodes 15-byte multi-record 0x56 HRV response and selects the NEWEST record', () {
@@ -1010,7 +1010,7 @@ void main() {
         0xFF,
       ];
 
-      final allRecords = JStyleDecoder.decodeAllRecords(multiHrvPacket);
+      final allRecords = MomSafeDecoder.decodeAllRecords(multiHrvPacket);
       final hrvRecords = allRecords.where((r) => r.type == MeasurementType.hrv).toList();
       expect(hrvRecords.length, equals(2));
 
@@ -1034,7 +1034,7 @@ void main() {
       expect(hrvRecords[1].isEnd, isTrue);
 
       // decodePacket selects the newest (Record 1)
-      final newest = JStyleDecoder.decodePacket(multiHrvPacket);
+      final newest = MomSafeDecoder.decodePacket(multiHrvPacket);
       expect(newest, isNotNull);
       expect(newest!.type, equals(MeasurementType.hrv));
       expect(newest.value, equals(62));
@@ -1062,20 +1062,20 @@ void main() {
         55, 26, 75, 40, 122, 82,
       ];
 
-      final validRecords = JStyleDecoder.decodeAllRecords(packetWithInvalidSlots);
+      final validRecords = MomSafeDecoder.decodeAllRecords(packetWithInvalidSlots);
       final validHrvRecords = validRecords.where((r) => r.type == MeasurementType.hrv).toList();
       expect(validHrvRecords.length, equals(1));
       expect(validHrvRecords[0].value, equals(55));
       expect(validHrvRecords[0].measurementTimestamp, equals(DateTime(2026, 10, 28, 11, 10, 00)));
 
-      final newest = JStyleDecoder.decodePacket(packetWithInvalidSlots);
+      final newest = MomSafeDecoder.decodePacket(packetWithInvalidSlots);
       expect(newest, isNotNull);
       expect(newest!.value, equals(55));
     });
 
     test('4. Decodes 0x28 ACK packet for HRV (mode = 1) without polluting telemetry', () {
       final hrvAck = [0x28, 0x01, 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2A];
-      final parsedAck = JStyleDecoder.decodePacket(hrvAck);
+      final parsedAck = MomSafeDecoder.decodePacket(hrvAck);
 
       expect(parsedAck, isNotNull);
       expect(parsedAck!.type, equals(MeasurementType.hrv));
@@ -1186,15 +1186,15 @@ void main() {
     });
   });
 
-  group('J-Style 2208A Temperature Protocol (0x62) Tests', () {
+  group('MomSafe Band Temperature Protocol (0x62) Tests', () {
     test('Temperature query command (0x62) has correct length, opcode, mode, and CRC-8', () {
-      final packet = JStyleEncoder.buildGetTemperatureData(mode: 0);
+      final packet = MomSafeEncoder.buildGetTemperatureData(mode: 0);
 
       expect(packet.length, equals(16));
       expect(packet[0], equals(0x62)); // Opcode
       expect(packet[1], equals(0x00)); // Mode 0 = read latest
       expect(packet[15], equals(0x62)); // Checksum (0x62 + 0 = 0x62)
-      expect(JStyleDecoder.verifyCrc(packet), isTrue);
+      expect(MomSafeDecoder.verifyCrc(packet), isTrue);
     });
 
     test('Decodes multi-record 11-byte temperature packet and selects newest valid reading (36.2 °C)', () {
@@ -1209,7 +1209,7 @@ void main() {
         0x6A, 0x01,
       ];
 
-      final records = JStyleDecoder.decodeAllRecords(tempPacket);
+      final records = MomSafeDecoder.decodeAllRecords(tempPacket);
       expect(records.length, equals(2));
       expect(records[0].type, equals(MeasurementType.temperature));
       expect(records[0].value, equals(35.8));
@@ -1219,7 +1219,7 @@ void main() {
       expect(records[1].value, equals(36.2));
       expect(records[1].measurementTimestamp, equals(DateTime(2026, 10, 28, 14, 15, 30)));
 
-      final newest = JStyleDecoder.decodePacket(tempPacket);
+      final newest = MomSafeDecoder.decodePacket(tempPacket);
       expect(newest, isNotNull);
       expect(newest!.type, equals(MeasurementType.temperature));
       expect(newest.value, equals(36.2));
@@ -1233,20 +1233,20 @@ void main() {
         0x64, 0x00, // 100 -> 10.0 °C (below minimum 20.0 °C threshold)
       ];
 
-      final records = JStyleDecoder.decodeAllRecords(invalidPacket);
+      final records = MomSafeDecoder.decodeAllRecords(invalidPacket);
       expect(records.isEmpty, isTrue);
     });
   });
 
-  group('J-Style 2208A Sleep Protocol (0x53) Tests', () {
+  group('MomSafe Band Sleep Protocol (0x53) Tests', () {
     test('Sleep query command (0x53) has correct length, opcode, mode, and CRC-8', () {
-      final packet = JStyleEncoder.buildGetSleepData(mode: 0);
+      final packet = MomSafeEncoder.buildGetSleepData(mode: 0);
 
       expect(packet.length, equals(16));
       expect(packet[0], equals(0x53)); // Opcode
       expect(packet[1], equals(0x00)); // Mode 0 = read latest
       expect(packet[15], equals(0x53)); // Checksum (0x53 + 0 = 0x53)
-      expect(JStyleDecoder.verifyCrc(packet), isTrue);
+      expect(MomSafeDecoder.verifyCrc(packet), isTrue);
     });
 
     test('Decodes 34-byte sleep record and calculates accurate light and deep sleep hours', () {
@@ -1270,7 +1270,7 @@ void main() {
 
       expect(sleepPacket.length, equals(34));
 
-      final records = JStyleDecoder.decodeAllRecords(sleepPacket);
+      final records = MomSafeDecoder.decodeAllRecords(sleepPacket);
       expect(records.length, equals(1));
       final sleepRecord = records[0];
 
@@ -1289,12 +1289,12 @@ void main() {
         ...List<int>.filled(25, 0),
       ];
 
-      final records = JStyleDecoder.decodeAllRecords(emptySleepPacket);
+      final records = MomSafeDecoder.decodeAllRecords(emptySleepPacket);
       expect(records.isEmpty, isTrue);
     });
   });
 
-  group('J-Style 2208A Stress Metric (0x56) Tests', () {
+  group('MomSafe Band Stress Metric (0x56) Tests', () {
     test('Extracts vendor stress score (0-100) from 0x56 byte 12 with matching device timestamp', () {
       final hrvAndStressPacket = <int>[
         0x56, 0x00, 0x00,
@@ -1308,7 +1308,7 @@ void main() {
         0x56, // Byte 15: Checksum
       ];
 
-      final records = JStyleDecoder.decodeAllRecords(hrvAndStressPacket);
+      final records = MomSafeDecoder.decodeAllRecords(hrvAndStressPacket);
       expect(records.length, equals(3));
 
       final hrv = records.firstWhere((r) => r.type == MeasurementType.hrv);
@@ -1341,7 +1341,7 @@ void main() {
         0x56, // Byte 15: Checksum
       ];
 
-      final records = JStyleDecoder.decodeAllRecords(directBpPacket);
+      final records = MomSafeDecoder.decodeAllRecords(directBpPacket);
       final bp = records.firstWhere((r) => r.type == MeasurementType.bloodPressure);
       expect(bp.value, equals(118));
       expect(bp.secondaryValue, equals(78));
@@ -1349,17 +1349,17 @@ void main() {
     });
   });
 
-  group('J-Style 2208A Blood Pressure Hardware Limitation Tests', () {
+  group('MomSafe Band Blood Pressure Hardware Limitation Tests', () {
     test('Explicitly documents that 2208A uses pulse wave estimated BP and lacks arterial cuff', () {
-      expect(JStyleDecoder.isBloodPressureSupportedOn2208A, isFalse);
-      expect(JStyleDecoder.isEstimatedBloodPressureSupported, isTrue);
+      expect(MomSafeDecoder.isBloodPressureSupportedOnMomSafeBand, isFalse);
+      expect(MomSafeDecoder.isEstimatedBloodPressureSupported, isTrue);
     });
   });
 
-  group('J-Style 2208A Axillary Temperature (0x65) Tests', () {
+  group('MomSafe Band Axillary Temperature (0x65) Tests', () {
     test('Encodes 0x65 command for spot axillary temperature retrieval', () {
-      final packet = JStyleEncoder.buildGetAxillaryTemperatureData(mode: 0);
-      expect(packet[0], equals(JStyleCmd.getAxillaryTemp)); // 0x65
+      final packet = MomSafeEncoder.buildGetAxillaryTemperatureData(mode: 0);
+      expect(packet[0], equals(MomSafeCmd.getAxillaryTemp)); // 0x65
       expect(packet[1], equals(0x00));
       expect(packet.length, equals(16));
     });

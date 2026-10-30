@@ -1,5 +1,5 @@
-import 'jstyle_constants.dart';
-import 'jstyle_decoder.dart';
+import 'momsafe_constants.dart';
+import 'momsafe_decoder.dart';
 
 /// Decision result for evaluating incoming telemetry against currently displayed state
 class StateUpdateDecision {

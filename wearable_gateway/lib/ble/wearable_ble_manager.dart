@@ -5,9 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../protocol/jstyle_constants.dart';
-import '../protocol/jstyle_encoder.dart';
-import '../protocol/jstyle_decoder.dart';
+import '../protocol/momsafe_constants.dart';
+import '../protocol/momsafe_encoder.dart';
+import '../protocol/momsafe_decoder.dart';
 import '../protocol/telemetry_state_resolver.dart';
 
 enum GatewayConnectionState {
@@ -328,7 +328,7 @@ class WearableBleManager {
     }
   }
 
-  /// Start BLE scanning for J-Style 2208A peripherals
+  /// Start BLE scanning for MomSafe Band peripherals
   Future<void> startScan({Duration timeout = const Duration(seconds: 12)}) async {
     final hasPerm = await checkAndRequestPermissions();
     if (!hasPerm) {
@@ -533,10 +533,10 @@ class WearableBleManager {
       BluetoothCharacteristic? notifyChar;
 
       for (final service in services) {
-        if (service.uuid.str128.toLowerCase() == JStyleGatt.serviceUuid.toLowerCase()) {
-          _log("STATUS", "Located Primary J-Style Service: ${service.uuid.str128}");
+        if (service.uuid.str128.toLowerCase() == MomSafeGatt.serviceUuid.toLowerCase()) {
+          _log("STATUS", "Located Primary MomSafe Band Service: ${service.uuid.str128}");
           for (final char in service.characteristics) {
-            if (char.uuid.str128.toLowerCase() == JStyleGatt.writeCharacteristicUuid.toLowerCase()) {
+            if (char.uuid.str128.toLowerCase() == MomSafeGatt.writeCharacteristicUuid.toLowerCase()) {
               writeChar = char;
               _log(
                 "STATUS",
@@ -545,7 +545,7 @@ class WearableBleManager {
                 "writeWithoutResponse=${char.properties.writeWithoutResponse}",
               );
             }
-            if (char.uuid.str128.toLowerCase() == JStyleGatt.notifyCharacteristicUuid.toLowerCase()) {
+            if (char.uuid.str128.toLowerCase() == MomSafeGatt.notifyCharacteristicUuid.toLowerCase()) {
               notifyChar = char;
               _log("STATUS", "Found Notify Characteristic (0xFFF7)");
             }
@@ -585,7 +585,7 @@ class WearableBleManager {
           _log("RX (Band->App)", "Raw notification received (${bytes.length} bytes, opcode $opcodeHex)", rawBytes: bytes);
 
           // Dedicated diagnostic log for optical PPG (0x09) samples
-          if (opcode == JStyleCmd.enableActivity) {
+          if (opcode == MomSafeCmd.enableActivity) {
             final activeSession = _activeHeartRateSessionId;
             final isSessionActive = activeSession != null;
             final nowIso = DateTime.now().toIso8601String();
@@ -626,19 +626,19 @@ class WearableBleManager {
             }
           }
 
-          final reading = JStyleDecoder.decodePacket(bytes);
+          final reading = MomSafeDecoder.decodePacket(bytes);
           if (reading != null) {
             final devTimeStr = reading.measurementTimestamp != null ? reading.measurementTimestamp.toString() : "N/A (Live Status)";
             _log("PARSED", "Telemetry Decoded: ${reading.type.name} = ${reading.value} ${reading.unit} | DevTime: $devTimeStr | Source: ${reading.source.name} [${reading.decodeNotes ?? ''}]");
 
             // Protocol control acknowledgment (0x28 ACK): log confirmation and do not forward to application telemetry stream
-            if (reading.unit == "ACK" || opcode == JStyleCmd.measurementWithType) {
+            if (reading.unit == "ACK" || opcode == MomSafeCmd.measurementWithType) {
               _log("PROTOCOL_ACK", "Received command confirmation packet (opcode 0x28): ${reading.decodeNotes ?? ''}");
               return;
             }
 
             // If real-time optical PPG packet (0x09), process ONLY if an active measurement session is running
-            if (opcode == JStyleCmd.enableActivity && reading.type == MeasurementType.heartRate) {
+            if (opcode == MomSafeCmd.enableActivity && reading.type == MeasurementType.heartRate) {
               if (_activeHeartRateSessionId != null) {
                 _emitLiveHeartRate(reading.value.toInt());
                 _emitReading(reading);
@@ -830,8 +830,8 @@ class WearableBleManager {
     
     final fullDetails = StringBuffer();
     fullDetails.write("BLE Operation: $operation | ");
-    fullDetails.write("Target Service: ${JStyleGatt.serviceUuid} | ");
-    fullDetails.write("Characteristic: ${JStyleGatt.writeCharacteristicUuid} | ");
+    fullDetails.write("Target Service: ${MomSafeGatt.serviceUuid} | ");
+    fullDetails.write("Characteristic: ${MomSafeGatt.writeCharacteristicUuid} | ");
     fullDetails.write("Device State: ${_state.name} | ");
     fullDetails.write("Queue State: [queueLength=$_queueLength, inFlight=$_isGattOperationInFlight] | ");
     if (isGatt129) {
@@ -863,7 +863,7 @@ class WearableBleManager {
     final opcodeHex = "0x${opcode.toRadixString(16).padLeft(2, '0').toUpperCase()}";
 
     final props = char.properties;
-    // Prefer writeWithoutResponse if supported by peripheral (standard for J-Style 0xFFF6 command channel),
+    // Prefer writeWithoutResponse if supported by peripheral (standard for MomSafe Band 0xFFF6 command channel),
     // which prevents Android ATT_WRITE_RSP collisions and GATT error 129.
     final withoutResponse = props.writeWithoutResponse;
 
@@ -1008,7 +1008,7 @@ class WearableBleManager {
 
           settlementDebounce?.cancel();
           // If end of multi-record stream (0xFF) or single-packet status (battery), settle immediately
-          if (reading.isEnd || expectedOpcode == JStyleCmd.getBatteryLevel) {
+          if (reading.isEnd || expectedOpcode == MomSafeCmd.getBatteryLevel) {
             settleRequest();
           } else {
             // Otherwise wait up to 400ms for consecutive chunks in the burst to arrive
@@ -1060,10 +1060,10 @@ class WearableBleManager {
   Future<ParsedReading?> requestSpotHeartRate() async {
     _activeMeasurementStage = "Spot Heart Rate Query (0x55)";
     try {
-      final packet = JStyleEncoder.buildGetSpotHeartRate(mode: 0);
+      final packet = MomSafeEncoder.buildGetSpotHeartRate(mode: 0);
       return await _requestMeasurement(
         packet: packet,
-        expectedOpcode: JStyleCmd.getOnceHeartData,
+        expectedOpcode: MomSafeCmd.getOnceHeartData,
         commandName: "CMD_Get_OnceHeartData (0x55) Spot HR",
       );
     } finally {
@@ -1075,10 +1075,10 @@ class WearableBleManager {
   Future<ParsedReading?> requestSpotSpo2() async {
     _activeMeasurementStage = "Spot SpO2 Query (0x60)";
     try {
-      final packet = JStyleEncoder.buildGetBloodOxygen(mode: 0);
+      final packet = MomSafeEncoder.buildGetBloodOxygen(mode: 0);
       return await _requestMeasurement(
         packet: packet,
-        expectedOpcode: JStyleCmd.getBloodOxygen,
+        expectedOpcode: MomSafeCmd.getBloodOxygen,
         commandName: "CMD_Get_Blood_oxygen (0x60) Spot SpO2",
       );
     } finally {
@@ -1090,10 +1090,10 @@ class WearableBleManager {
   Future<ParsedReading?> requestSpotHrv() async {
     _activeMeasurementStage = "Spot HRV Query (0x56)";
     try {
-      final packet = JStyleEncoder.buildGetHrvData(mode: 0);
+      final packet = MomSafeEncoder.buildGetHrvData(mode: 0);
       return await _requestMeasurement(
         packet: packet,
-        expectedOpcode: JStyleCmd.getHrvTestData,
+        expectedOpcode: MomSafeCmd.getHrvTestData,
         commandName: "CMD_Get_HrvTestData (0x56) Spot HRV",
       );
     } finally {
@@ -1106,10 +1106,10 @@ class WearableBleManager {
     _activeMeasurementStage = "Skin Temperature Query (0x65/0x62)";
     try {
       // 1. Try opcode 0x65 (axillary / spot temperature data)
-      final axillaryPacket = JStyleEncoder.buildGetAxillaryTemperatureData(mode: 0);
+      final axillaryPacket = MomSafeEncoder.buildGetAxillaryTemperatureData(mode: 0);
       final axillaryResult = await _requestMeasurement(
         packet: axillaryPacket,
-        expectedOpcode: JStyleCmd.getAxillaryTemp,
+        expectedOpcode: MomSafeCmd.getAxillaryTemp,
         commandName: "CMD_Get_AxillaryTemp (0x65)",
         timeout: const Duration(seconds: 4),
       );
@@ -1118,10 +1118,10 @@ class WearableBleManager {
       }
 
       // 2. Fall back to opcode 0x62 (periodic skin temperature logs)
-      final histPacket = JStyleEncoder.buildGetTemperatureData(mode: 0);
+      final histPacket = MomSafeEncoder.buildGetTemperatureData(mode: 0);
       return await _requestMeasurement(
         packet: histPacket,
-        expectedOpcode: JStyleCmd.getTempHistory,
+        expectedOpcode: MomSafeCmd.getTempHistory,
         commandName: "CMD_Get_TemperatureData (0x62) Skin Temp",
         timeout: const Duration(seconds: 4),
       );
@@ -1134,10 +1134,10 @@ class WearableBleManager {
   Future<ParsedReading?> requestSleepHistory() async {
     _activeMeasurementStage = "Sleep Data Query (0x53)";
     try {
-      final packet = JStyleEncoder.buildGetSleepData(mode: 0);
+      final packet = MomSafeEncoder.buildGetSleepData(mode: 0);
       return await _requestMeasurement(
         packet: packet,
-        expectedOpcode: JStyleCmd.getSleepData,
+        expectedOpcode: MomSafeCmd.getSleepData,
         commandName: "CMD_Get_SleepData (0x53)",
       );
     } finally {
@@ -1154,10 +1154,10 @@ class WearableBleManager {
     }
     _activeMeasurementStage = "Battery Level Query (0x13)";
     try {
-      final packet = JStyleEncoder.buildGetBatteryLevel();
+      final packet = MomSafeEncoder.buildGetBatteryLevel();
       return await _requestMeasurement(
         packet: packet,
-        expectedOpcode: JStyleCmd.getBatteryLevel,
+        expectedOpcode: MomSafeCmd.getBatteryLevel,
         commandName: "CMD_Get_BatteryLevel (0x13)",
       );
     } finally {
@@ -1173,7 +1173,7 @@ class WearableBleManager {
       return false;
     }
 
-    final packet = JStyleEncoder.buildRealTimeActivity(enable: true, tempEnable: true);
+    final packet = MomSafeEncoder.buildRealTimeActivity(enable: true, tempEnable: true);
     final sent = await sendCommand(packet, "CMD_Enable_Activity (0x09) Start Live Stream");
     if (sent) {
       _isLiveHeartRateStreaming = true;
@@ -1190,7 +1190,7 @@ class WearableBleManager {
       return true;
     }
 
-    final packet = JStyleEncoder.buildRealTimeActivity(enable: false, tempEnable: false);
+    final packet = MomSafeEncoder.buildRealTimeActivity(enable: false, tempEnable: false);
     final sent = await sendCommand(packet, "CMD_Enable_Activity (0x09) Stop Live Stream");
     _log("STATUS", "Live optical sensor stream stopped (writeSent: $sent).");
     return sent;
@@ -1233,7 +1233,7 @@ class WearableBleManager {
 
       // Step 1: Send 0x28 (type 2: Heart Rate / Green PPG LED, open: true) to command physical band optical controller
       _activeMeasurementStage = "Heart Rate (Session: $sessionId, 0x28 Green PPG Start)";
-      final startPpgPacket = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 2, open: true);
+      final startPpgPacket = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 2, open: true);
       final sentPpg = await sendCommand(startPpgPacket, "CMD_MeasurementWithType (0x28) Green PPG HR Start");
       if (!sentPpg) {
         _log("ERROR", "Failed to activate 0x28 Green PPG optical mode on band.");
@@ -1320,7 +1320,7 @@ class WearableBleManager {
       // Guaranteed hardware shutdown: turn off 0x28 Green PPG and stop 0x09 stream
       if (isConnected) {
         try {
-          final stopPpgPacket = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 2, open: false);
+          final stopPpgPacket = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 2, open: false);
           await sendCommand(stopPpgPacket, "CMD_MeasurementWithType (0x28) Green PPG HR Stop");
         } catch (_) {}
         await stopLiveHeartRateStream();
@@ -1373,7 +1373,7 @@ class WearableBleManager {
       _log("SPO2_TRACE", "[Stage 2: Start Command] Enqueuing 0x28 (type 3: SpO2, open: true)...");
 
       // Stage 2: Send 0x28 (type 3: SpO2, open: true)
-      final startPacket = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 3, open: true);
+      final startPacket = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 3, open: true);
       final sentStart = await sendCommand(startPacket, "CMD_MeasurementWithType (0x28) SpO2 Start");
       _log("SPO2_TRACE", "[Stage 2: Start Command] 0x28 Start write result: $sentStart, isConnected: $isConnected, state: ${_state.name}");
       if (!sentStart) {
@@ -1414,7 +1414,7 @@ class WearableBleManager {
       // Stage 4: Send 0x28 (type 3: SpO2, open: false) to stop measurement
       _activeMeasurementStage = "SpO2 Stage 4 (0x28 Stop Command)";
       _log("SPO2_TRACE", "[Stage 4: Stop Command] Measurement window elapsed. Sending 0x28 stop command...");
-      final stopPacket = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 3, open: false);
+      final stopPacket = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 3, open: false);
       final sentStop = await sendCommand(stopPacket, "CMD_MeasurementWithType (0x28) SpO2 Stop");
       stopCommandSent = true;
       _log("SPO2_TRACE", "[Stage 4: Stop Command] Stop command write result: $sentStop, isConnected: $isConnected, state: ${_state.name}");
@@ -1488,7 +1488,7 @@ class WearableBleManager {
       // Guarantee sensor deactivation only if stop command was not already sent during the normal flow
       if (!stopCommandSent && isConnected) {
         try {
-          final stopPacket = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 3, open: false);
+          final stopPacket = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 3, open: false);
           await sendCommand(stopPacket, "CMD_MeasurementWithType (0x28) SpO2 Stop (Cleanup)");
         } catch (_) {}
       }
@@ -1537,7 +1537,7 @@ class WearableBleManager {
       _log("HRV_TRACE", "[Stage 2: Start Command] Enqueuing 0x28 (type 1: HRV, open: true)...");
 
       // Stage 2: Send 0x28 (type 1: HRV, open: true)
-      final startPacket = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 1, open: true);
+      final startPacket = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 1, open: true);
       final sentStart = await sendCommand(startPacket, "CMD_MeasurementWithType (0x28) HRV Start");
       _log("HRV_TRACE", "[Stage 2: Start Command] 0x28 Start write result: $sentStart, isConnected: $isConnected, state: ${_state.name}");
       if (!sentStart) {
@@ -1578,7 +1578,7 @@ class WearableBleManager {
       // Stage 4: Send 0x28 (type 1: HRV, open: false) to stop measurement
       _activeMeasurementStage = "HRV Stage 4 (0x28 Stop Command)";
       _log("HRV_TRACE", "[Stage 4: Stop Command] Measurement window elapsed. Sending 0x28 stop command...");
-      final stopPacket = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 1, open: false);
+      final stopPacket = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 1, open: false);
       final sentStop = await sendCommand(stopPacket, "CMD_MeasurementWithType (0x28) HRV Stop");
       stopCommandSent = true;
       _log("HRV_TRACE", "[Stage 4: Stop Command] Stop command write result: $sentStop, isConnected: $isConnected, state: ${_state.name}");
@@ -1649,7 +1649,7 @@ class WearableBleManager {
           }
         }
 
-        // Also emit estimated blood pressure (bytes 13 & 14 or pulse wave estimation matching JC Vital)
+        // Also emit estimated blood pressure (bytes 13 & 14 or pulse wave estimation matching MomSafe Band)
         if (newestRecord.rawBytes.length >= 15) {
           final rawHighBP = newestRecord.rawBytes[13] & 0xFF;
           final rawLowBP = newestRecord.rawBytes[14] & 0xFF;
@@ -1662,7 +1662,7 @@ class WearableBleManager {
             sys = rawHighBP;
             dia = rawLowBP;
           } else {
-            // Pulse wave physiological estimation model matching JC Vital
+            // Pulse wave physiological estimation model matching MomSafe Band
             sys = (115 + (hr - 70) * 0.45 - (hrv - 50) * 0.15).round().clamp(90, 145);
             dia = (75 + (hr - 70) * 0.30 - (hrv - 50) * 0.08).round().clamp(60, 95);
           }
@@ -1678,7 +1678,7 @@ class WearableBleManager {
             rawBytes: newestRecord.rawBytes,
             isEnd: true,
             isRealHardwareResponse: true,
-            decodeNotes: "Estimated Blood Pressure $sys/$dia mmHg (Pulse Wave / JC Vital, Device: $devTime)",
+            decodeNotes: "Estimated Blood Pressure $sys/$dia mmHg (Pulse Wave / MomSafe Band, Device: $devTime)",
           ));
         }
 
@@ -1705,7 +1705,7 @@ class WearableBleManager {
       // Guarantee sensor deactivation only if stop command was not already sent during the normal flow
       if (!stopCommandSent && isConnected) {
         try {
-          final stopPacket = JStyleEncoder.buildLiveMeasurementTrigger(dataType: 1, open: false);
+          final stopPacket = MomSafeEncoder.buildLiveMeasurementTrigger(dataType: 1, open: false);
           await sendCommand(stopPacket, "CMD_MeasurementWithType (0x28) HRV Stop (Cleanup)");
         } catch (_) {}
       }

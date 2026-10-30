@@ -1,4 +1,4 @@
-import 'jstyle_constants.dart';
+import 'momsafe_constants.dart';
 
 /// Structured telemetry container for verified measurements
 class ParsedReading {
@@ -82,7 +82,7 @@ class ParsedReading {
 }
 
 /// Binary decoder that parses incoming GATT notifications from characteristic 0xFFF7
-class JStyleDecoder {
+class MomSafeDecoder {
   /// Converts BCD byte to 2-digit string
   static String _bcd2String(int byte) {
     final int a = (byte & 0xF0) >> 4;
@@ -128,7 +128,7 @@ class JStyleDecoder {
   }
 
   /// Decodes all individual measurement records contained in an incoming notification packet.
-  /// J-Style 0x55 and 0x60 notifications can contain multiple 10-byte records concatenated together.
+  /// MomSafe Band 0x55 and 0x60 notifications can contain multiple 10-byte records concatenated together.
   static List<ParsedReading> decodeAllRecords(List<int> bytes) {
     if (bytes.isEmpty) return const [];
     final cmd = bytes[0];
@@ -137,7 +137,7 @@ class JStyleDecoder {
     final records = <ParsedReading>[];
 
     // 0x55: Spot Heart Rate Flash Records
-    if (cmd == JStyleCmd.getOnceHeartData) {
+    if (cmd == MomSafeCmd.getOnceHeartData) {
       final totalRecords = bytes.length ~/ 10;
       for (int i = 0; i < totalRecords; i++) {
         final offset = 3 + i * 10;
@@ -168,7 +168,7 @@ class JStyleDecoder {
     }
 
     // 0x60 / 0x66: Blood Oxygen (SpO2) Flash Records
-    if (cmd == JStyleCmd.getBloodOxygen || cmd == JStyleCmd.getAutoBloodOxygen) {
+    if (cmd == MomSafeCmd.getBloodOxygen || cmd == MomSafeCmd.getAutoBloodOxygen) {
       final totalRecords = bytes.length ~/ 10;
       for (int i = 0; i < totalRecords; i++) {
         final offset = 3 + i * 10;
@@ -199,7 +199,7 @@ class JStyleDecoder {
     }
 
     // 0x56: Heart Rate Variability (HRV) Flash Records (ResolveUtil.getHrvTestData)
-    if (cmd == JStyleCmd.getHrvTestData) {
+    if (cmd == MomSafeCmd.getHrvTestData) {
       const recordSize = 15;
       final totalRecords = bytes.length ~/ recordSize;
       for (int i = 0; i < totalRecords; i++) {
@@ -246,7 +246,7 @@ class JStyleDecoder {
               ));
             }
 
-            // Extract estimated blood pressure from 0x56 record (bytes 13 & 14 or pulse wave estimation matching JC Vital)
+            // Extract estimated blood pressure from 0x56 record (bytes 13 & 14 or pulse wave estimation matching MomSafe Band)
             final rawHighBP = (13 + i * recordSize < bytes.length) ? (bytes[13 + i * recordSize] & 0xFF) : null;
             final rawLowBP = (14 + i * recordSize < bytes.length) ? (bytes[14 + i * recordSize] & 0xFF) : null;
 
@@ -256,7 +256,7 @@ class JStyleDecoder {
               sys = rawHighBP;
               dia = rawLowBP;
             } else if (hr != null && hr > 0) {
-              // Pulse wave physiological estimation model matching JC Vital
+              // Pulse wave physiological estimation model matching MomSafe Band
               sys = (115 + (hr - 70) * 0.45 - (hrv - 50) * 0.15).round().clamp(90, 145);
               dia = (75 + (hr - 70) * 0.30 - (hrv - 50) * 0.08).round().clamp(60, 95);
             }
@@ -275,7 +275,7 @@ class JStyleDecoder {
                 isRealHardwareResponse: true,
                 recordIndex: i,
                 totalRecordsInPacket: totalRecords,
-                decodeNotes: "Estimated Blood Pressure $sys/$dia mmHg (Pulse Wave / JC Vital, Device: $devTime)",
+                decodeNotes: "Estimated Blood Pressure $sys/$dia mmHg (Pulse Wave / MomSafe Band, Device: $devTime)",
               ));
             }
           }
@@ -285,7 +285,7 @@ class JStyleDecoder {
     }
 
     // 0x62 / 0x65: Skin Temperature History (ResolveUtil.getTempData / getTempDataer)
-    if (cmd == JStyleCmd.getTempHistory || cmd == JStyleCmd.getAxillaryTemp) {
+    if (cmd == MomSafeCmd.getTempHistory || cmd == MomSafeCmd.getAxillaryTemp) {
       const recordSize = 11;
       final totalRecords = bytes.length ~/ recordSize;
       for (int i = 0; i < totalRecords; i++) {
@@ -318,7 +318,7 @@ class JStyleDecoder {
     }
 
     // 0x53: Sleep Data History (ResolveUtil.getSleepData)
-    if (cmd == JStyleCmd.getSleepData) {
+    if (cmd == MomSafeCmd.getSleepData) {
       const recordSize = 34;
       final totalRecords = bytes.length ~/ recordSize;
       for (int i = 0; i < totalRecords; i++) {
@@ -388,7 +388,7 @@ class JStyleDecoder {
     final now = DateTime.now();
 
     // 0x55: Spot Heart Rate
-    if (cmd == JStyleCmd.getOnceHeartData) {
+    if (cmd == MomSafeCmd.getOnceHeartData) {
       final all = decodeAllRecords(bytes);
       if (all.isEmpty) return null;
       // Sort by measurement timestamp ascending to pick the newest reading
@@ -418,7 +418,7 @@ class JStyleDecoder {
     }
 
     // 0x60 / 0x66: Spot Blood Oxygen (SpO2)
-    if (cmd == JStyleCmd.getBloodOxygen || cmd == JStyleCmd.getAutoBloodOxygen) {
+    if (cmd == MomSafeCmd.getBloodOxygen || cmd == MomSafeCmd.getAutoBloodOxygen) {
       final all = decodeAllRecords(bytes);
       if (all.isEmpty) return null;
       all.sort((a, b) {
@@ -447,7 +447,7 @@ class JStyleDecoder {
     }
 
     // 0x56: Spot HRV Test Data
-    if (cmd == JStyleCmd.getHrvTestData) {
+    if (cmd == MomSafeCmd.getHrvTestData) {
       final all = decodeAllRecords(bytes);
       if (all.isEmpty) return null;
       final hrvOnly = all.where((r) => r.type == MeasurementType.hrv).toList();
@@ -478,7 +478,7 @@ class JStyleDecoder {
     }
 
     // 0x13: Battery Level
-    if (cmd == JStyleCmd.getBatteryLevel) {
+    if (cmd == MomSafeCmd.getBatteryLevel) {
       if (bytes.length >= 2) {
         final battery = bytes[1] & 0xFF;
         if (battery <= 100) {
@@ -499,7 +499,7 @@ class JStyleDecoder {
     }
 
     // 0x62 / 0x65: Temperature (Skin/surface)
-    if (cmd == JStyleCmd.getTempHistory || cmd == JStyleCmd.getAxillaryTemp) {
+    if (cmd == MomSafeCmd.getTempHistory || cmd == MomSafeCmd.getAxillaryTemp) {
       final all = decodeAllRecords(bytes);
       if (all.isEmpty) return null;
       all.sort((a, b) {
@@ -528,7 +528,7 @@ class JStyleDecoder {
     }
 
     // 0x53: Sleep Data History
-    if (cmd == JStyleCmd.getSleepData) {
+    if (cmd == MomSafeCmd.getSleepData) {
       final all = decodeAllRecords(bytes);
       if (all.isEmpty) return null;
       all.sort((a, b) {
@@ -558,7 +558,7 @@ class JStyleDecoder {
 
     // 0x09: Real-time Activity & Optical Sensor Stream (ResolveUtil.getActivityData)
     // Vendor SDK: value[21] = heartRate (BPM), value[22..23] = temp, value[1..4] = steps
-    if (cmd == JStyleCmd.enableActivity) {
+    if (cmd == MomSafeCmd.enableActivity) {
       if (bytes.length >= 22) {
         final hr = bytes[21] & 0xFF;
         // Valid heart rate range: 30 to 240 BPM (0 indicates searching/settling optical contact)
@@ -581,7 +581,7 @@ class JStyleDecoder {
 
     // 0x28: Health Measurement Control Acknowledgment (ResolveUtil.measurementWithType)
     // Vendor SDK: value[1] = mode (1: HRV, 2: HeartRate, 3: SpO2), returns confirmation
-    if (cmd == JStyleCmd.measurementWithType) {
+    if (cmd == MomSafeCmd.measurementWithType) {
       if (bytes.length >= 2) {
         final mode = bytes[1] & 0xFF;
         final MeasurementType ackType;
@@ -610,10 +610,10 @@ class JStyleDecoder {
     return null;
   }
 
-  /// Hardware capability note: The J-Style 2208A band DOES NOT contain an inflatable cuff for direct arterial blood pressure.
-  /// However, estimated blood pressure derived from pulse-wave velocity / HRV frequency analysis (identical to JC Vital)
+  /// Hardware capability note: The MomSafe Band DOES NOT contain an inflatable cuff for direct arterial blood pressure.
+  /// However, estimated blood pressure derived from pulse-wave velocity / HRV frequency analysis (identical to MomSafe Band)
   /// is supported and labeled as algorithmic estimated blood pressure.
-  static const bool isBloodPressureSupportedOn2208A = false;
+  static const bool isBloodPressureSupportedOnMomSafeBand = false;
   static const bool isEstimatedBloodPressureSupported = true;
 }
 

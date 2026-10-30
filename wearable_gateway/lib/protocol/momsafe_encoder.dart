@@ -1,9 +1,9 @@
 import 'dart:typed_data';
-import 'jstyle_constants.dart';
+import 'momsafe_constants.dart';
 
 /// Formats 16-byte fixed-length command packets with additive CRC-8 checksum
-/// according to the J-Style 2208A vendor protocol.
-class JStyleEncoder {
+/// according to the MomSafe Band vendor protocol.
+class MomSafeEncoder {
   static const int packetLength = 16;
 
   /// Creates a zero-initialized 16-byte buffer
@@ -24,7 +24,7 @@ class JStyleEncoder {
   /// [mode]: 0 = read latest, 2 = continue next, 0x99 = delete/ack
   static Uint8List buildGetSpotHeartRate({int mode = 0}) {
     final packet = _createBuffer();
-    packet[0] = JStyleCmd.getOnceHeartData;
+    packet[0] = MomSafeCmd.getOnceHeartData;
     packet[1] = mode;
     _applyCrc(packet);
     return Uint8List.fromList(packet);
@@ -34,7 +34,7 @@ class JStyleEncoder {
   /// [mode]: 0 = read latest, 2 = continue next, 0x99 = delete/ack
   static Uint8List buildGetBloodOxygen({int mode = 0}) {
     final packet = _createBuffer();
-    packet[0] = JStyleCmd.getBloodOxygen;
+    packet[0] = MomSafeCmd.getBloodOxygen;
     packet[1] = mode;
     _applyCrc(packet);
     return Uint8List.fromList(packet);
@@ -44,7 +44,7 @@ class JStyleEncoder {
   /// [mode]: 0 = read latest, 2 = continue next, 0x99 = delete/ack
   static Uint8List buildGetHrvData({int mode = 0}) {
     final packet = _createBuffer();
-    packet[0] = JStyleCmd.getHrvTestData; // 0x56
+    packet[0] = MomSafeCmd.getHrvTestData; // 0x56
     packet[1] = mode;
     _applyCrc(packet);
     return Uint8List.fromList(packet);
@@ -54,7 +54,7 @@ class JStyleEncoder {
   /// [mode]: 0 = read latest, 2 = continue next, 0x99 = delete/ack
   static Uint8List buildGetTemperatureData({int mode = 0}) {
     final packet = _createBuffer();
-    packet[0] = JStyleCmd.getTempHistory; // 0x62
+    packet[0] = MomSafeCmd.getTempHistory; // 0x62
     packet[1] = mode;
     _applyCrc(packet);
     return Uint8List.fromList(packet);
@@ -64,7 +64,7 @@ class JStyleEncoder {
   /// [mode]: 0 = read latest, 2 = continue next, 0x99 = delete/ack
   static Uint8List buildGetAxillaryTemperatureData({int mode = 0}) {
     final packet = _createBuffer();
-    packet[0] = JStyleCmd.getAxillaryTemp; // 0x65
+    packet[0] = MomSafeCmd.getAxillaryTemp; // 0x65
     packet[1] = mode;
     _applyCrc(packet);
     return Uint8List.fromList(packet);
@@ -74,7 +74,7 @@ class JStyleEncoder {
   /// [mode]: 0 = read latest, 2 = continue next, 0x99 = delete/ack
   static Uint8List buildGetSleepData({int mode = 0}) {
     final packet = _createBuffer();
-    packet[0] = JStyleCmd.getSleepData; // 0x53
+    packet[0] = MomSafeCmd.getSleepData; // 0x53
     packet[1] = mode;
     _applyCrc(packet);
     return Uint8List.fromList(packet);
@@ -83,7 +83,7 @@ class JStyleEncoder {
   /// Command 0x13: Query device battery percentage
   static Uint8List buildGetBatteryLevel() {
     final packet = _createBuffer();
-    packet[0] = JStyleCmd.getBatteryLevel;
+    packet[0] = MomSafeCmd.getBatteryLevel;
     _applyCrc(packet);
     return Uint8List.fromList(packet);
   }
@@ -100,7 +100,7 @@ class JStyleEncoder {
     bool openPpi = false,
   }) {
     final packet = _createBuffer();
-    packet[0] = JStyleCmd.measurementWithType;
+    packet[0] = MomSafeCmd.measurementWithType;
     packet[1] = dataType;
     packet[2] = open ? 0x01 : 0x00;
     if (dataType == 1) {
@@ -116,7 +116,7 @@ class JStyleEncoder {
   /// [tempEnable]: true = include temperature, false = exclude
   static Uint8List buildRealTimeActivity({required bool enable, bool tempEnable = true}) {
     final packet = _createBuffer();
-    packet[0] = JStyleCmd.enableActivity; // 0x09
+    packet[0] = MomSafeCmd.enableActivity; // 0x09
     packet[1] = enable ? 0x01 : 0x00;
     packet[2] = tempEnable ? 0x01 : 0x00;
     _applyCrc(packet);

@@ -1,8 +1,8 @@
-/// J-Style 2208A BLE Command and Key Constants
+/// MomSafe Band BLE Command and Key Constants
 /// Verified against vendor specification (2208协议文档.docx & blesdk2025_plugin)
 
-class JStyleGatt {
-  /// Standard J-Style primary BLE Service UUID
+class MomSafeGatt {
+  /// Standard MomSafe Band primary BLE Service UUID
   static const String serviceUuid = "0000fff0-0000-1000-8000-00805f9b34fb";
 
   /// Characteristic for writing commands from App to Wearable
@@ -15,7 +15,7 @@ class JStyleGatt {
   static const String cccdDescriptorUuid = "00002902-0000-1000-8000-00805f9b34fb";
 }
 
-class JStyleCmd {
+class MomSafeCmd {
   static const int setTime = 0x01;
   static const int getTime = 0x41;
   static const int getBatteryLevel = 0x13;

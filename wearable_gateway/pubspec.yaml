@@ -1,5 +1,5 @@
 name: momsafe_wearable_gateway
-description: "Minimal Phase 1 Android Flutter Gateway for J-Style 2208A Wearable to MomSafe AI"
+description: "Minimal Phase 1 Android Flutter Gateway for MomSafe Band Wearable to MomSafe AI"
 publish_to: "none"
 version: 0.1.0+1
 
